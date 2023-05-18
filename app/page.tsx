@@ -38,9 +38,6 @@ export default function Home() {
             </DndProvider>
           </div>
         </div>
-        <aside>
-          <div className="h-16 w-16 ring-2 bg-white ring-blue-400 shadow-lg z-50"></div>
-        </aside>
       </div>
     </main>
   )

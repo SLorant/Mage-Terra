@@ -21,13 +21,12 @@ export const Square: FC<SquareProps> = memo(function Square({
   index,
   onIsOverChange,
 }) {
-  const [{ isOver, canDrop, currentOffset }, drop] = useDrop({
+  const [{ isOver, canDrop }, drop] = useDrop({
     accept,
     drop: onDrop,
     collect: (monitor) => ({
       isOver: monitor.isOver(),
       canDrop: monitor.canDrop(),
-      currentOffset: monitor.getClientOffset(),
     }),
   })
   //isActive = isOver && canDrop
@@ -53,8 +52,6 @@ export const Square: FC<SquareProps> = memo(function Square({
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
-      {isActive ? 'Release to drop' : ``}
-
       {lastDroppedItem && (
         <div className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20">
           <p>{JSON.stringify(lastDroppedItem.name.substring(0, 1))}</p>

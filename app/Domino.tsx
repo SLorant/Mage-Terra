@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useEffect, useState } from 'react'
+import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, useState } from 'react'
 import { memo, useRef, useMemo } from 'react'
 import { useDrag, useDragLayer, XYCoord } from 'react-dnd'
 
@@ -16,9 +16,10 @@ export interface DominoProps {
   name: string
   type: string
   isDropped: boolean
+  setIsActive: Dispatch<SetStateAction<boolean>>
 }
 
-export const Domino: FC<DominoProps> = memo(function Domino({ name, type, isDropped }) {
+export const Domino: FC<DominoProps> = memo(function Domino({ name, type, isDropped, setIsActive }) {
   const dominoRef = useRef<HTMLDivElement>(null)
 
   const [{ opacity, isDragging, didDrop }, drag] = useDrag(
@@ -26,13 +27,16 @@ export const Domino: FC<DominoProps> = memo(function Domino({ name, type, isDrop
       type,
       item: { name },
       collect: (monitor) => ({
-        opacity: monitor.isDragging() ? 0.4 : 1,
+        opacity: monitor.isDragging() ? 0.9 : 1,
         isDragging: monitor.isDragging() ? true : false,
         didDrop: monitor.didDrop() ? true : false,
       }),
     }),
     [name, type],
   )
+  useEffect(() => {
+    !isDragging ? setIsActive(false) : ''
+  }, [isDragging])
 
   return (
     <div ref={drag} className="flex w-[160px]">

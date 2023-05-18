@@ -50,14 +50,20 @@ export const Board: FC = memo(function Board() {
     return droppedDominoNames.indexOf(DominoName) > -1
   }
 
-  const [activeSquareIndex, setActiveSquareIndex] = useState<number | null>(null)
-  const [activeSquare, setActiveSquare] = useState<boolean>(false)
+  const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
+
+  const isDominoPlacedCorrectly = (index: number) => {
+    const square = Squares[index]
+    //const isAlreadyDropped = Squares.las
+    //console.log(square.lastDroppedItem)
+    return !square.lastDroppedItem && (sqIndex == index - 1 || sqIndex == index) && sqIndex % 10 !== 9
+  }
+
   const handleIsOverChange = useCallback((index: number, isOver: boolean) => {
     if (isOver) {
-      // Perform any necessary operations when isOver is true
-      console.log(`Square ${index} is over`)
+      //console.log(`Square ${index} is over`)
       setSqIndex(index)
       setOver(true)
     }
@@ -66,50 +72,51 @@ export const Board: FC = memo(function Board() {
   const handleDrop = useCallback(
     (index: number, item: { name: string }) => {
       let { name } = item
-      setActiveSquareIndex(index)
-      console.log(activeSquareIndex)
       const fillIndex: number = index + 1
-      const newSquares = [...Squares]
+      setIsActive(false)
 
-      // Update the Square state
-      if (fillIndex !== null) {
-        newSquares[fillIndex].lastDroppedItem = {
-          name: 'FOREST',
-        }
-      }
-      setDroppedDominoNames(update(droppedDominoNames, name ? { $push: [name] } : { $push: [] }))
-      setSquares(
-        update(newSquares, {
+      if (index % 10 !== 9 && !Squares[index].lastDroppedItem && !Squares[index + 1].lastDroppedItem) {
+        const newSquares = update(Squares, {
+          [fillIndex]: {
+            lastDroppedItem: {
+              $set: { name: 'FOREST' },
+            },
+          },
           [index]: {
             lastDroppedItem: {
               $set: item,
             },
           },
-        }),
-      )
+        })
+        setSquares(newSquares)
+
+        if (name) {
+          setDroppedDominoNames(update(droppedDominoNames, { $push: [name] }))
+        }
+      }
     },
     [droppedDominoNames, Squares],
   )
+
   return (
     <div className="h-full w-full flex gap-10">
       <div className="h-auto w-auto grid grid-cols-10 grid-rows-10">
-        {Squares.map(({ accepts, lastDroppedItem }, index, cursorPosition) => (
+        {Squares.map(({ accepts, lastDroppedItem }, index) => (
           <Square
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             onDrop={(item) => handleDrop(index, item)}
-            isActive={activeSquare && over && (sqIndex == index - 1 || sqIndex == index)}
-            setIsActive={setActiveSquare}
-            //onIsOverChange={handleIsOverChange}
-            onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)} // Pass the index along with isOver
-            index={index} // Pass the index as a prop
+            isActive={isActive && over && isDominoPlacedCorrectly(index)}
+            setIsActive={setIsActive}
+            onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
+            index={index}
             key={index}
           />
         ))}
       </div>
       <div className="w-28 flex justify-center items-center flex-col ">
         {Dominoes.map(({ name, type }, index) => (
-          <Domino name={name} type={type} isDropped={isDropped(name)} key={index} />
+          <Domino name={name} type={type} isDropped={isDropped(name)} key={index} setIsActive={setIsActive} />
         ))}
       </div>
     </div>
