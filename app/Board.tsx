@@ -53,28 +53,38 @@ export const Board: FC = memo(function Board() {
   const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
+  const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
 
   const isDominoPlacedCorrectly = (index: number) => {
     const square = Squares[index]
-    //const isAlreadyDropped = Squares.las
-    //console.log(square.lastDroppedItem)
-    return !square.lastDroppedItem && (sqIndex == index - 1 || sqIndex == index) && sqIndex % 10 !== 9
+    return (
+      !square.lastDroppedItem &&
+      (sqIndex === index - 1 || sqIndex === index) &&
+      sqIndex % 10 !== 9 &&
+      (leftSqIndex === +1 || leftSqIndex === index + 1)
+    )
   }
 
-  const handleIsOverChange = useCallback((index: number, isOver: boolean) => {
-    if (isOver) {
-      //console.log(`Square ${index} is over`)
-      setSqIndex(index)
-      setOver(true)
-    }
-  }, [])
+  const handleIsOverChange = useCallback(
+    (index: number, isOver: boolean) => {
+      if (isOver) {
+        setSqIndex(index)
+        setOver(true)
+        // Set the left square index
+        setLeftSqIndex(index + 1)
+        if (Squares[index].lastDroppedItem == null) setLeftSqIndex(index + 1)
+        else setLeftSqIndex(-1)
+      }
+    },
+    [Squares],
+  )
 
   const handleDrop = useCallback(
     (index: number, item: { name: string }) => {
       let { name } = item
       const fillIndex: number = index + 1
       setIsActive(false)
-
+      setLeftSqIndex(-1)
       if (index % 10 !== 9 && !Squares[index].lastDroppedItem && !Squares[index + 1].lastDroppedItem) {
         const newSquares = update(Squares, {
           [fillIndex]: {
@@ -106,11 +116,12 @@ export const Board: FC = memo(function Board() {
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             onDrop={(item) => handleDrop(index, item)}
-            isActive={isActive && over && isDominoPlacedCorrectly(index)}
+            isActive={isActive && over && isDominoPlacedCorrectly(index) && !Squares[index + 1].lastDroppedItem}
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}
             key={index}
+            leftSqIndex={leftSqIndex} // Pass the left square index
           />
         ))}
       </div>

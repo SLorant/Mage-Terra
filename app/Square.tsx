@@ -10,6 +10,7 @@ export interface SquareProps {
   setIsActive: Dispatch<SetStateAction<boolean>>
   index: number
   onIsOverChange: (index: number, isOver: boolean) => void // Update the prop
+  leftSqIndex: number
 }
 
 export const Square: FC<SquareProps> = memo(function Square({
@@ -20,6 +21,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   setIsActive,
   index,
   onIsOverChange,
+  leftSqIndex,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -40,8 +42,9 @@ export const Square: FC<SquareProps> = memo(function Square({
     onIsOverChange(index, isOver) // Notify the Board component of isOver change
   }, [isOver])
 
+  let isLeftSquareActive = leftSqIndex === index && leftSqIndex % 10 !== 0 && canDrop // Check if it's the left square
   let backgroundColor = 'snow'
-  if (isActive) {
+  if (isActive || isLeftSquareActive) {
     backgroundColor = 'darkgreen'
   } else if (canDrop) {
     backgroundColor = 'lightgray'
