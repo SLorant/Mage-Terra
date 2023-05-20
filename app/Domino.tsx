@@ -13,26 +13,35 @@ const style: CSSProperties = {
 }
 
 export interface DominoProps {
-  name: string
-  type: string
+  firstname: string
+  secondname: string
+  firsttype: string
+  secondtype: string
   isDropped: boolean
   setIsActive: Dispatch<SetStateAction<boolean>>
 }
 
-export const Domino: FC<DominoProps> = memo(function Domino({ name, type, isDropped, setIsActive }) {
+export const Domino: FC<DominoProps> = memo(function Domino({
+  firstname,
+  firsttype,
+  secondname,
+  secondtype,
+  isDropped,
+  setIsActive,
+}) {
   const dominoRef = useRef<HTMLDivElement>(null)
 
   const [{ opacity, isDragging, didDrop }, drag] = useDrag(
     () => ({
-      type,
-      item: { name },
+      type: firsttype,
+      item: { firstname, secondname, firsttype, secondtype },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.9 : 1,
         isDragging: monitor.isDragging() ? true : false,
         didDrop: monitor.didDrop() ? true : false,
       }),
     }),
-    [name, type],
+    [firstname, firsttype, secondname, secondtype],
   )
   useEffect(() => {
     !isDragging ? setIsActive(false) : ''
@@ -42,10 +51,10 @@ export const Domino: FC<DominoProps> = memo(function Domino({ name, type, isDrop
     <div ref={drag} className="flex w-[160px]">
       <div ref={dominoRef} style={{ ...style, opacity }} className="flex w-[160px]">
         <div className={`h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-          {name}
+          {firstname}
         </div>
         <div className={`h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-          {name}
+          {secondname}
         </div>
       </div>
     </div>

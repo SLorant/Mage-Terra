@@ -49,6 +49,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   } else if (canDrop) {
     backgroundColor = 'lightgray'
   }
+  //console.log(lastDroppedItem)
   return (
     <div
       className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20"
@@ -57,7 +58,7 @@ export const Square: FC<SquareProps> = memo(function Square({
       data-testid="Square">
       {lastDroppedItem && (
         <div className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20">
-          <p>{JSON.stringify(lastDroppedItem.name.substring(0, 1))}</p>
+          <p>{JSON.stringify(lastDroppedItem.firstname.substring(0, 1))}</p>
         </div>
       )}
     </div>

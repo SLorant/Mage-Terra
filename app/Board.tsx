@@ -12,8 +12,10 @@ interface SquareState {
 }
 
 interface DominoState {
-  name: string
-  type: string
+  firstname: string
+  secondname: string
+  firsttype: string
+  secondtype: string
 }
 
 export interface SquareSpec {
@@ -31,7 +33,7 @@ export interface BoardState {
 }
 
 const initialSquares: SquareState[] = Array.from({ length: 100 }).map(() => ({
-  accepts: [ItemTypes.WATER, ItemTypes.FOREST, ItemTypes.CITY],
+  accepts: [ItemTypes.FOREST, ItemTypes.WATER, ItemTypes.CITY],
   lastDroppedItem: null,
 }))
 
@@ -39,9 +41,9 @@ export const Board: FC = memo(function Board() {
   const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
 
   const [Dominoes] = useState<DominoState[]>([
-    { name: 'F', type: ItemTypes.FOREST },
-    { name: 'W', type: ItemTypes.WATER },
-    { name: 'C', type: ItemTypes.CITY },
+    { firstname: 'F', secondname: 'C', firsttype: ItemTypes.FOREST, secondtype: ItemTypes.CITY },
+    { firstname: 'W', secondname: 'F', firsttype: ItemTypes.WATER, secondtype: ItemTypes.FOREST },
+    { firstname: 'C', secondname: 'W', firsttype: ItemTypes.CITY, secondtype: ItemTypes.WATER },
   ])
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
@@ -57,6 +59,7 @@ export const Board: FC = memo(function Board() {
 
   const isDominoPlacedCorrectly = (index: number) => {
     const square = Squares[index]
+
     return (
       !square.lastDroppedItem &&
       (sqIndex === index - 1 || sqIndex === index) &&
@@ -68,6 +71,7 @@ export const Board: FC = memo(function Board() {
   const handleIsOverChange = useCallback(
     (index: number, isOver: boolean) => {
       if (isOver) {
+        console.log(index)
         setSqIndex(index)
         setOver(true)
         // Set the left square index
@@ -79,29 +83,56 @@ export const Board: FC = memo(function Board() {
     [Squares],
   )
 
+  function isValidNeighbour(index: number, targetIndex: number, firstname: string): boolean {
+    if (Squares[index + targetIndex] == undefined || Squares[index - targetIndex] == undefined) return true
+    Squares[index - targetIndex].lastDroppedItem !== null
+      ? console.log(Squares[index - targetIndex].lastDroppedItem)
+      : ''
+    console.log(firstname)
+    if (Squares[index - targetIndex].lastDroppedItem == null) return false
+    else return Squares[index - targetIndex].lastDroppedItem.firstname == firstname
+  }
+
   const handleDrop = useCallback(
-    (index: number, item: { name: string }) => {
-      let { name } = item
+    (index: number, item: { firstname: string; secondname: string; firsttype: string; secondtype: string }) => {
+      let { firstname, secondname, firsttype, secondtype } = item
       const fillIndex: number = index + 1
       setIsActive(false)
       setLeftSqIndex(-1)
-      if (index % 10 !== 9 && !Squares[index].lastDroppedItem && !Squares[index + 1].lastDroppedItem) {
+
+      if (
+        index % 10 !== 9 &&
+        !Squares[index].lastDroppedItem &&
+        !Squares[index + 1].lastDroppedItem &&
+        (isValidNeighbour(index, -10, firstname) ||
+          isValidNeighbour(fillIndex, -10, secondname) ||
+          isValidNeighbour(index, 10, firstname) ||
+          isValidNeighbour(fillIndex, 10, secondname) ||
+          isValidNeighbour(index, -1, firstname) ||
+          isValidNeighbour(fillIndex, -1, secondname) ||
+          isValidNeighbour(index, 1, firstname) ||
+          isValidNeighbour(fillIndex, 1, secondname))
+        /*(Squares[fillIndex - 10].lastDroppedItem == null ||
+          Squares[fillIndex - 10].lastDroppedItem.firstname == firstname ||
+          Squares[fillIndex - 10].lastDroppedItem.secondname == secondname) &&
+          (Squares[index - 10].lastDroppedItem == null ||
+          Squares[ - 10].lastDroppedItem.firstname == firstname ||
+          Squares[fillIndex - 10].lastDroppedItem.secondname == secondname)*/
+      ) {
         const newSquares = update(Squares, {
-          [fillIndex]: {
-            lastDroppedItem: {
-              $set: { name: 'FOREST' },
-            },
-          },
-          [index]: {
-            lastDroppedItem: {
-              $set: item,
-            },
-          },
+          [fillIndex]: { lastDroppedItem: { $set: { firstname: secondname } } },
+          [index]: { lastDroppedItem: { $set: item } },
+          [index - 1]: { accepts: { $push: [firsttype] } },
+          [index + 10]: { accepts: { $push: [firsttype] } },
+          [index - 10]: { accepts: { $push: [firsttype] } },
+          [fillIndex + 1]: { accepts: { $push: [secondtype] } },
+          [fillIndex + 10]: { accepts: { $push: [secondtype] } },
+          [fillIndex - 10]: { accepts: { $push: [secondtype] } },
         })
         setSquares(newSquares)
 
-        if (name) {
-          setDroppedDominoNames(update(droppedDominoNames, { $push: [name] }))
+        if (firstname) {
+          setDroppedDominoNames(update(droppedDominoNames, { $push: [firstname] }))
         }
       }
     },
@@ -126,8 +157,16 @@ export const Board: FC = memo(function Board() {
         ))}
       </div>
       <div className="w-28 flex justify-center items-center flex-col ">
-        {Dominoes.map(({ name, type }, index) => (
-          <Domino name={name} type={type} isDropped={isDropped(name)} key={index} setIsActive={setIsActive} />
+        {Dominoes.map(({ firstname, firsttype, secondname, secondtype }, index) => (
+          <Domino
+            firstname={firstname}
+            secondname={secondname}
+            isDropped={isDropped(firstname)}
+            key={index}
+            setIsActive={setIsActive}
+            firsttype={firsttype}
+            secondtype={secondtype}
+          />
         ))}
       </div>
     </div>
