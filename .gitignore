@@ -37,4 +37,4 @@ next-env.d.ts
 
 .vscode
 .prettierrc.json
-app/unusedcode
+app/unusedcode.txt

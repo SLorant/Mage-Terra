@@ -1,6 +1,7 @@
 import { CSSProperties, FC, useEffect } from 'react'
 import { memo, useState, Dispatch, SetStateAction } from 'react'
 import { useDrop } from 'react-dnd'
+import Image from 'next/image'
 
 export interface SquareProps {
   accept: string[]
@@ -58,11 +59,13 @@ export const Square: FC<SquareProps> = memo(function Square({
       data-testid="Square">
       {lastDroppedItem && (
         <div className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20">
-          <p>{JSON.stringify(lastDroppedItem.firstname.substring(0, 1))}</p>
+          <Image src={lastDroppedItem.img} alt="kep" width={500} height={500} className="w-full h-full pbject-cover" />
         </div>
       )}
     </div>
   )
 })
+// <p>{JSON.stringify(lastDroppedItem.firstname.substring(0, 1))}</p>
+
 //{lastDroppedItem && <p>{JSON.stringify(lastDroppedItem)}</p>}
 /* This Square accepts: ${accept.join(', ')} */
