@@ -17,10 +17,9 @@ export interface DominoProps {
   img: string
   secondimg: string
   isTurned: boolean
-  setIsTurned: Dispatch<SetStateAction<boolean>>
 }
 
-export const Domino: FC<DominoProps> = memo(function Domino({
+export const DominoComponent: FC<DominoProps> = memo(function Domino({
   firstname,
   secondname,
   isDropped,
@@ -28,7 +27,6 @@ export const Domino: FC<DominoProps> = memo(function Domino({
   img,
   secondimg,
   isTurned,
-  setIsTurned,
 }) {
   const dominoRef = useRef<HTMLDivElement>(null)
   const [{ opacity, isDragging, didDrop }, drag] = useDrag(
@@ -46,9 +44,6 @@ export const Domino: FC<DominoProps> = memo(function Domino({
   useEffect(() => {
     !isDragging ? setIsActive(false) : ''
   }, [isDragging])
-  const handleTurnClick = () => {
-    setIsTurned(!isTurned)
-  }
 
   return (
     <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} flex  ml-20 justify-center items-center`}>
@@ -65,9 +60,6 @@ export const Domino: FC<DominoProps> = memo(function Domino({
           </div>
         </div>
       </div>
-      <button className="ml-4" onClick={handleTurnClick}>
-        Turn
-      </button>
     </div>
   )
 })

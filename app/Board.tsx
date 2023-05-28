@@ -1,7 +1,7 @@
 import update from 'immutability-helper'
 import { FC, useEffect } from 'react'
 import { memo, useCallback, useState, useRef, useMemo } from 'react'
-import { Domino } from './Domino'
+import { DominoComponent } from './Domino'
 import { Square } from './Square'
 import { ItemTypes } from './ItemTypes'
 import Image from 'next/image'
@@ -29,7 +29,7 @@ export interface DominoSpec {
 export interface BoardState {
   droppedDominoNames: string[]
   Squares: SquareSpec[]
-  Dominoes: DominoSpec[]
+  Domino: DominoSpec[]
 }
 
 const initialSquares: SquareState[] = Array.from({ length: 100 }).map(() => ({
@@ -40,11 +40,12 @@ const initialSquares: SquareState[] = Array.from({ length: 100 }).map(() => ({
 export const Board: FC = memo(function Board() {
   const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
 
-  const [Dominoes, setDominoes] = useState<DominoState[]>([
-    { firstname: 'F', secondname: 'C', img: '/kep1.png', secondimg: '/kep3.jpg' },
-    /*{ firstname: 'W', secondname: 'F', img: '/kep2.jpg', secondimg: '/kep1.png' },
-    { firstname: 'C', secondname: 'W', img: '/kep3.jpg', secondimg: '/kep2.jpg' },*/
-  ])
+  const [Domino, setDomino] = useState<DominoState>({
+    firstname: 'F',
+    secondname: 'C',
+    img: '/kep1.png',
+    secondimg: '/kep3.jpg',
+  })
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
 
@@ -69,6 +70,10 @@ export const Board: FC = memo(function Board() {
     setSquares(newSquares)
   }, [isTurned])
 
+  /* useEffect(()=>{
+
+  }, [Squares]) */
+
   const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
@@ -76,19 +81,17 @@ export const Board: FC = memo(function Board() {
 
   // const [fillIndex, setFillIndex] = useState<number>(0)
   const handleMirrorClick = () => {
-    const tempimg: string = Dominoes[0].img
-    const tempname: string = Dominoes[0].firstname
-    const newDominoes = update(Dominoes, {
-      [0]: {
-        $set: {
-          firstname: Dominoes[0].secondname,
-          img: Dominoes[0].secondimg,
-          secondname: tempname,
-          secondimg: tempimg,
-        },
+    const tempimg: string = Domino.img
+    const tempname: string = Domino.firstname
+    const newDomino = update(Domino, {
+      $set: {
+        firstname: Domino.secondname,
+        img: Domino.secondimg,
+        secondname: tempname,
+        secondimg: tempimg,
       },
     })
-    setDominoes(newDominoes)
+    setDomino(newDomino)
   }
 
   const isDominoPlacedCorrectly = (index: number) => {
@@ -176,6 +179,9 @@ export const Board: FC = memo(function Board() {
     [droppedDominoNames, Squares],
   )
 
+  const handleTurnClick = () => {
+    setIsTurned(!isTurned)
+  }
   return (
     <div className="h-full w-full flex gap-10">
       <div className="h-auto w-auto grid grid-cols-10 grid-rows-10">
@@ -202,20 +208,19 @@ export const Board: FC = memo(function Board() {
         Mirror
       </button>
       <div className="w-28 flex justify-center items-center flex-col ">
-        {Dominoes.map(({ firstname, secondname, img, secondimg }, index) => (
-          <Domino
-            firstname={firstname}
-            secondname={secondname}
-            isDropped={isDropped(firstname)}
-            key={index}
-            setIsActive={setIsActive}
-            img={img}
-            secondimg={secondimg}
-            isTurned={isTurned}
-            setIsTurned={setIsTurned}
-          />
-        ))}
+        <DominoComponent
+          firstname={Domino.firstname}
+          secondname={Domino.secondname}
+          isDropped={isDropped(Domino.firstname)}
+          setIsActive={setIsActive}
+          img={Domino.img}
+          secondimg={Domino.secondimg}
+          isTurned={isTurned}
+        />
       </div>
+      <button className="mt-10 h-6" onClick={handleTurnClick}>
+        Turn
+      </button>
     </div>
   )
 })
