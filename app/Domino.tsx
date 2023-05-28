@@ -49,6 +49,7 @@ export const Domino: FC<DominoProps> = memo(function Domino({
   const handleTurnClick = () => {
     setIsTurned(!isTurned)
   }
+
   return (
     <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} flex  ml-20 justify-center items-center`}>
       <div ref={drag}>
