@@ -1,10 +1,9 @@
 import update from 'immutability-helper'
 import { FC, useEffect } from 'react'
-import { memo, useCallback, useState, useRef, useMemo } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
 import { ItemTypes } from './ItemTypes'
-import Image from 'next/image'
 
 interface SquareState {
   accepts: string[]
@@ -32,12 +31,11 @@ export interface BoardState {
   Domino: DominoSpec[]
 }
 
-const initialSquares: SquareState[] = Array.from({ length: 100 }).map(() => ({
-  accepts: [ItemTypes.FOREST, ItemTypes.WATER, ItemTypes.CITY],
-  lastDroppedItem: null,
-}))
-
 export const Board: FC = memo(function Board() {
+  const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
+    accepts: [ItemTypes.FOREST, ItemTypes.WATER, ItemTypes.CITY],
+    lastDroppedItem: null,
+  }))
   const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
 
   const [Domino, setDomino] = useState<DominoState>({
@@ -46,8 +44,16 @@ export const Board: FC = memo(function Board() {
     img: '/kep1.png',
     secondimg: '/kep3.jpg',
   })
+  const nameArray: string[] = ['F', 'W', 'C']
+  const imgArray: string[] = ['/kep1.png', '/kep2.jpg', '/kep3.jpg']
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
+
+  let dominoIndexes = new Map<number, DominoState>()
+  type DroppedDomino = [number, number, DominoState]
+  type DroppedDomino2 = [number, number]
+  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
+  const [droppedDominoes2, setDroppedDominoes2] = useState<DroppedDomino2[]>([])
 
   function isDropped(DominoName: string) {
     return droppedDominoNames.indexOf(DominoName) > -1
@@ -55,24 +61,30 @@ export const Board: FC = memo(function Board() {
   const [isTurned, setIsTurned] = useState(false)
 
   useEffect(() => {
-    const specificIndexes = [64, 65, 63, 74, 75, 76] // Specific indexes to set with empty values
+    const specificIndexes = [60, 62, 63, 60, 59, 43] // Specific indexes to set with empty values
+
     const newSquares = update(Squares, {
-      [50]: { lastDroppedItem: { $set: { firstname: 'F', img: '/kep1.png' } } },
+      [4]: { lastDroppedItem: { $set: { firstname: 'F', img: '/kep1.png' } } },
       [25]: { lastDroppedItem: { $set: { firstname: 'W', img: '/kep2.jpg' } } },
-      [78]: { lastDroppedItem: { $set: { firstname: 'C', img: '/kep3.jpg' } } },
-      [64]: { accepts: { $set: [] } },
-      [65]: { accepts: { $set: [] } },
-      [63]: { accepts: { $set: [] } },
-      [74]: { accepts: { $set: [] } },
-      [75]: { accepts: { $set: [] } },
-      [76]: { accepts: { $set: [] } },
+      [55]: { lastDroppedItem: { $set: { firstname: 'C', img: '/kep3.jpg' } } },
+      ...specificIndexes.reduce((result: Record<number, any>, index) => {
+        if (Squares[index]) {
+          result[index] = { accepts: { $set: [] } }
+        }
+        return result
+      }, {}),
     })
+
     setSquares(newSquares)
   }, [isTurned])
 
-  /* useEffect(()=>{
-
-  }, [Squares]) */
+  useEffect(() => {
+    const randomItemIndex = Math.floor(Math.random() * nameArray.length)
+    const randomItemIndex2 = Math.floor(Math.random() * nameArray.length)
+    const [randomName, randomName2] = [nameArray[randomItemIndex], nameArray[randomItemIndex2]]
+    const [randomImg, randomImg2] = [imgArray[randomItemIndex], imgArray[randomItemIndex2]]
+    setDomino({ firstname: randomName, img: randomImg, secondname: randomName2, secondimg: randomImg2 })
+  }, [droppedDominoNames])
 
   const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
@@ -99,16 +111,16 @@ export const Board: FC = memo(function Board() {
     if (isTurned) {
       return (
         !square.lastDroppedItem &&
-        (sqIndex === index - 10 || sqIndex === index) &&
-        sqIndex < 90 &&
-        (leftSqIndex === +10 || leftSqIndex === index + 10) &&
-        Squares[index + 10].accepts.includes('F')
+        (sqIndex === index - 8 || sqIndex === index) &&
+        sqIndex < 56 &&
+        (leftSqIndex === +8 || leftSqIndex === index + 8) &&
+        Squares[index + 8].accepts.includes('F')
       )
     } else {
       return (
         !square.lastDroppedItem &&
         (sqIndex === index - 1 || sqIndex === index) &&
-        sqIndex % 10 !== 9 &&
+        sqIndex % 8 !== 7 &&
         (leftSqIndex === +1 || leftSqIndex === index + 1) &&
         Squares[index + 1].accepts.includes('F')
       )
@@ -120,8 +132,8 @@ export const Board: FC = memo(function Board() {
       if (isOver) {
         setSqIndex(index)
         setOver(true)
-        setLeftSqIndex(isTurned ? index + 10 : index + 1)
-        if (Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 10 : index + 1)
+        setLeftSqIndex(isTurned ? index + 8 : index + 1)
+        if (Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 8 : index + 1)
         else setLeftSqIndex(-1)
       }
     },
@@ -137,13 +149,13 @@ export const Board: FC = memo(function Board() {
 
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
     //const fillIndex: number = index + 1
-    const fillIndex: number = isTurned ? index + 10 : index + 1
+    const fillIndex: number = isTurned ? index + 8 : index + 1
 
     return (
-      isValidNeighbour(index, -10, firstname) ||
-      isValidNeighbour(fillIndex, -10, secondname) ||
-      isValidNeighbour(index, 10, firstname) ||
-      isValidNeighbour(fillIndex, 10, secondname) ||
+      isValidNeighbour(index, -8, firstname) ||
+      isValidNeighbour(fillIndex, -8, secondname) ||
+      isValidNeighbour(index, 8, firstname) ||
+      isValidNeighbour(fillIndex, 8, secondname) ||
       isValidNeighbour(index, -1, firstname) ||
       isValidNeighbour(fillIndex, -1, secondname) ||
       isValidNeighbour(index, 1, firstname) ||
@@ -153,18 +165,20 @@ export const Board: FC = memo(function Board() {
 
   const handleDrop = useCallback(
     (index: number, item: { firstname: string; secondname: string; img: string; secondimg: string }) => {
-      let { firstname, secondname, img, secondimg } = item
+      let { firstname, secondname, /*img*/ secondimg } = item
       //const fillIndex: number = index + 1
-      const fillIndex: number = isTurned ? index + 10 : index + 1
+      const fillIndex: number = isTurned ? index + 8 : index + 1
       setIsActive(false)
       setLeftSqIndex(-1)
-
+      //dominoIndexes.set(index, item)
       if (
-        (isTurned ? index < 90 : index % 10 !== 9) &&
+        (isTurned ? index < 56 : index % 8 !== 7) &&
         !Squares[index].lastDroppedItem &&
-        !Squares[isTurned ? index + 10 : index + 1].lastDroppedItem &&
+        !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem &&
         areNeighboursValid(index, firstname, secondname)
       ) {
+        setDroppedDominoes([...droppedDominoes, [index, fillIndex, item]])
+        setDroppedDominoes2([...droppedDominoes2, [index, fillIndex]])
         const newSquares = update(Squares, {
           [fillIndex]: { lastDroppedItem: { $set: { firstname: secondname, img: secondimg } } },
           [index]: { lastDroppedItem: { $set: item } },
@@ -181,10 +195,11 @@ export const Board: FC = memo(function Board() {
 
   const handleTurnClick = () => {
     setIsTurned(!isTurned)
+    console.log(droppedDominoes)
   }
   return (
     <div className="h-full w-full flex gap-10">
-      <div className="h-auto w-auto grid grid-cols-10 grid-rows-10">
+      <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
         {Squares.map(({ accepts, lastDroppedItem }, index) => (
           <Square
             accept={accepts}
@@ -194,13 +209,14 @@ export const Board: FC = memo(function Board() {
               isActive &&
               over &&
               isDominoPlacedCorrectly(index) &&
-              !Squares[isTurned ? index + 10 : index + 1].lastDroppedItem
+              !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem
             }
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}
             key={index}
             leftSqIndex={leftSqIndex} // Pass the left square index
+            droppedDominoes2={droppedDominoes2}
           />
         ))}
       </div>

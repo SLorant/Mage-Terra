@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
     "esModuleInterop": true,
+    "noUnusedLocals": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,

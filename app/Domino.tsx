@@ -1,5 +1,5 @@
-import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, useState, memo, useRef } from 'react'
-import { useDrag, useDragLayer, XYCoord } from 'react-dnd'
+import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, memo, useRef } from 'react'
+import { useDrag } from 'react-dnd'
 import { ItemTypes } from './ItemTypes'
 import Image from 'next/image'
 
@@ -22,21 +22,20 @@ export interface DominoProps {
 export const DominoComponent: FC<DominoProps> = memo(function Domino({
   firstname,
   secondname,
-  isDropped,
+  //isDropped,
   setIsActive,
   img,
   secondimg,
   isTurned,
 }) {
   const dominoRef = useRef<HTMLDivElement>(null)
-  const [{ opacity, isDragging, didDrop }, drag] = useDrag(
+  const [{ opacity, isDragging }, drag] = useDrag(
     () => ({
       type: ItemTypes.FOREST,
       item: { firstname, secondname, img, secondimg },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.9 : 1,
         isDragging: monitor.isDragging() ? true : false,
-        didDrop: monitor.didDrop() ? true : false,
       }),
     }),
     [firstname, secondname, img, secondimg],

@@ -1,8 +1,9 @@
-import { CSSProperties, FC, useEffect } from 'react'
-import { memo, useState, Dispatch, SetStateAction } from 'react'
+import { FC, useEffect } from 'react'
+import { memo, Dispatch, SetStateAction } from 'react'
 import { useDrop } from 'react-dnd'
 import Image from 'next/image'
 
+type DroppedDomino2 = [number, number]
 export interface SquareProps {
   accept: string[]
   lastDroppedItem?: any
@@ -12,6 +13,7 @@ export interface SquareProps {
   index: number
   onIsOverChange: (index: number, isOver: boolean) => void // Update the prop
   leftSqIndex: number
+  droppedDominoes2: DroppedDomino2[]
 }
 
 export const Square: FC<SquareProps> = memo(function Square({
@@ -23,6 +25,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   index,
   onIsOverChange,
   leftSqIndex,
+  droppedDominoes2,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -32,6 +35,7 @@ export const Square: FC<SquareProps> = memo(function Square({
       canDrop: monitor.canDrop(),
     }),
   })
+
   //isActive = isOver && canDrop
   useEffect(() => {
     if (isOver && canDrop) {
@@ -43,7 +47,17 @@ export const Square: FC<SquareProps> = memo(function Square({
     onIsOverChange(index, isOver) // Notify the Board component of isOver change
   }, [isOver])
 
-  let isLeftSquareActive = leftSqIndex === index && leftSqIndex % 10 !== 0 && canDrop // Check if it's the left square
+  let isWholeDomino = false
+  for (let i = 0; i < droppedDominoes2.length; i++) {
+    console.log(droppedDominoes2[i][0])
+    if (
+      (index === droppedDominoes2[i][0] && index + 1 === droppedDominoes2[i][1]) ||
+      (index === droppedDominoes2[i][1] && index - 1 === droppedDominoes2[i][0])
+    )
+      isWholeDomino = true
+  }
+
+  let isLeftSquareActive = leftSqIndex === index && leftSqIndex % 8 !== 0 && canDrop // Check if it's the left square
   let backgroundColor = 'snow'
   if (isActive || isLeftSquareActive) {
     backgroundColor = 'darkgreen'
@@ -53,13 +67,15 @@ export const Square: FC<SquareProps> = memo(function Square({
   //console.log(lastDroppedItem)
   return (
     <div
-      className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20"
+      className={`${
+        isWholeDomino ? '' : 'border-2 '
+      } h-20 w-20 border-gray-200 bg-yellow-500 ring-gray-200 shadow-lg z-20`}
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
       {lastDroppedItem && (
-        <div className="h-16 w-16 ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20">
-          <Image src={lastDroppedItem.img} alt="kep" width={500} height={500} className="w-full h-full pbject-cover" />
+        <div className="h-20 w-20  shadow-lg z-20">
+          <Image src={lastDroppedItem.img} alt="kep" width={500} height={500} className="w-full h-full object-cover" />
         </div>
       )}
     </div>
