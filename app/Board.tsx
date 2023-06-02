@@ -4,6 +4,7 @@ import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
 import { ItemTypes } from './ItemTypes'
+import { ScoreCounter } from './ScoreCounter'
 
 interface SquareState {
   accepts: string[]
@@ -49,7 +50,6 @@ export const Board: FC = memo(function Board() {
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
 
-  let dominoIndexes = new Map<number, DominoState>()
   type DroppedDomino = [number, number, DominoState]
   type DroppedDomino2 = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
@@ -85,6 +85,12 @@ export const Board: FC = memo(function Board() {
     const [randomImg, randomImg2] = [imgArray[randomItemIndex], imgArray[randomItemIndex2]]
     setDomino({ firstname: randomName, img: randomImg, secondname: randomName2, secondimg: randomImg2 })
   }, [droppedDominoNames])
+
+  const [score, setScore] = useState<number>(0)
+  useEffect(() => {
+    ScoreCounter(Squares)
+    setScore(ScoreCounter(Squares))
+  }, [droppedDominoes])
 
   const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
@@ -195,7 +201,7 @@ export const Board: FC = memo(function Board() {
 
   const handleTurnClick = () => {
     setIsTurned(!isTurned)
-    console.log(droppedDominoes)
+    console.log(Squares)
   }
   return (
     <div className="h-full w-full flex gap-10">
@@ -237,6 +243,7 @@ export const Board: FC = memo(function Board() {
       <button className="mt-10 h-6" onClick={handleTurnClick}>
         Turn
       </button>
+      <div>{score}</div>
     </div>
   )
 })

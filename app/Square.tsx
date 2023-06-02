@@ -48,13 +48,16 @@ export const Square: FC<SquareProps> = memo(function Square({
   }, [isOver])
 
   let isWholeDomino = false
+  let borderClass = 'border-2'
   for (let i = 0; i < droppedDominoes2.length; i++) {
-    console.log(droppedDominoes2[i][0])
-    if (
-      (index === droppedDominoes2[i][0] && index + 1 === droppedDominoes2[i][1]) ||
-      (index === droppedDominoes2[i][1] && index - 1 === droppedDominoes2[i][0])
-    )
-      isWholeDomino = true
+    if (index === droppedDominoes2[i][0] && index + 1 === droppedDominoes2[i][1])
+      borderClass = 'border-l-2 border-b-2 border-t-2'
+    if (index === droppedDominoes2[i][1] && index - 1 === droppedDominoes2[i][0])
+      borderClass = 'border-r-2 border-b-2 border-t-2'
+    if (index === droppedDominoes2[i][0] && index + 8 === droppedDominoes2[i][0])
+      borderClass = 'border-r-2 border-l-2 border-t-2'
+    if (index === droppedDominoes2[i][1] && index - 8 === droppedDominoes2[i][0])
+      borderClass = 'border-r-2 border-b-2 border-l-2'
   }
 
   let isLeftSquareActive = leftSqIndex === index && leftSqIndex % 8 !== 0 && canDrop // Check if it's the left square
@@ -68,13 +71,13 @@ export const Square: FC<SquareProps> = memo(function Square({
   return (
     <div
       className={`${
-        isWholeDomino ? '' : 'border-2 '
-      } h-20 w-20 border-gray-200 bg-yellow-500 ring-gray-200 shadow-lg z-20`}
+        isWholeDomino ? '' : ''
+      } h-20 w-20 border-gray-200 ${borderClass} bg-yellow-500 ring-gray-200 shadow-lg z-20`}
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
       {lastDroppedItem && (
-        <div className="h-20 w-20  shadow-lg z-20">
+        <div className={`h-20 w-20  shadow-lg z-20 `}>
           <Image src={lastDroppedItem.img} alt="kep" width={500} height={500} className="w-full h-full object-cover" />
         </div>
       )}
