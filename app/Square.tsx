@@ -78,7 +78,7 @@ export const Square: FC<SquareProps> = memo(function Square({
       data-testid="Square">
       {lastDroppedItem && (
         <div className={`h-20 w-20  shadow-lg z-20 `}>
-          <Image src={lastDroppedItem.img} alt="kep" width={500} height={500} className="w-full h-full object-cover" />
+          <Image src={lastDroppedItem.img} alt="dropped" width={500} height={500} className="w-full h-full " />
         </div>
       )}
     </div>

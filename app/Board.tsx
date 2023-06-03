@@ -67,6 +67,7 @@ export const Board: FC = memo(function Board() {
       [4]: { lastDroppedItem: { $set: { firstname: 'F', img: '/kep1.png' } } },
       [25]: { lastDroppedItem: { $set: { firstname: 'W', img: '/kep2.jpg' } } },
       [55]: { lastDroppedItem: { $set: { firstname: 'C', img: '/kep3.jpg' } } },
+      [28]: { lastDroppedItem: { $set: { firstname: 'FWC', img: '/br.jpg' } } },
       ...specificIndexes.reduce((result: Record<number, any>, index) => {
         if (Squares[index]) {
           result[index] = { accepts: { $set: [] } }
@@ -88,7 +89,6 @@ export const Board: FC = memo(function Board() {
 
   const [score, setScore] = useState<number>(0)
   useEffect(() => {
-    ScoreCounter(Squares)
     setScore(ScoreCounter(Squares))
   }, [droppedDominoes])
 
@@ -149,7 +149,7 @@ export const Board: FC = memo(function Board() {
   function isValidNeighbour(index: number, targetIndex: number, firstname: string): boolean {
     if (Squares[index - targetIndex] !== undefined) {
       if (Squares[index - targetIndex].lastDroppedItem == null) return false
-      else return Squares[index - targetIndex].lastDroppedItem.firstname == firstname
+      else return Squares[index - targetIndex].lastDroppedItem.firstname.includes(firstname)
     } else return false
   }
 

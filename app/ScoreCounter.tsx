@@ -4,26 +4,27 @@ interface SquareState {
 }
 
 export const ScoreCounter = (squares: SquareState[]): number => {
-  let maxSequenceLength: number = 0
+  const maxSequenceLengths: { [type: string]: number } = {}
   const visited: boolean[] = Array(squares.length).fill(false)
 
   for (let i = 0; i < squares.length; i++) {
-    if (!visited[i] && squares[i].lastDroppedItem?.firstname === 'F') {
-      const sequenceLength = getConnectedSequenceLength(i)
-      if (sequenceLength > maxSequenceLength) {
-        maxSequenceLength = sequenceLength
+    const type = squares[i].lastDroppedItem?.firstname
+    if (!visited[i] && type) {
+      const sequenceLength = getConnectedSequenceLength(i, type)
+      if (!maxSequenceLengths[type] || sequenceLength > maxSequenceLengths[type]) {
+        maxSequenceLengths[type] = sequenceLength
       }
     }
   }
 
-  return maxSequenceLength
+  return Object.values(maxSequenceLengths).reduce((sum, length) => sum + length, 0)
 
-  function getConnectedSequenceLength(squareIndex: number): number {
+  function getConnectedSequenceLength(squareIndex: number, type: string): number {
     if (
       squareIndex < 0 ||
       squareIndex >= squares.length ||
       visited[squareIndex] ||
-      squares[squareIndex].lastDroppedItem?.firstname !== 'F'
+      squares[squareIndex].lastDroppedItem?.firstname !== type
     ) {
       return 0
     }
@@ -38,7 +39,7 @@ export const ScoreCounter = (squares: SquareState[]): number => {
     let sequenceLength = 1
 
     for (const neighbor of neighbors) {
-      sequenceLength += getConnectedSequenceLength(neighbor)
+      sequenceLength += getConnectedSequenceLength(neighbor, type)
     }
 
     return sequenceLength
