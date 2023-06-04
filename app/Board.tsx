@@ -9,6 +9,7 @@ import { ScoreCounter } from './ScoreCounter'
 interface SquareState {
   accepts: string[]
   lastDroppedItem: any
+  hasStar: boolean
 }
 
 interface DominoState {
@@ -36,6 +37,7 @@ export const Board: FC = memo(function Board() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
     accepts: [ItemTypes.FOREST, ItemTypes.WATER, ItemTypes.CITY],
     lastDroppedItem: null,
+    hasStar: false,
   }))
   const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
 
@@ -68,6 +70,9 @@ export const Board: FC = memo(function Board() {
       [25]: { lastDroppedItem: { $set: { firstname: 'W', img: '/kep2.jpg' } } },
       [55]: { lastDroppedItem: { $set: { firstname: 'C', img: '/kep3.jpg' } } },
       [28]: { lastDroppedItem: { $set: { firstname: 'FWC', img: '/br.jpg' } } },
+      [10]: { hasStar: { $set: true } },
+      [49]: { hasStar: { $set: true } },
+      [61]: { hasStar: { $set: true } },
       ...specificIndexes.reduce((result: Record<number, any>, index) => {
         if (Squares[index]) {
           result[index] = { accepts: { $set: [] } }
@@ -181,7 +186,8 @@ export const Board: FC = memo(function Board() {
         (isTurned ? index < 56 : index % 8 !== 7) &&
         !Squares[index].lastDroppedItem &&
         !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem &&
-        areNeighboursValid(index, firstname, secondname)
+        areNeighboursValid(index, firstname, secondname) &&
+        Squares[fillIndex].accepts.includes('F')
       ) {
         setDroppedDominoes([...droppedDominoes, [index, fillIndex, item]])
         setDroppedDominoes2([...droppedDominoes2, [index, fillIndex]])
@@ -206,17 +212,13 @@ export const Board: FC = memo(function Board() {
   return (
     <div className="h-full w-full flex gap-10">
       <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
-        {Squares.map(({ accepts, lastDroppedItem }, index) => (
+        {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
+            hasStar={hasStar}
             onDrop={(item) => handleDrop(index, item)}
-            isActive={
-              isActive &&
-              over &&
-              isDominoPlacedCorrectly(index) &&
-              !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem
-            }
+            isActive={isActive && over && isDominoPlacedCorrectly(index) && !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem}
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}
@@ -229,7 +231,7 @@ export const Board: FC = memo(function Board() {
       <button className="mt-10 h-6" onClick={handleMirrorClick}>
         Mirror
       </button>
-      <div className="w-28 flex justify-center items-center flex-col ">
+      <div className="w-20 flex justify-center items-center flex-col ">
         <DominoComponent
           firstname={Domino.firstname}
           secondname={Domino.secondname}
