@@ -38,3 +38,4 @@ next-env.d.ts
 .vscode
 .prettierrc.json
 app/unusedcode.txt
+.env.development

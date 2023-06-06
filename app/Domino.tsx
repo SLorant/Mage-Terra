@@ -31,7 +31,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   const dominoRef = useRef<HTMLDivElement>(null)
   const [{ opacity, isDragging }, drag] = useDrag(
     () => ({
-      type: ItemTypes.FOREST,
+      type: ItemTypes.DOMINO,
       item: { firstname, secondname, img, secondimg },
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.9 : 1,

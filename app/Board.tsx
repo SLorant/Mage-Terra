@@ -35,7 +35,7 @@ export interface BoardState {
 
 export const Board: FC = memo(function Board() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
-    accepts: [ItemTypes.FOREST, ItemTypes.WATER, ItemTypes.CITY],
+    accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
     hasStar: false,
   }))
@@ -125,7 +125,7 @@ export const Board: FC = memo(function Board() {
         (sqIndex === index - 8 || sqIndex === index) &&
         sqIndex < 56 &&
         (leftSqIndex === +8 || leftSqIndex === index + 8) &&
-        Squares[index + 8].accepts.includes('F')
+        Squares[index + 8].accepts.includes('D')
       )
     } else {
       return (
@@ -133,7 +133,7 @@ export const Board: FC = memo(function Board() {
         (sqIndex === index - 1 || sqIndex === index) &&
         sqIndex % 8 !== 7 &&
         (leftSqIndex === +1 || leftSqIndex === index + 1) &&
-        Squares[index + 1].accepts.includes('F')
+        Squares[index + 1].accepts.includes('D')
       )
     }
   }
@@ -187,7 +187,7 @@ export const Board: FC = memo(function Board() {
         !Squares[index].lastDroppedItem &&
         !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem &&
         areNeighboursValid(index, firstname, secondname) &&
-        Squares[fillIndex].accepts.includes('F')
+        Squares[fillIndex].accepts.includes('D')
       ) {
         setDroppedDominoes([...droppedDominoes, [index, fillIndex, item]])
         setDroppedDominoes2([...droppedDominoes2, [index, fillIndex]])
