@@ -3,8 +3,10 @@ import { FC, useEffect } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
-import { ItemTypes } from './ItemTypes'
+import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
+import { projectDatabase } from '@/firebase/config'
+import { ref, set, onValue, push } from 'firebase/database'
 
 interface SquareState {
   accepts: string[]
@@ -102,7 +104,6 @@ export const Board: FC = memo(function Board() {
   const [sqIndex, setSqIndex] = useState<number>(0)
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
 
-  // const [fillIndex, setFillIndex] = useState<number>(0)
   const handleMirrorClick = () => {
     const tempimg: string = Domino.img
     const tempname: string = Domino.firstname
@@ -161,7 +162,17 @@ export const Board: FC = memo(function Board() {
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
     //const fillIndex: number = index + 1
     const fillIndex: number = isTurned ? index + 8 : index + 1
-
+    if (
+      isValidNeighbour(index, 1, firstname) &&
+      index % 8 === 0 &&
+      !(
+        isValidNeighbour(index, -8, firstname) ||
+        isValidNeighbour(fillIndex, -8, secondname) ||
+        isValidNeighbour(index, 8, firstname) ||
+        isValidNeighbour(fillIndex, 8, secondname)
+      )
+    )
+      return false
     return (
       isValidNeighbour(index, -8, firstname) ||
       isValidNeighbour(fillIndex, -8, secondname) ||
@@ -209,6 +220,23 @@ export const Board: FC = memo(function Board() {
     setIsTurned(!isTurned)
     console.log(Squares)
   }
+
+  useEffect(() => {
+    const dataRef = ref(projectDatabase, '/vmi')
+    const squaresData = Squares.map((square) => ({
+      accepts: square.accepts,
+      lastDroppedItem: square.lastDroppedItem,
+      hasStar: square.hasStar,
+    }))
+    set(dataRef, { Board: squaresData })
+      .then(() => {
+        console.log('Data written successfully.')
+      })
+      .catch((error) => {
+        console.error('Error writing data:', error)
+      })
+  }, [Squares])
+
   return (
     <div className="h-full w-full flex gap-10">
       <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">

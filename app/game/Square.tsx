@@ -55,7 +55,6 @@ export const Square: FC<SquareProps> = memo(function Square({
     if (index === droppedDominoes2[i][0] && index + 8 === droppedDominoes2[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
     if (index === droppedDominoes2[i][1] && index - 8 === droppedDominoes2[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
   }
-
   let isLeftSquareActive = leftSqIndex === index && leftSqIndex % 8 !== 0 && canDrop // Check if it's the left square
   let backgroundColor = 'snow'
   if (isActive || isLeftSquareActive) {
