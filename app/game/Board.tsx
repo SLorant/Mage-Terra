@@ -7,6 +7,7 @@ import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, set, onValue, push } from 'firebase/database'
+import { data } from 'autoprefixer'
 
 interface SquareState {
   accepts: string[]
@@ -143,8 +144,8 @@ export const Board: FC = memo(function Board() {
     (index: number, isOver: boolean) => {
       if (isOver) {
         setSqIndex(index)
+
         setOver(true)
-        setLeftSqIndex(isTurned ? index + 8 : index + 1)
         if (Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 8 : index + 1)
         else setLeftSqIndex(-1)
       }
@@ -162,27 +163,21 @@ export const Board: FC = memo(function Board() {
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
     //const fillIndex: number = index + 1
     const fillIndex: number = isTurned ? index + 8 : index + 1
-    if (
-      isValidNeighbour(index, 1, firstname) &&
-      index % 8 === 0 &&
-      !(
-        isValidNeighbour(index, -8, firstname) ||
-        isValidNeighbour(fillIndex, -8, secondname) ||
-        isValidNeighbour(index, 8, firstname) ||
-        isValidNeighbour(fillIndex, 8, secondname)
-      )
-    )
-      return false
-    return (
+    const verticalNeighborValid =
       isValidNeighbour(index, -8, firstname) ||
       isValidNeighbour(fillIndex, -8, secondname) ||
       isValidNeighbour(index, 8, firstname) ||
-      isValidNeighbour(fillIndex, 8, secondname) ||
+      isValidNeighbour(fillIndex, 8, secondname)
+    const horizontalNeighborValid =
       isValidNeighbour(index, -1, firstname) ||
       isValidNeighbour(fillIndex, -1, secondname) ||
       isValidNeighbour(index, 1, firstname) ||
       isValidNeighbour(fillIndex, 1, secondname)
-    )
+
+    if (isValidNeighbour(index, 1, firstname) && index % 8 === 0 && !verticalNeighborValid) {
+      return false
+    }
+    return verticalNeighborValid || horizontalNeighborValid
   }
 
   const handleDrop = useCallback(
@@ -222,19 +217,21 @@ export const Board: FC = memo(function Board() {
   }
 
   useEffect(() => {
-    const dataRef = ref(projectDatabase, '/vmi')
+    const dataRef = ref(projectDatabase, '/vmi/Board')
     const squaresData = Squares.map((square) => ({
       accepts: square.accepts,
       lastDroppedItem: square.lastDroppedItem,
       hasStar: square.hasStar,
     }))
-    set(dataRef, { Board: squaresData })
+    set(dataRef, { Squares: squaresData })
       .then(() => {
         console.log('Data written successfully.')
       })
       .catch((error) => {
         console.error('Error writing data:', error)
       })
+    const dataRef2 = ref(projectDatabase, '/vmi/Board/droppedDominoes')
+    set(dataRef2, droppedDominoes2)
   }, [Squares])
 
   return (
@@ -253,6 +250,7 @@ export const Board: FC = memo(function Board() {
             key={index}
             leftSqIndex={leftSqIndex} // Pass the left square index
             droppedDominoes2={droppedDominoes2}
+            isTurned={isTurned}
           />
         ))}
       </div>
