@@ -7,7 +7,11 @@ import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, set, onValue, push } from 'firebase/database'
-import { useSearchParams } from 'next/navigation'
+
+export interface BoardProps {
+  uniqueId: string
+  room: string | null
+}
 
 interface SquareState {
   accepts: string[]
@@ -36,7 +40,8 @@ export interface BoardState {
   Domino: DominoSpec[]
 }
 
-export const Board: FC = memo(function Board() {
+export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room }) {
+  console.log(uniqueId)
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
@@ -216,24 +221,24 @@ export const Board: FC = memo(function Board() {
     console.log(Squares)
   }
 
-  const searchParams = useSearchParams()
-  const room = searchParams.get('roomId')
   useEffect(() => {
-    const dataRef = ref(projectDatabase, `/vmi/${room}/Board`)
-    const squaresData = Squares.map((square) => ({
-      accepts: square.accepts,
-      lastDroppedItem: square.lastDroppedItem,
-      hasStar: square.hasStar,
-    }))
-    set(dataRef, { Squares: squaresData })
-      .then(() => {
-        console.log('Data written successfully.')
-      })
-      .catch((error) => {
-        console.error('Error writing data:', error)
-      })
-    const dataRef2 = ref(projectDatabase, `/vmi/${room}/Board/droppedDominoes`)
-    set(dataRef2, droppedDominoes2)
+    if (uniqueId !== '') {
+      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
+      const squaresData = Squares.map((square) => ({
+        accepts: square.accepts,
+        lastDroppedItem: square.lastDroppedItem,
+        hasStar: square.hasStar,
+      }))
+      set(dataRef, { Squares: squaresData })
+        .then(() => {
+          console.log('Data written successfully.')
+        })
+        .catch((error) => {
+          console.error('Error writing data:', error)
+        })
+      const dataRef2 = ref(projectDatabase, `/${room}/${uniqueId}/Board/droppedDominoes`)
+      set(dataRef2, droppedDominoes2)
+    }
   }, [Squares])
 
   return (

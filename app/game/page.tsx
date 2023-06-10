@@ -7,6 +7,9 @@ import { ref, set, onValue, push } from 'firebase/database'
 import { useState, useEffect } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { MiniSquare } from './MiniSquare'
+import { v4 as uuidv4 } from 'uuid'
+import { useSearchParams } from 'next/navigation'
+
 interface SquareState {
   accepts: string[]
   lastDroppedItem: any
@@ -23,9 +26,44 @@ export default function Home() {
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
   type DroppedDominoes = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
-  useEffect(() => {
-    const dataRef = ref(projectDatabase, '/vmi/Board')
+  const [uniqueId, setUniqueId] = useState('')
+  const searchParams = useSearchParams()
+  const room = searchParams.get('roomId')
 
+  // Save the unique ID in local storage
+  let otherPlayerIds: Array<string>
+  const [otherPlayerId, setOtherPlayerId] = useState<Array<string>>([])
+
+  useEffect(() => {
+    const playersRef = ref(projectDatabase, `/${room}`)
+    onValue(playersRef, (snapshot) => {
+      const data = snapshot.val()
+      if (data) {
+        const playerIds = Object.keys(data)
+        // Exclude the current player's ID
+        otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
+        setOtherPlayerId(otherPlayerIds)
+        // Now you have the other player IDs
+        console.log(otherPlayerIds)
+        console.log(localStorage.getItem('uniqueId'))
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    let storedUniqueId = localStorage.getItem('uniqueId')
+    if (storedUniqueId) {
+      setUniqueId(storedUniqueId)
+    } else {
+      const newUniqueId = uuidv4()
+      setUniqueId(newUniqueId)
+      storedUniqueId = newUniqueId
+      localStorage.setItem('uniqueId', newUniqueId)
+    }
+    console.log(otherPlayerId[0])
+    const otherId = otherPlayerIds === undefined ? '' : otherPlayerIds[0]
+    // ha a tömb undefined crashel, de amúgy működik, null check viszont nem oldja meg
+    const dataRef = ref(projectDatabase, `/${room}/${otherPlayerIds[0]}/Board`)
     onValue(dataRef, (snapshot) => {
       const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
 
@@ -43,7 +81,7 @@ export default function Home() {
       }
     })
   }, [])
-
+  console.log(uniqueId)
   return (
     <main className="flex h-screen flex-col items-center justify-center">
       <div className="bg-purple-300 h-full w-2/3 flex items-center justify-center gap-20">
@@ -51,7 +89,7 @@ export default function Home() {
           <div className="text-5xl mt-0 text-center"> The game</div>
           <div className="mt-20 w-[1100px] bg-blue-300 h-[640px] gap-0 shadow-md">
             <DndProvider backend={HTML5Backend}>
-              <Board />
+              <Board uniqueId={uniqueId} room={room} />
             </DndProvider>
           </div>
         </div>
