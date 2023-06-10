@@ -12,11 +12,8 @@ interface SquareState {
   lastDroppedItem: any
   hasStar: boolean
 }
-type DroppedDominoes = [number, number]
 
 export default function Home() {
-  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes>([0, 0])
-
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
@@ -24,15 +21,13 @@ export default function Home() {
   }))
 
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
-
+  type DroppedDominoes = [number, number]
+  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
   useEffect(() => {
     const dataRef = ref(projectDatabase, '/vmi/Board')
 
     onValue(dataRef, (snapshot) => {
-      const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes } = snapshot.val()
-      //const dominoData: { droppedDominoes: DroppedDominoes } = snapshot.val()
-      // Handle the retrieved data
-      console.log('Data:', data)
+      const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
 
       if (data && data.Squares) {
         const squaresData = data.Squares.map((square) => ({
@@ -44,7 +39,6 @@ export default function Home() {
       }
       if (data && data.droppedDominoes) {
         const dominoData = data.droppedDominoes
-        console.log(dominoData)
         setDroppedDominoes(dominoData)
       }
     })

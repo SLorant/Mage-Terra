@@ -7,7 +7,7 @@ import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, set, onValue, push } from 'firebase/database'
-import { data } from 'autoprefixer'
+import { useSearchParams } from 'next/navigation'
 
 interface SquareState {
   accepts: string[]
@@ -216,8 +216,10 @@ export const Board: FC = memo(function Board() {
     console.log(Squares)
   }
 
+  const searchParams = useSearchParams()
+  const room = searchParams.get('roomId')
   useEffect(() => {
-    const dataRef = ref(projectDatabase, '/vmi/Board')
+    const dataRef = ref(projectDatabase, `/vmi/${room}/Board`)
     const squaresData = Squares.map((square) => ({
       accepts: square.accepts,
       lastDroppedItem: square.lastDroppedItem,
@@ -230,7 +232,7 @@ export const Board: FC = memo(function Board() {
       .catch((error) => {
         console.error('Error writing data:', error)
       })
-    const dataRef2 = ref(projectDatabase, '/vmi/Board/droppedDominoes')
+    const dataRef2 = ref(projectDatabase, `/vmi/${room}/Board/droppedDominoes`)
     set(dataRef2, droppedDominoes2)
   }, [Squares])
 
