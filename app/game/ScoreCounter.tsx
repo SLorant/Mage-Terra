@@ -1,8 +1,4 @@
-interface SquareState {
-  accepts: string[]
-  lastDroppedItem: any
-  hasStar: boolean
-}
+import { SquareState } from './Interfaces'
 
 export const ScoreCounter = (squares: SquareState[]): number => {
   const maxSequenceLengths: { [type: string]: { length: number; starCount: number } } = {}

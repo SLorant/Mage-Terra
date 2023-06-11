@@ -6,41 +6,11 @@ import { Square } from './Square'
 import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
-import { ref, set, onValue, push } from 'firebase/database'
+import { ref, set } from 'firebase/database'
+import { MapSetter } from './MapSetter'
+import { BoardProps, DominoState, SquareState } from './Interfaces'
 
-export interface BoardProps {
-  uniqueId: string
-  room: string | null
-}
-
-interface SquareState {
-  accepts: string[]
-  lastDroppedItem: any
-  hasStar: boolean
-}
-
-interface DominoState {
-  firstname: string
-  secondname: string
-  img: string
-  secondimg: string
-}
-
-export interface SquareSpec {
-  accepts: string[]
-  lastDroppedItem: any
-}
-export interface DominoSpec {
-  name: string
-  type: string
-}
-export interface BoardState {
-  droppedDominoNames: string[]
-  Squares: SquareSpec[]
-  Domino: DominoSpec[]
-}
-
-export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room }) {
+export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIsChanged }) {
   console.log(uniqueId)
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
     accepts: [ItemTypes.DOMINO],
@@ -71,24 +41,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room }) {
   const [isTurned, setIsTurned] = useState(false)
 
   useEffect(() => {
-    const specificIndexes = [60, 62, 63, 60, 59, 43] // Specific indexes to set with empty values
-
-    const newSquares = update(Squares, {
-      [4]: { lastDroppedItem: { $set: { firstname: 'F', img: '/kep1.png' } } },
-      [25]: { lastDroppedItem: { $set: { firstname: 'W', img: '/kep2.jpg' } } },
-      [55]: { lastDroppedItem: { $set: { firstname: 'C', img: '/kep3.jpg' } } },
-      [28]: { lastDroppedItem: { $set: { firstname: 'FWC', img: '/br.jpg' } } },
-      [10]: { hasStar: { $set: true } },
-      [49]: { hasStar: { $set: true } },
-      [61]: { hasStar: { $set: true } },
-      ...specificIndexes.reduce((result: Record<number, any>, index) => {
-        if (Squares[index]) {
-          result[index] = { accepts: { $set: [] } }
-        }
-        return result
-      }, {}),
-    })
-
+    const newSquares = MapSetter(Squares)
     setSquares(newSquares)
   }, [isTurned])
 
@@ -189,6 +142,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room }) {
     (index: number, item: { firstname: string; secondname: string; img: string; secondimg: string }) => {
       let { firstname, secondname, /*img*/ secondimg } = item
       //const fillIndex: number = index + 1
+      setIsChanged(true)
       const fillIndex: number = isTurned ? index + 8 : index + 1
       setIsActive(false)
       setLeftSqIndex(-1)
