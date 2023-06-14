@@ -23,7 +23,7 @@ export default function Home() {
       .then(() => {
         console.log('Data written successfully.')
         // Redirect the user to the game page with the unique ID as a query parameter
-        router.push(`/game?roomId=${newUniqueId}`)
+        router.push(`/room?roomId=${newUniqueId}`)
       })
       .catch((error) => {
         console.error('Error writing data:', error)

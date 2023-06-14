@@ -25,6 +25,9 @@ export default function Home() {
   }))
 
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
+  //const [readBoards, setReadBoards] = useState<SquareState[][]>([initialSquares])
+  const [readBoards, setReadBoards] = useState<{ [playerId: string]: SquareState[] }>({})
+  const [readScores, setReadScores] = useState<number[]>([])
 
   type DroppedDominoes = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
@@ -52,29 +55,58 @@ export default function Home() {
       if (data) {
         const playerIds = Object.keys(data)
         otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
-      }
-    })
 
-    const otherId = otherPlayerIds === undefined ? '' : otherPlayerIds[0]
-    const dataRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
+        // Maybe I could do this on the main page instead
+        const initialReadBoards = otherPlayerIds.reduce((acc, playerId) => {
+          acc[playerId] = []
+          return acc
+        }, {} as { [playerId: string]: SquareState[] }) // Type assertion
 
-    onValue(dataRef, (snapshot) => {
-      if (otherPlayerIds !== undefined) {
-        setIsChanged(false)
-        const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
+        setReadBoards(initialReadBoards)
 
-        if (data && data.Squares) {
-          const squaresData = data.Squares.map((square) => ({
-            accepts: square.accepts,
-            lastDroppedItem: square.lastDroppedItem,
-            hasStar: square.hasStar,
-          }))
-          setReadSquares(squaresData)
-        }
-        if (data && data.droppedDominoes) {
-          const dominoData = data.droppedDominoes
-          setDroppedDominoes(dominoData)
-        }
+        otherPlayerIds.forEach((otherId) => {
+          const dataRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
+
+          onValue(dataRef, (snapshot) => {
+            setIsChanged(false)
+            const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[]; Score: number } = snapshot.val()
+
+            if (data && data.Squares) {
+              const squaresData = data.Squares.map((square) => ({
+                accepts: square.accepts,
+                lastDroppedItem: square.lastDroppedItem,
+                hasStar: square.hasStar,
+              }))
+              setReadSquares(squaresData)
+              //setReadBoards((prevStoredSquares) => [...prevStoredSquares, squaresData])
+              setReadBoards((prevReadBoards) => ({
+                ...prevReadBoards,
+                [otherId]: squaresData,
+              }))
+            }
+            if (data && data.droppedDominoes) {
+              const dominoData = data.droppedDominoes
+              setDroppedDominoes(dominoData)
+            }
+            if (data && data.Score) {
+              const scoreData = data.Score
+              setReadScores((prevReadScores) => ({
+                ...prevReadScores,
+                [otherId]: scoreData,
+              }))
+            }
+          })
+          /* const dataRef2 = ref(projectDatabase, `/${room}/${otherId}/Score`)
+          onValue(dataRef2, (snapshot) => {
+            setIsChanged(false)
+            const data: { Score: number } = snapshot.val()
+            console.log(data)
+            if (data && data.Score) {
+             
+              console.log(data.Score)
+            }
+          }) */
+        })
       }
     })
   }, [isChanged])
@@ -83,7 +115,7 @@ export default function Home() {
     const newSquares = MapSetter(readSquares)
     setReadSquares(newSquares)
   }, [])
-
+  console.log(readScores)
   return (
     <main className="flex h-screen flex-col items-center justify-center">
       <div className="bg-purple-300 h-full w-2/3 flex items-center justify-center gap-20">
@@ -96,9 +128,43 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+      {/*  <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
         {readSquares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={index} key={index} droppedDominoes={droppedDominoes} />
+        ))}
+      </div> */}
+
+      {/* <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+        {Object.values(readBoards).map((playerSquares, playerIndex) =>
+          playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
+            <MiniSquare
+              accept={accepts}
+              lastDroppedItem={lastDroppedItem}
+              hasStar={hasStar}
+              index={squareIndex}
+              key={`player-${playerIndex}-square-${squareIndex}`}
+              droppedDominoes={droppedDominoes}
+            />
+          )),
+        )}
+      </div> */}
+      <div className="flex gap-20">
+        {Object.entries(readBoards).map(([playerId, playerSquares]) => (
+          <div key={playerId} className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+            {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
+              <MiniSquare
+                accept={accepts}
+                lastDroppedItem={lastDroppedItem}
+                hasStar={hasStar}
+                index={squareIndex}
+                key={`player-${playerId}-square-${squareIndex}`}
+                droppedDominoes={droppedDominoes}
+              />
+            ))}
+          </div>
+        ))}
+        {Object.entries(readScores).map(([playerId, score]) => (
+          <div key={playerId}>{score}</div>
         ))}
       </div>
     </main>

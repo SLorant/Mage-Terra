@@ -192,8 +192,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
         })
       const dataRef2 = ref(projectDatabase, `/${room}/${uniqueId}/Board/droppedDominoes`)
       set(dataRef2, droppedDominoes2)
+      const dataRef3 = ref(projectDatabase, `/${room}/${uniqueId}/Board/Score`)
+      set(dataRef3, score)
     }
-  }, [Squares])
+  }, [Squares, score])
 
   return (
     <div className="h-full w-full flex gap-10">
