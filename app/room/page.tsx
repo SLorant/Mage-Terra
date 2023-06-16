@@ -1,10 +1,11 @@
 'use client'
-import { set, ref, onValue, update } from 'firebase/database'
+import { set, ref, onValue, update, off } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
+import Image from 'next/image'
 
 export default function Home() {
   const router = useRouter()
@@ -12,18 +13,21 @@ export default function Home() {
   const room = searchParams.get('roomId')
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
-
+  const [readNames, setReadNames] = useState<string[]>([])
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
     const dataRef = ref(projectDatabase, `/${room}`)
     update(dataRef, { gameStarted: true })
   }
+  const [inputName, setInputName] = useState('')
+
   const handleConfirmName = () => {
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
-    set(dataRef, playerName)
-    setPlayerName('')
+    set(dataRef, inputName)
+    setPlayerName(inputName)
+    setInputName('')
   }
-
+  let otherPlayerIds: Array<string>
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
     if (storedUniqueId) {
@@ -41,15 +45,68 @@ export default function Home() {
         const data = snapshot.val()
         if (data) router.push(`/game?roomId=${room}`)
       })
+      const playersRef = ref(projectDatabase, `/${room}`)
+      onValue(playersRef, (snapshot) => {
+        const data = snapshot.val()
+        if (data) {
+          const playerIds = Object.keys(data)
+          //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
+          playerIds.forEach((otherId) => {
+            const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
+            onValue(dataRef3, (snapshot) => {
+              const data: { Name: string } = snapshot.val()
+              if (data && data.Name) {
+                const nameData = data.Name
+                setReadNames((prevReadNames) => ({
+                  ...prevReadNames,
+                  [otherId]: nameData,
+                }))
+              }
+            })
+          })
+        }
+      })
     }
-  })
+    return () => {
+      const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
+      // Unsubscribe from the listener
+      off(dataRef2)
 
+      const playersRef = ref(projectDatabase, `/${room}`)
+      // Unsubscribe from the listener
+      off(playersRef)
+
+      // Clean up any other event listeners or subscriptions here
+    }
+  }, [uniqueId, room])
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <div className="bg-purple-300 h-full w-2/3 flex items-center justify-center gap-20">
-        <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Enter your name" />
-        <button onClick={handleConfirmName}>Confirm Name</button>
-        <button onClick={handlePlayGame}>Play the game</button>
+    <main className="flex h-screen flex-col items-center justify-center text-white">
+      <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-3/4 w-1/2 flex flex-col items-center justify-center gap-10">
+        <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handlePlayGame}>
+          Copy link
+        </button>
+        <div className="flex">
+          <Image src="/pain.jpeg" alt="dropped" width={50} height={50} className="w-32 h-32 " />
+          <div className="flex flex-col ml-8">
+            Choose a name and an avatar
+            <div className="mt-4">
+              <input className="text-lg rounded-lg" type="text" value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="Your name" />
+              <button className="px-4 ml-4 rounded-md py-1 text-lg bg-[#EFCEFB] text-black" onClick={handleConfirmName}>
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="grid h-auto w-auto grid-cols-2 grid-rows-6">
+          {Object.entries(readNames).map(([playerId, name]) => (
+            <div key={playerId} className="ml-4 py-2 px-8 rounded-lg border-2 border-white">
+              {name === playerName ? name + ' (you)' : name}
+            </div>
+          ))}
+        </div>
+        <button className="px-16 rounded-md py-5 text-2xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
+          Start game
+        </button>
       </div>
     </main>
   )
