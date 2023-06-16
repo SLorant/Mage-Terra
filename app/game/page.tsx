@@ -28,6 +28,7 @@ export default function Home() {
   //const [readBoards, setReadBoards] = useState<SquareState[][]>([initialSquares])
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: SquareState[] }>({})
   const [readScores, setReadScores] = useState<number[]>([])
+  const [readNames, setReadNames] = useState<string[]>([])
 
   type DroppedDominoes = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
@@ -55,7 +56,6 @@ export default function Home() {
       if (data) {
         const playerIds = Object.keys(data)
         otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
-
         // Maybe I could do this on the main page instead
         const initialReadBoards = otherPlayerIds.reduce((acc, playerId) => {
           acc[playerId] = []
@@ -66,10 +66,10 @@ export default function Home() {
 
         otherPlayerIds.forEach((otherId) => {
           const dataRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
-
+          const dataRef2 = ref(projectDatabase, `/${room}/${otherId}`)
           onValue(dataRef, (snapshot) => {
             setIsChanged(false)
-            const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[]; Score: number } = snapshot.val()
+            const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
 
             if (data && data.Squares) {
               const squaresData = data.Squares.map((square) => ({
@@ -88,6 +88,10 @@ export default function Home() {
               const dominoData = data.droppedDominoes
               setDroppedDominoes(dominoData)
             }
+          })
+          onValue(dataRef2, (snapshot) => {
+            setIsChanged(false)
+            const data: { Score: number; Name: string } = snapshot.val()
             if (data && data.Score) {
               const scoreData = data.Score
               setReadScores((prevReadScores) => ({
@@ -95,17 +99,15 @@ export default function Home() {
                 [otherId]: scoreData,
               }))
             }
-          })
-          /* const dataRef2 = ref(projectDatabase, `/${room}/${otherId}/Score`)
-          onValue(dataRef2, (snapshot) => {
-            setIsChanged(false)
-            const data: { Score: number } = snapshot.val()
-            console.log(data)
-            if (data && data.Score) {
-             
-              console.log(data.Score)
+            if (data && data.Name) {
+              const nameData = data.Name
+              console.log(nameData)
+              setReadNames((prevReadNames) => ({
+                ...prevReadNames,
+                [otherId]: nameData,
+              }))
             }
-          }) */
+          })
         })
       }
     })
@@ -115,7 +117,7 @@ export default function Home() {
     const newSquares = MapSetter(readSquares)
     setReadSquares(newSquares)
   }, [])
-  console.log(readScores)
+  console.log(readSquares)
   return (
     <main className="flex h-screen flex-col items-center justify-center">
       <div className="bg-purple-300 h-full w-2/3 flex items-center justify-center gap-20">
@@ -128,27 +130,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/*  <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
-        {readSquares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
-          <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={index} key={index} droppedDominoes={droppedDominoes} />
-        ))}
-      </div> */}
-
-      {/* <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
-        {Object.values(readBoards).map((playerSquares, playerIndex) =>
-          playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-            <MiniSquare
-              accept={accepts}
-              lastDroppedItem={lastDroppedItem}
-              hasStar={hasStar}
-              index={squareIndex}
-              key={`player-${playerIndex}-square-${squareIndex}`}
-              droppedDominoes={droppedDominoes}
-            />
-          )),
-        )}
-      </div> */}
-      <div className="flex gap-20">
+      <div className="flex gap-10">
         {Object.entries(readBoards).map(([playerId, playerSquares]) => (
           <div key={playerId} className="h-auto w-auto grid grid-cols-8 grid-rows-8">
             {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
@@ -165,6 +147,9 @@ export default function Home() {
         ))}
         {Object.entries(readScores).map(([playerId, score]) => (
           <div key={playerId}>{score}</div>
+        ))}
+        {Object.entries(readNames).map(([playerId, name]) => (
+          <div key={playerId}>{name}</div>
         ))}
       </div>
     </main>

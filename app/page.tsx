@@ -31,9 +31,24 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <div className="bg-purple-300 h-full w-2/3 flex items-center justify-center gap-20">
-        <button onClick={handlePlayGame}>Play the game</button>
+    <main className="flex h-screen flex-col items-center justify-center text-white">
+      <div className="mb-10">
+        <h1 className="text-6xl">LOGO</h1>
+      </div>
+      <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-1/2 w-1/2 flex flex-col items-center justify-center">
+        <p className="mb-20">Random bevezető mondat lorem ipsum izébizé</p>
+        <div className="gap-20 flex items-center justify-center">
+          <button className="px-24 rounded-md py-6 text-2xl bg-[#CFCEFB] text-black opacity-50" disabled onClick={handlePlayGame}>
+            Play!
+          </button>
+          <button className="px-12 rounded-md py-6 text-2xl bg-[#CFCEFB] text-black" onClick={handlePlayGame}>
+            Create private room
+          </button>
+        </div>
+        <p className="text-xl mt-20 mb-2">New to the game?</p>
+        <button className="px-12 rounded-md py-6 text-xl bg-[#CFCEFB] text-black opacity-50" disabled>
+          Play the tutorial
+        </button>
       </div>
     </main>
   )

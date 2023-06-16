@@ -6,7 +6,7 @@ import { Square } from './Square'
 import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
-import { ref, set } from 'firebase/database'
+import { onValue, ref, set, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
 
@@ -174,26 +174,36 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
     setIsTurned(!isTurned)
     console.log(Squares)
   }
+  /* const [playerName, setPlayerName] = useState('asd')
+  useEffect(() => {
+    const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
+    onValue(dataRef, (snapshot) => {
+      const name = snapshot.val()
+      setPlayerName(name)
+    })
+  }, [room, uniqueId]) */
 
   useEffect(() => {
     if (uniqueId !== '') {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
+      const dataRef2 = ref(projectDatabase, `/${room}/${uniqueId}`)
       const squaresData = Squares.map((square) => ({
         accepts: square.accepts,
         lastDroppedItem: square.lastDroppedItem,
         hasStar: square.hasStar,
       }))
-      set(dataRef, { Squares: squaresData })
+      const updatedData = {
+        Squares: squaresData,
+        droppedDominoes: droppedDominoes2,
+      }
+      set(dataRef, updatedData)
         .then(() => {
           console.log('Data written successfully.')
         })
         .catch((error) => {
           console.error('Error writing data:', error)
         })
-      const dataRef2 = ref(projectDatabase, `/${room}/${uniqueId}/Board/droppedDominoes`)
-      set(dataRef2, droppedDominoes2)
-      const dataRef3 = ref(projectDatabase, `/${room}/${uniqueId}/Board/Score`)
-      set(dataRef3, score)
+      up(dataRef2, { Score: score })
     }
   }, [Squares, score])
 
