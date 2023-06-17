@@ -1,5 +1,5 @@
 'use client'
-import { set, ref, onValue, update, off } from 'firebase/database'
+import { set, ref, onValue, update, off, onDisconnect } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -24,6 +24,7 @@ export default function Home() {
   const handleConfirmName = () => {
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
     set(dataRef, inputName)
+
     setPlayerName(inputName)
     setInputName('')
   }
@@ -45,6 +46,10 @@ export default function Home() {
     if (uniqueId !== '') {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
       set(dataRef, 0)
+      // Set up onDisconnect event listener
+      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      const playerDisconnectRef = onDisconnect(playerRef)
+      playerDisconnectRef.remove()
       const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
       onValue(dataRef2, (snapshot) => {
         const data = snapshot.val()
@@ -53,12 +58,15 @@ export default function Home() {
       const playersRef = ref(projectDatabase, `/${room}`)
       onValue(playersRef, (snapshot) => {
         const data = snapshot.val()
+        console.log(data)
+
         if (data) {
           const playerIds = Object.keys(data)
           //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
-            onValue(dataRef3, (snapshot) => {
+
+            const listener = onValue(dataRef3, (snapshot) => {
               const data: { Name: string } = snapshot.val()
               if (data && data.Name) {
                 const nameData = data.Name
@@ -82,12 +90,17 @@ export default function Home() {
       // Állítólag nem jó az off
     }
   }, [uniqueId, room])
+  const [placeHolders, setPlaceHolders] = useState<any[]>([])
+  useEffect(() => {
+    setPlaceHolders(
+      Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
+        <div key={`placeholder-${index}`} className="ml-4 py-2 mt-2 px-8 rounded-lg border-2 border-white opacity-50">
+          Player
+        </div>
+      )),
+    )
+  }, [readNames])
 
-  const placeholderElements = Array.from({ length: 6 }).map((_, index) => (
-    <div key={`placeholder-${index}`} className="ml-4 py-2 px-8 rounded-lg border-2 border-white">
-      Placeholder
-    </div>
-  ))
   return (
     <main className="flex h-screen flex-col items-center justify-center text-white">
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-3/4 w-1/2 flex flex-col items-center justify-center gap-10">
@@ -112,7 +125,7 @@ export default function Home() {
               {name === playerName ? name + ' (you)' : name}
             </div>
           ))}
-          {placeholderElements}
+          {placeHolders}
         </div>
         <button className="px-16 rounded-md py-5 text-2xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
           Start game
