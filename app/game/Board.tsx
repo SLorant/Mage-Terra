@@ -6,7 +6,7 @@ import { Square } from './Square'
 import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
-import { onValue, ref, set, update as up } from 'firebase/database'
+import { ref, set, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
 
@@ -22,11 +22,11 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
   const [Domino, setDomino] = useState<DominoState>({
     firstname: 'F',
     secondname: 'C',
-    img: '/kep1.png',
-    secondimg: '/kep3.jpg',
+    img: '/cave-05.svg',
+    secondimg: '/mountains-01.svg',
   })
   const nameArray: string[] = ['F', 'W', 'C']
-  const imgArray: string[] = ['/kep1.png', '/kep2.jpg', '/kep3.jpg']
+  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg']
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
 

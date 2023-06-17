@@ -27,6 +27,11 @@ export default function Home() {
     setPlayerName(inputName)
     setInputName('')
   }
+  const [copySuccess, setCopySuccess] = useState('')
+  async function handleCopyLink() {
+    await navigator.clipboard.writeText(location.href)
+    setCopySuccess('Copied')
+  }
   let otherPlayerIds: Array<string>
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
@@ -69,20 +74,24 @@ export default function Home() {
     }
     return () => {
       const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
-      // Unsubscribe from the listener
       off(dataRef2)
 
       const playersRef = ref(projectDatabase, `/${room}`)
-      // Unsubscribe from the listener
       off(playersRef)
 
-      // Clean up any other event listeners or subscriptions here
+      // Állítólag nem jó az off
     }
   }, [uniqueId, room])
+
+  const placeholderElements = Array.from({ length: 6 }).map((_, index) => (
+    <div key={`placeholder-${index}`} className="ml-4 py-2 px-8 rounded-lg border-2 border-white">
+      Placeholder
+    </div>
+  ))
   return (
     <main className="flex h-screen flex-col items-center justify-center text-white">
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-3/4 w-1/2 flex flex-col items-center justify-center gap-10">
-        <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handlePlayGame}>
+        <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handleCopyLink}>
           Copy link
         </button>
         <div className="flex">
@@ -97,12 +106,13 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="grid h-auto w-auto grid-cols-2 grid-rows-6">
+        <div className="grid h-auto w-auto grid-cols-2 grid-rows-3">
           {Object.entries(readNames).map(([playerId, name]) => (
             <div key={playerId} className="ml-4 py-2 px-8 rounded-lg border-2 border-white">
               {name === playerName ? name + ' (you)' : name}
             </div>
           ))}
+          {placeholderElements}
         </div>
         <button className="px-16 rounded-md py-5 text-2xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
           Start game
