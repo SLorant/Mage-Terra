@@ -45,7 +45,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   }, [isDragging])
 
   return (
-    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} flex  ml-20 justify-center items-center`}>
+    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} flex  ml-10 justify-center items-center`}>
       <div ref={drag}>
         <div ref={dominoRef} style={{ ...style, opacity }} className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px]'} flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">

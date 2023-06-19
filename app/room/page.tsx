@@ -1,5 +1,5 @@
 'use client'
-import { set, ref, onValue, update, off, onDisconnect } from 'firebase/database'
+import { set, ref, onValue, update, off, onDisconnect, remove } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -13,7 +13,8 @@ export default function Home() {
   const room = searchParams.get('roomId')
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
-  const [readNames, setReadNames] = useState<string[]>([])
+  const [playerId, setPlayerId] = useState('')
+  const [readNames, setReadNames] = useState<{ [key: string]: string }>({})
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -44,11 +45,20 @@ export default function Home() {
       localStorage.setItem('uniqueId', newUniqueId)
     }
     if (uniqueId !== '') {
+      setPlayerId(uniqueId)
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
       set(dataRef, 0)
       // Set up onDisconnect event listener
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const playerDisconnectRef = onDisconnect(playerRef)
+      const connectedRef = ref(projectDatabase, '.info/connected')
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === true) {
+          console.log('connected')
+        } else {
+          console.log('not connected')
+        }
+      })
       playerDisconnectRef.remove()
       const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
       onValue(dataRef2, (snapshot) => {
@@ -65,10 +75,10 @@ export default function Home() {
           //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
-
             const listener = onValue(dataRef3, (snapshot) => {
               const data: { Name: string } = snapshot.val()
               if (data && data.Name) {
+                console.log(data)
                 const nameData = data.Name
                 setReadNames((prevReadNames) => ({
                   ...prevReadNames,

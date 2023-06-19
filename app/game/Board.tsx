@@ -208,8 +208,8 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
   }, [Squares, score])
 
   return (
-    <div className="h-full w-full flex gap-10">
-      <div className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+    <div className="h-full w-full flex gap-2">
+      <div className="h-[640px] w-[640px] grid grid-cols-8 grid-rows-8">
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
@@ -227,10 +227,9 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
           />
         ))}
       </div>
-      <button className="mt-10 h-6" onClick={handleMirrorClick}>
-        Mirror
-      </button>
-      <div className="w-20 flex justify-center items-center flex-col ">
+
+      <div className="w-40  flex justify-center items-center flex-col ">
+        <div className="text-xl  text-white">Your score: {score}</div>
         <DominoComponent
           firstname={Domino.firstname}
           secondname={Domino.secondname}
@@ -240,11 +239,15 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
           secondimg={Domino.secondimg}
           isTurned={isTurned}
         />
+        <div className="text-white ml-10 mt-4 text-xl flex gap-6">
+          <button className="" onClick={handleMirrorClick}>
+            Mirror
+          </button>
+          <button className="" onClick={handleTurnClick}>
+            Turn
+          </button>
+        </div>
       </div>
-      <button className="mt-10 h-6" onClick={handleTurnClick}>
-        Turn
-      </button>
-      <div>{score}</div>
     </div>
   )
 })
