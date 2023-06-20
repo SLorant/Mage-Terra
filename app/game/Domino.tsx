@@ -19,33 +19,28 @@ export interface DominoProps {
   isTurned: boolean
 }
 
-export const DominoComponent: FC<DominoProps> = memo(function Domino({
-  firstname,
-  secondname,
-  //isDropped,
-  setIsActive,
-  img,
-  secondimg,
-  isTurned,
-}) {
+export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname, secondname, isDropped, setIsActive, img, secondimg, isTurned }) {
   const dominoRef = useRef<HTMLDivElement>(null)
-  const [{ opacity, isDragging }, drag] = useDrag(
+  console.log(isDropped)
+  const [{ opacity, isDragging, canDrag }, drag] = useDrag(
     () => ({
       type: ItemTypes.DOMINO,
       item: { firstname, secondname, img, secondimg },
+      canDrag: !isDropped,
       collect: (monitor) => ({
         opacity: monitor.isDragging() ? 0.9 : 1,
         isDragging: monitor.isDragging() ? true : false,
+        canDrag: monitor.canDrag() ? true : false,
       }),
     }),
     [firstname, secondname, img, secondimg],
   )
   useEffect(() => {
-    !isDragging ? setIsActive(false) : ''
+    !isDragging && setIsActive(false)
   }, [isDragging])
 
   return (
-    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} flex  ml-10 justify-center items-center`}>
+    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} ${isDropped && 'opacity-50'} flex  ml-10 justify-center items-center`}>
       <div ref={drag}>
         <div ref={dominoRef} style={{ ...style, opacity }} className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px]'} flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">

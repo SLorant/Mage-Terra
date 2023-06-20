@@ -13,7 +13,6 @@ export default function Home() {
   const room = searchParams.get('roomId')
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
-  const [playerId, setPlayerId] = useState('')
   const [readNames, setReadNames] = useState<{ [key: string]: string }>({})
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
@@ -29,12 +28,9 @@ export default function Home() {
     setPlayerName(inputName)
     setInputName('')
   }
-  const [copySuccess, setCopySuccess] = useState('')
   async function handleCopyLink() {
     await navigator.clipboard.writeText(location.href)
-    setCopySuccess('Copied')
   }
-  let otherPlayerIds: Array<string>
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
     if (storedUniqueId) {
@@ -45,21 +41,23 @@ export default function Home() {
       localStorage.setItem('uniqueId', newUniqueId)
     }
     if (uniqueId !== '') {
-      setPlayerId(uniqueId)
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
       set(dataRef, 0)
       // Set up onDisconnect event listener
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const playerDisconnectRef = onDisconnect(playerRef)
-      const connectedRef = ref(projectDatabase, '.info/connected')
+
+      playerDisconnectRef.remove()
+
+      /*  const connectedRef = ref(projectDatabase, '.info/connected')
       onValue(connectedRef, (snap) => {
         if (snap.val() === true) {
           console.log('connected')
         } else {
-          console.log('not connected')
+          //setReadNames({})
         }
-      })
-      playerDisconnectRef.remove()
+      }) */
+
       const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
       onValue(dataRef2, (snapshot) => {
         const data = snapshot.val()
@@ -73,12 +71,12 @@ export default function Home() {
         if (data) {
           const playerIds = Object.keys(data)
           //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
+          setReadNames({})
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
-            const listener = onValue(dataRef3, (snapshot) => {
+            onValue(dataRef3, (snapshot) => {
               const data: { Name: string } = snapshot.val()
               if (data && data.Name) {
-                console.log(data)
                 const nameData = data.Name
                 setReadNames((prevReadNames) => ({
                   ...prevReadNames,
@@ -112,7 +110,7 @@ export default function Home() {
   }, [readNames])
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center text-white">
+    <main className="flex h-screen flex-col items-center justify-center text-white font-sans">
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-3/4 w-1/2 flex flex-col items-center justify-center gap-10">
         <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handleCopyLink}>
           Copy link

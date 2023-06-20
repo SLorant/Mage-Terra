@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation'
 import { ref, set } from 'firebase/database'
 import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
+import { Amaranth } from 'next/font/google'
+
+const amaranth = Amaranth({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-amaranth',
+})
 
 export default function Home() {
   const router = useRouter()
@@ -31,7 +38,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center text-white">
+    <main className={`flex h-screen flex-col items-center justify-center text-white ${amaranth.variable} font-sans`}>
       <div className="mb-10">
         <h1 className="text-6xl">LOGO</h1>
       </div>

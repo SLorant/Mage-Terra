@@ -7,15 +7,9 @@ import { ref, onValue } from 'firebase/database'
 import { useState, useEffect } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { MiniSquare } from './MiniSquare'
-import { v4 as uuidv4 } from 'uuid'
 import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
-
-interface SquareState {
-  accepts: string[]
-  lastDroppedItem: any
-  hasStar: boolean
-}
+import { SquareState } from './Interfaces'
 
 export default function Home() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
@@ -25,7 +19,6 @@ export default function Home() {
   }))
 
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
-  //const [readBoards, setReadBoards] = useState<SquareState[][]>([initialSquares])
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: SquareState[] }>({})
 
   interface PlayerInfo {
@@ -36,7 +29,6 @@ export default function Home() {
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
 
   /* const [playerInfos, setPlayerInfos] = useState<number[]>([]) */
-  const [readNames, setReadNames] = useState<string[]>([])
 
   type DroppedDominoes = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
@@ -50,13 +42,7 @@ export default function Home() {
 
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
-    if (storedUniqueId) {
-      setUniqueId(storedUniqueId)
-    } else {
-      const newUniqueId = uuidv4()
-      setUniqueId(newUniqueId)
-      localStorage.setItem('uniqueId', newUniqueId)
-    }
+    storedUniqueId && setUniqueId(storedUniqueId)
 
     const playersRef = ref(projectDatabase, `/${room}`)
     onValue(playersRef, (snapshot) => {
@@ -64,7 +50,6 @@ export default function Home() {
       if (data) {
         const playerIds = Object.keys(data)
         otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
-        // Maybe I could do this on the main page instead
         const initialReadBoards = otherPlayerIds.reduce((acc, playerId) => {
           acc[playerId] = []
           return acc
@@ -73,10 +58,10 @@ export default function Home() {
         setReadBoards(initialReadBoards)
 
         playerIds.forEach((otherId) => {
-          const dataRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
-          const dataRef2 = ref(projectDatabase, `/${room}/${otherId}`)
+          const playerBoardsRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
+          const playerInfoRef = ref(projectDatabase, `/${room}/${otherId}`)
           if (otherId !== localStorage.getItem('uniqueId')) {
-            onValue(dataRef, (snapshot) => {
+            onValue(playerBoardsRef, (snapshot) => {
               setIsChanged(false)
               const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
 
@@ -87,7 +72,6 @@ export default function Home() {
                   hasStar: square.hasStar,
                 }))
                 setReadSquares(squaresData)
-                //setReadBoards((prevStoredSquares) => [...prevStoredSquares, squaresData])
                 setReadBoards((prevReadBoards) => ({
                   ...prevReadBoards,
                   [otherId]: squaresData,
@@ -99,7 +83,7 @@ export default function Home() {
               }
             })
           }
-          onValue(dataRef2, (snapshot) => {
+          onValue(playerInfoRef, (snapshot) => {
             setIsChanged(false)
             const data: { Score: number; Name: string } = snapshot.val()
             if (data && data.Score && data.Name) {
@@ -110,32 +94,19 @@ export default function Home() {
                 [otherId]: { name: nameData, score: scoreData },
               }))
             }
-            /*  if (data && data.Name) {
-              const nameData = data.Name
-              setReadNames((prevReadNames) => ({
-                ...prevReadNames,
-                [otherId]: nameData,
-              }))
-            }*/
-            console.log(playerInfos)
           })
         })
       }
     })
-  }, [isChanged])
+  }, [])
 
   useEffect(() => {
     const newSquares = MapSetter(readSquares)
     setReadSquares(newSquares)
-    console.log(playerInfos)
   }, [])
-  /*  const combinedArray = playerInfos.map((score, index) => ({
-    name: readNames[index],
-    score: score,
-  }))
-  console.log(combinedArray) */
+
   return (
-    <main className="flex h-screen  items-center justify-center">
+    <main className="flex h-screen  items-center justify-center font-sans">
       <div className="h-full w-2/3 flex items-center justify-center gap-20">
         <div className="items-center flex-col  justify-center">
           <div className="mt-20 w-[900px] bg-purple-700 h-[640px] gap-0 shadow-md">
@@ -162,11 +133,6 @@ export default function Home() {
         ))}
         <div className="flex flex-col text-xl text-white  items-center text-center">
           <h3 className="col-span-2  text-3xl mb-2">Scores</h3>
-          {/*   {Object.entries(readNames).map(([playerId, name]) => (
-            <div key={playerId} className="border-y-2 border-gray-200">
-              {name}
-            </div>
-          ))} */}
           {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
             <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
               <div>{playerId === uniqueId ? name + ' (you)' : name}</div>

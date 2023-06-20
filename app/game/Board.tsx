@@ -6,7 +6,7 @@ import { Square } from './Square'
 import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
-import { ref, set, update as up } from 'firebase/database'
+import { onValue, ref, set, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
 
@@ -34,10 +34,15 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
   type DroppedDomino2 = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
   const [droppedDominoes2, setDroppedDominoes2] = useState<DroppedDomino2[]>([])
+  const [round, setRound] = useState<number>(1)
 
-  function isDropped(DominoName: string) {
+  /* function isDropped(DominoName: string) {
     return droppedDominoNames.indexOf(DominoName) > -1
-  }
+  } */
+  /* function isDropped() {
+    return droppedDominoNames.length > 0
+  } */
+  const [isDropped, setIsDropped] = useState<boolean>(false)
   const [isTurned, setIsTurned] = useState(false)
 
   useEffect(() => {
@@ -119,7 +124,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
   }
 
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
-    //const fillIndex: number = index + 1
     const fillIndex: number = isTurned ? index + 8 : index + 1
     const verticalNeighborValid =
       isValidNeighbour(index, -8, firstname) ||
@@ -141,10 +145,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
   const handleDrop = useCallback(
     (index: number, item: { firstname: string; secondname: string; img: string; secondimg: string }) => {
       let { firstname, secondname, /*img*/ secondimg } = item
-      //const fillIndex: number = index + 1
       setIsChanged(true)
       const fillIndex: number = isTurned ? index + 8 : index + 1
       setIsActive(false)
+      setIsDropped(true)
       setLeftSqIndex(-1)
       //dominoIndexes.set(index, item)
       if (
@@ -174,14 +178,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
     setIsTurned(!isTurned)
     console.log(Squares)
   }
-  /* const [playerName, setPlayerName] = useState('asd')
-  useEffect(() => {
-    const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
-    onValue(dataRef, (snapshot) => {
-      const name = snapshot.val()
-      setPlayerName(name)
-    })
-  }, [room, uniqueId]) */
 
   useEffect(() => {
     if (uniqueId !== '') {
@@ -195,17 +191,33 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
       const updatedData = {
         Squares: squaresData,
         droppedDominoes: droppedDominoes2,
+        didDrop: true,
       }
       set(dataRef, updatedData)
-        .then(() => {
-          console.log('Data written successfully.')
-        })
-        .catch((error) => {
-          console.error('Error writing data:', error)
-        })
       up(dataRef2, { Score: score })
+      const dataRef3 = ref(projectDatabase, `/${room}/round`)
+      onValue(dataRef3, (snapshot) => {
+        const data = snapshot.val()
+        console.log(data)
+      })
     }
   }, [Squares, score])
+
+  const handlePlayGame = () => {
+    const dataRef = ref(projectDatabase, `/${room}`)
+    let count = 0
+    onValue(dataRef, (snapshot) => {
+      const data: { round: number } = snapshot.val()
+      if (data && data.round) {
+        count = data.round
+        setRound(data.round)
+      }
+    })
+    up(dataRef, { round: count + 1 })
+  }
+  useEffect(() => {
+    setIsDropped(false)
+  }, [round])
 
   return (
     <div className="h-full w-full flex gap-2">
@@ -233,7 +245,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
         <DominoComponent
           firstname={Domino.firstname}
           secondname={Domino.secondname}
-          isDropped={isDropped(Domino.firstname)}
+          isDropped={isDropped}
           setIsActive={setIsActive}
           img={Domino.img}
           secondimg={Domino.secondimg}
@@ -247,6 +259,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, setIs
             Turn
           </button>
         </div>
+        <button onClick={handlePlayGame}>Next round</button>
       </div>
     </div>
   )
