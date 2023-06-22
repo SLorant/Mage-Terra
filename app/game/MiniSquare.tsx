@@ -21,15 +21,15 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
   }
   return (
     <div className={` h-10 w-10 border-gray-200 ${borderClass} bg-gray-100 ring-gray-200 relative shadow-lg z-20`} data-testid="Square">
-      {hasStar && <Image src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
+      {hasStar && <Image draggable="false" src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
       {lastDroppedItem && (
         <div className={`h-[39px] w-[39px]  shadow-lg z-20 `}>
-          <Image src={lastDroppedItem.img} alt="dropped" width={500} height={500} className="w-full h-full " />
+          <Image src={lastDroppedItem.img} draggable="false" alt="dropped" width={500} height={500} className="w-full h-full " />
         </div>
       )}
       {(accept === undefined || accept.length === 0) && (
         <div className={`h-[39px] w-[39px]  shadow-lg z-20 `}>
-          <Image src="/pain.jpeg" alt="dropped" width={500} height={500} className="w-full h-full " />
+          <Image src="/pain.jpeg" draggable="false" alt="dropped" width={500} height={500} className="w-full h-full " />
         </div>
       )}
     </div>

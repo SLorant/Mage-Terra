@@ -3,7 +3,7 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
-import { ref, onValue } from 'firebase/database'
+import { ref, onValue, update } from 'firebase/database'
 import { useState, useEffect } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { MiniSquare } from './MiniSquare'
@@ -27,7 +27,7 @@ export default function Home() {
   }
 
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
-
+  const [playerDrops, setPlayerDrops] = useState<{ [key: string]: boolean }>({})
   /* const [playerInfos, setPlayerInfos] = useState<number[]>([]) */
 
   type DroppedDominoes = [number, number]
@@ -35,6 +35,8 @@ export default function Home() {
   const [uniqueId, setUniqueId] = useState('')
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
+  const [isDropped, setIsDropped] = useState<boolean>(false)
+  const [round, setRound] = useState<number>(1)
 
   // Save the unique ID in local storage
   let otherPlayerIds: Array<string>
@@ -85,13 +87,25 @@ export default function Home() {
           }
           onValue(playerInfoRef, (snapshot) => {
             setIsChanged(false)
-            const data: { Score: number; Name: string } = snapshot.val()
+            const data: { Score: number; Name: string; didDrop: boolean } = snapshot.val()
             if (data && data.Score && data.Name) {
               const scoreData = data.Score
               const nameData = data.Name
               setPlayerInfos((prevPlayerInfos) => ({
                 ...prevPlayerInfos,
                 [otherId]: { name: nameData, score: scoreData },
+              }))
+            }
+            if (data && data.didDrop) {
+              const dropData = data.didDrop
+              setPlayerDrops((prevPlayerDrops) => ({
+                ...prevPlayerDrops,
+                [otherId]: dropData,
+              }))
+            } else if (data && !data.didDrop && otherId !== 'gameStarted' && otherId !== 'round') {
+              setPlayerDrops((prevPlayerDrops) => ({
+                ...prevPlayerDrops,
+                [otherId]: false,
               }))
             }
           })
@@ -105,13 +119,41 @@ export default function Home() {
     setReadSquares(newSquares)
   }, [])
 
+  const handlePlayGame = () => {
+    const dataRef = ref(projectDatabase, `/${room}`)
+    let count = 0
+    onValue(dataRef, (snapshot) => {
+      const data: { round: number } = snapshot.val()
+      if (data && data.round) {
+        count = data.round
+        setRound(data.round)
+      }
+    })
+    update(dataRef, { round: count + 1 })
+  }
+  useEffect(() => {
+    const allTrue = Object.values(playerDrops).every((value) => value === true)
+    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+    console.log(allTrue)
+    console.log(playerDrops)
+    if (allTrue && uniqueId) {
+      update(playerRef, { didDrop: false })
+      setIsDropped(false)
+    }
+  }, [playerDrops])
+
+  useEffect(() => {
+    setIsDropped(false)
+  }, [round])
+  console.log(playerDrops)
   return (
     <main className="flex h-screen  items-center justify-center font-sans">
       <div className="h-full w-2/3 flex items-center justify-center gap-20">
         <div className="items-center flex-col  justify-center">
+          <button onClick={handlePlayGame}>Next round</button>
           <div className="mt-20 w-[900px] bg-purple-700 h-[640px] gap-0 shadow-md">
             <DndProvider backend={HTML5Backend}>
-              <Board uniqueId={uniqueId} room={room} setIsChanged={setIsChanged} />
+              <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
             </DndProvider>
           </div>
         </div>
@@ -140,6 +182,11 @@ export default function Home() {
             </div>
           ))}
         </div>
+        {Object.entries(playerDrops).map(([playerId, drops]) => (
+          <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
+            <div>{drops}</div>
+          </div>
+        ))}
       </aside>
     </main>
   )

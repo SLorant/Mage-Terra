@@ -111,12 +111,12 @@ export default function Home() {
 
   return (
     <main className="flex h-screen flex-col items-center justify-center text-white font-sans">
-      <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-3/4 w-1/2 flex flex-col items-center justify-center gap-10">
+      <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[700px] flex flex-col items-center justify-center gap-10">
         <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handleCopyLink}>
           Copy link
         </button>
         <div className="flex">
-          <Image src="/pain.jpeg" alt="dropped" width={50} height={50} className="w-32 h-32 " />
+          <Image src="/avatars-04.png" alt="dropped" width={100} height={100} className="w-36 h-40 " unoptimized />
           <div className="flex flex-col ml-8">
             Choose a name and an avatar
             <div className="mt-4">

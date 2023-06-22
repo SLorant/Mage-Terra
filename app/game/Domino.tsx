@@ -21,7 +21,6 @@ export interface DominoProps {
 
 export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname, secondname, isDropped, setIsActive, img, secondimg, isTurned }) {
   const dominoRef = useRef<HTMLDivElement>(null)
-  console.log(isDropped)
   const [{ opacity, isDragging, canDrag }, drag] = useDrag(
     () => ({
       type: ItemTypes.DOMINO,
@@ -33,7 +32,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname
         canDrag: monitor.canDrag() ? true : false,
       }),
     }),
-    [firstname, secondname, img, secondimg],
+    [firstname, secondname, img, secondimg, isDropped],
   )
   useEffect(() => {
     !isDragging && setIsActive(false)
@@ -44,10 +43,10 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname
       <div ref={drag}>
         <div ref={dominoRef} style={{ ...style, opacity }} className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px]'} flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={img} alt="kep" width={80} height={80} className="w-full h-full pbject-cover" />
+            <Image src={img} alt="kep" width={80} height={80} className="w-full h-full pbject-cover" draggable="false" />
           </div>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={secondimg} alt="kep" width={80} height={80} className="w-full h-full pbject-cover" />
+            <Image src={secondimg} alt="kep" width={80} height={80} className="w-full h-full pbject-cover" draggable="false" />
           </div>
         </div>
       </div>

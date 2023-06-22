@@ -3,7 +3,8 @@ import { Dispatch, SetStateAction } from 'react'
 export interface BoardProps {
   uniqueId: string
   room: string | null
-  setIsChanged: Dispatch<SetStateAction<boolean>>
+  isDropped: boolean
+  setIsDropped: Dispatch<SetStateAction<boolean>>
 }
 
 export interface SquareState {
