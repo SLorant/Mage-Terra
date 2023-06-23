@@ -11,7 +11,6 @@ import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped }) {
-  console.log(uniqueId)
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
@@ -193,11 +192,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       }
       set(dataRef, updatedData)
       up(dataRef2, { Score: score, didDrop: isDropped })
-      const dataRef3 = ref(projectDatabase, `/${room}/round`)
+      /* const dataRef3 = ref(projectDatabase, `/${room}/round`)
       onValue(dataRef3, (snapshot) => {
         const data = snapshot.val()
-        console.log(data)
-      })
+      }) */
     }
   }, [Squares, score])
 

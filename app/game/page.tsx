@@ -40,7 +40,6 @@ export default function Home() {
 
   // Save the unique ID in local storage
   let otherPlayerIds: Array<string>
-  const [isChanged, setIsChanged] = useState<boolean>(false)
 
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
@@ -64,7 +63,6 @@ export default function Home() {
           const playerInfoRef = ref(projectDatabase, `/${room}/${otherId}`)
           if (otherId !== localStorage.getItem('uniqueId')) {
             onValue(playerBoardsRef, (snapshot) => {
-              setIsChanged(false)
               const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
 
               if (data && data.Squares) {
@@ -86,7 +84,6 @@ export default function Home() {
             })
           }
           onValue(playerInfoRef, (snapshot) => {
-            setIsChanged(false)
             const data: { Score: number; Name: string; didDrop: boolean } = snapshot.val()
             if (data && data.Score && data.Name) {
               const scoreData = data.Score
@@ -96,18 +93,19 @@ export default function Home() {
                 [otherId]: { name: nameData, score: scoreData },
               }))
             }
-            if (data && data.didDrop) {
+            if (data && data.didDrop && otherId !== 'gameStarted' && otherId !== 'round') {
               const dropData = data.didDrop
               setPlayerDrops((prevPlayerDrops) => ({
                 ...prevPlayerDrops,
                 [otherId]: dropData,
               }))
-            } else if (data && !data.didDrop && otherId !== 'gameStarted' && otherId !== 'round') {
+            } /* else if (data && data.didDrop === undefined && otherId !== 'gameStarted' && otherId !== 'round') {
+              console.log('initial playerdrop set')
               setPlayerDrops((prevPlayerDrops) => ({
                 ...prevPlayerDrops,
                 [otherId]: false,
               }))
-            }
+            } */
           })
         })
       }
@@ -134,18 +132,17 @@ export default function Home() {
   useEffect(() => {
     const allTrue = Object.values(playerDrops).every((value) => value === true)
     const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-    console.log(allTrue)
-    console.log(playerDrops)
     if (allTrue && uniqueId) {
       update(playerRef, { didDrop: false })
       setIsDropped(false)
+      const updatedPlayerDrops = Object.fromEntries(Object.entries(playerDrops).map(([key, _]) => [key, false]))
+      setPlayerDrops(updatedPlayerDrops)
     }
   }, [playerDrops])
 
   useEffect(() => {
     setIsDropped(false)
   }, [round])
-  console.log(playerDrops)
   return (
     <main className="flex h-screen  items-center justify-center font-sans">
       <div className="h-full w-2/3 flex items-center justify-center gap-20">
