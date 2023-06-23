@@ -13,6 +13,7 @@ export default function Home() {
   const room = searchParams.get('roomId')
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
+  const [hostExists, setHostExists] = useState(false)
   const [readNames, setReadNames] = useState<{ [key: string]: string }>({})
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
@@ -40,13 +41,22 @@ export default function Home() {
       setUniqueId(newUniqueId)
       localStorage.setItem('uniqueId', newUniqueId)
     }
+    setReadNames({})
     if (uniqueId !== '') {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
       set(dataRef, 0)
       // Set up onDisconnect event listener
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      if (playerName === '') {
+        setPlayerName('New player')
+        setReadNames((prevReadNames) => ({
+          ...prevReadNames,
+          [uniqueId]: 'New player',
+        }))
+        const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
+        set(dataRef, 'New player')
+      }
       const playerDisconnectRef = onDisconnect(playerRef)
-
       playerDisconnectRef.remove()
 
       /*  const connectedRef = ref(projectDatabase, '.info/connected')
@@ -71,17 +81,24 @@ export default function Home() {
         if (data) {
           const playerIds = Object.keys(data)
           //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
-          setReadNames({})
+          if (playerIds.length === 1) {
+            const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Host`)
+            set(dataRef, true)
+            setHostExists(true)
+          } else setHostExists(false)
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
             onValue(dataRef3, (snapshot) => {
-              const data: { Name: string } = snapshot.val()
+              const data: { Name: string; Host: boolean } = snapshot.val()
               if (data && data.Name) {
                 const nameData = data.Name
                 setReadNames((prevReadNames) => ({
                   ...prevReadNames,
                   [otherId]: nameData,
                 }))
+              }
+              if (data && data.Host) {
+                setHostExists(true)
               }
             })
           })
@@ -102,13 +119,21 @@ export default function Home() {
   useEffect(() => {
     setPlaceHolders(
       Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
-        <div key={`placeholder-${index}`} className="ml-4 py-2 mt-2 px-8 rounded-lg border-2 border-white opacity-50">
-          Player
-        </div>
+        <div key={`placeholder-${index}`} className="ml-4 py-2 mt-2 px-8 rounded-lg border-2 border-white opacity-50"></div>
       )),
     )
   }, [readNames])
-
+  useEffect(() => {
+    if (hostExists === false) {
+      const IdArray = Object.keys(readNames)
+      //const randomIndex = Math.floor(Math.random() * IdArray.length)
+      console.log(IdArray[0])
+      const dataRef = ref(projectDatabase, `/${room}/${IdArray[1]}/Host`)
+      set(dataRef, true)
+      setHostExists(true)
+    }
+  }, [hostExists])
+  console.log(Object.keys(readNames))
   return (
     <main className="flex h-screen flex-col items-center justify-center text-white font-sans">
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[700px] flex flex-col items-center justify-center gap-10">
@@ -130,7 +155,14 @@ export default function Home() {
         <div className="grid h-auto w-auto grid-cols-2 grid-rows-3">
           {Object.entries(readNames).map(([playerId, name]) => (
             <div key={playerId} className="ml-4 py-2 px-8 rounded-lg border-2 border-white">
-              {name === playerName ? name + ' (you)' : name}
+              {name === playerName && playerId === uniqueId && name === 'New player'
+                ? 'You'
+                : name === playerName && playerId === uniqueId
+                ? name + ' (you)'
+                : name}
+
+              {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
+              {name === 'New player' && <span className="ml-8">...</span>}
             </div>
           ))}
           {placeHolders}
