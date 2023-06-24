@@ -117,18 +117,6 @@ export default function Home() {
     setReadSquares(newSquares)
   }, [])
 
-  const handlePlayGame = () => {
-    const dataRef = ref(projectDatabase, `/${room}`)
-    let count = 0
-    onValue(dataRef, (snapshot) => {
-      const data: { round: number } = snapshot.val()
-      if (data && data.round) {
-        count = data.round
-        setRound(data.round)
-      }
-    })
-    update(dataRef, { round: count + 1 })
-  }
   useEffect(() => {
     const allTrue = Object.values(playerDrops).every((value) => value === true)
     const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
@@ -144,47 +132,39 @@ export default function Home() {
     setIsDropped(false)
   }, [round])
   return (
-    <main className="flex h-screen  items-center justify-center font-sans">
-      <div className="h-full w-2/3 flex items-center justify-center gap-20">
-        <div className="items-center flex-col  justify-center">
-          <button onClick={handlePlayGame}>Next round</button>
-          <div className="mt-20 w-[900px] bg-purple-700 h-[640px] gap-0 shadow-md">
-            <DndProvider backend={HTML5Backend}>
-              <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
-            </DndProvider>
-          </div>
+    <main className="flex h-screen  items-center justify-center font-sans ">
+      <div className="flex  items-center justify-center gap-10 bg-purple-700 w-[1000px]">
+        <div className="mt-20 flex items-center justify-center  bg-purple-700 h-[640px] gap-0 shadow-md">
+          <DndProvider backend={HTML5Backend}>
+            <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
+          </DndProvider>
         </div>
-      </div>
-      <aside className="flex flex-col gap-10">
-        {Object.entries(readBoards).map(([playerId, playerSquares]) => (
-          <div key={playerId} className="h-auto w-auto grid grid-cols-8 grid-rows-8">
-            {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-              <MiniSquare
-                accept={accepts}
-                lastDroppedItem={lastDroppedItem}
-                hasStar={hasStar}
-                index={squareIndex}
-                key={`player-${playerId}-square-${squareIndex}`}
-                droppedDominoes={droppedDominoes}
-              />
-            ))}
-          </div>
-        ))}
-        <div className="flex flex-col text-xl text-white  items-center text-center">
-          <h3 className="col-span-2  text-3xl mb-2">Scores</h3>
-          {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
-            <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
-              <div>{playerId === uniqueId ? name + ' (you)' : name}</div>
-              <div>{score}</div>
+        <aside className="flex flex-col h-full justify-start gap-2 mb-40">
+          {Object.entries(readBoards).map(([playerId, playerSquares]) => (
+            <div key={playerId} className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+              {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
+                <MiniSquare
+                  accept={accepts}
+                  lastDroppedItem={lastDroppedItem}
+                  hasStar={hasStar}
+                  index={squareIndex}
+                  key={`player-${playerId}-square-${squareIndex}`}
+                  droppedDominoes={droppedDominoes}
+                />
+              ))}
             </div>
           ))}
-        </div>
-        {Object.entries(playerDrops).map(([playerId, drops]) => (
-          <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
-            <div>{drops}</div>
+          <div className="flex flex-col text-xl text-white  items-center text-center">
+            <h3 className="col-span-2  text-3xl mb-2">Scores</h3>
+            {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
+              <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
+                <div>{playerId === uniqueId ? name + ' (you)' : name}</div>
+                <div>{score}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </aside>
+        </aside>
+      </div>
     </main>
   )
 }

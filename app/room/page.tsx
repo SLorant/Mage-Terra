@@ -127,8 +127,8 @@ export default function Home() {
     if (hostExists === false) {
       const IdArray = Object.keys(readNames)
       //const randomIndex = Math.floor(Math.random() * IdArray.length)
-      console.log(IdArray[0])
-      const dataRef = ref(projectDatabase, `/${room}/${IdArray[1]}/Host`)
+      console.log(IdArray[1])
+      const dataRef = ref(projectDatabase, `/${room}/${IdArray[0]}/Host`)
       set(dataRef, true)
       setHostExists(true)
     }

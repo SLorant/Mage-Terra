@@ -33,6 +33,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   type DroppedDomino2 = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
   const [droppedDominoes2, setDroppedDominoes2] = useState<DroppedDomino2[]>([])
+  const [direction, setDirection] = useState<string>('left')
 
   /* function isDropped(DominoName: string) {
     return droppedDominoNames.indexOf(DominoName) > -1
@@ -91,13 +92,17 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         Squares[index + 8].accepts.includes('D')
       )
     } else {
-      return (
-        !square.lastDroppedItem &&
-        (sqIndex === index - 1 || sqIndex === index) &&
-        sqIndex % 8 !== 7 &&
-        (leftSqIndex === +1 || leftSqIndex === index + 1) &&
-        Squares[index + 1].accepts.includes('D')
-      )
+      return direction == 'left'
+        ? !square.lastDroppedItem &&
+            (sqIndex === index - 1 || sqIndex === index) &&
+            sqIndex % 8 !== 7 &&
+            (leftSqIndex === +1 || leftSqIndex === index + 1) &&
+            Squares[index + 1].accepts.includes('D')
+        : !square.lastDroppedItem &&
+            (sqIndex === index - 1 || sqIndex === index) &&
+            sqIndex % 8 !== 7 &&
+            (leftSqIndex === +1 || leftSqIndex === index + 1) &&
+            Squares[index].accepts.includes('D')
     }
   }
 
@@ -105,9 +110,8 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     (index: number, isOver: boolean) => {
       if (isOver) {
         setSqIndex(index)
-
         setOver(true)
-        if (Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 8 : index + 1)
+        if (Squares[index] && Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 8 : index + 1)
         else setLeftSqIndex(-1)
       }
     },
@@ -143,6 +147,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const handleDrop = useCallback(
     (index: number, item: { firstname: string; secondname: string; img: string; secondimg: string }) => {
       let { firstname, secondname, /*img*/ secondimg } = item
+
       const fillIndex: number = isTurned ? index + 8 : index + 1
       setIsActive(false)
 
@@ -150,10 +155,12 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       //dominoIndexes.set(index, item)
       if (
         (isTurned ? index < 56 : index % 8 !== 7) &&
+        Squares[index] &&
         !Squares[index].lastDroppedItem &&
         !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem &&
         areNeighboursValid(index, firstname, secondname) &&
-        Squares[fillIndex].accepts.includes('D')
+        Squares[fillIndex].accepts.includes('D') &&
+        Squares[index].accepts.includes('D')
       ) {
         setIsDropped(true)
         setDroppedDominoes([...droppedDominoes, [index, fillIndex, item]])
@@ -174,7 +181,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   const handleTurnClick = () => {
     setIsTurned(!isTurned)
-    console.log(Squares)
   }
 
   useEffect(() => {
@@ -200,15 +206,18 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [Squares, score])
 
   return (
-    <div className="h-full w-full flex gap-2">
+    <div className="h-full w-full flex gap-2 relative">
       <div className="h-[640px] w-[640px] grid grid-cols-8 grid-rows-8">
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             hasStar={hasStar}
-            onDrop={(item) => handleDrop(index, item)}
-            isActive={isActive && over && isDominoPlacedCorrectly(index) && !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem}
+            onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : index, item)}
+            isActive={
+              isActive && over && isDominoPlacedCorrectly(index) && !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem /* &&
+              areNeighboursValid(index, Domino.firstname, Domino.secondname) */
+            }
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}
@@ -216,11 +225,12 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             leftSqIndex={leftSqIndex} // Pass the left square index
             droppedDominoes2={droppedDominoes2}
             isTurned={isTurned}
+            direction={direction}
           />
         ))}
       </div>
 
-      <div className="w-40  flex justify-center items-center flex-col ">
+      <div className="w-28 ml-4 mt-72  flex justify-center items-center flex-col absolute bottom-6 -right-36">
         <div className="text-xl  text-white">Your score: {score}</div>
         <DominoComponent
           firstname={Domino.firstname}
@@ -230,6 +240,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           img={Domino.img}
           secondimg={Domino.secondimg}
           isTurned={isTurned}
+          setDirection={setDirection}
         />
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">
           <button className="" onClick={handleMirrorClick}>

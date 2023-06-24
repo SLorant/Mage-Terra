@@ -1,8 +1,7 @@
-import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, memo, useRef } from 'react'
-import { useDrag } from 'react-dnd'
+import { CSSProperties, Dispatch, FC, SetStateAction, useEffect, memo, useRef, useState } from 'react'
+import { useDrag, useDragLayer } from 'react-dnd'
 import { ItemTypes } from '../ItemTypes'
 import Image from 'next/image'
-
 const style: CSSProperties = {
   border: '1px dashed gray',
   backgroundColor: 'white',
@@ -17,9 +16,19 @@ export interface DominoProps {
   img: string
   secondimg: string
   isTurned: boolean
+  setDirection: Dispatch<SetStateAction<string>>
 }
 
-export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname, secondname, isDropped, setIsActive, img, secondimg, isTurned }) {
+export const DominoComponent: FC<DominoProps> = memo(function Domino({
+  firstname,
+  secondname,
+  isDropped,
+  setIsActive,
+  img,
+  secondimg,
+  isTurned,
+  setDirection,
+}) {
   const dominoRef = useRef<HTMLDivElement>(null)
   const [{ opacity, isDragging, canDrag }, drag] = useDrag(
     () => ({
@@ -37,6 +46,24 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({ firstname
   useEffect(() => {
     !isDragging && setIsActive(false)
   }, [isDragging])
+
+  const { currentOffset } = useDragLayer((monitor) => ({
+    currentOffset: monitor.getInitialClientOffset(),
+  }))
+
+  const getCursorPosition = (x: number) => {
+    if (dominoRef.current) {
+      const dominoRect = dominoRef.current.getBoundingClientRect()
+      const dominoCenter = dominoRect.left + dominoRect.width / 2
+      const position = x > dominoCenter ? 'right' : 'left'
+      return position
+    }
+    return ''
+  }
+  useEffect(() => {
+    const temp = currentOffset && getCursorPosition(currentOffset.x)
+    temp && setDirection(temp)
+  }, [currentOffset])
 
   return (
     <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} ${isDropped && 'opacity-50'} flex  ml-10 justify-center items-center`}>

@@ -16,6 +16,7 @@ export interface SquareProps {
   leftSqIndex: number
   droppedDominoes2: DroppedDomino2[]
   isTurned: boolean
+  direction: string
 }
 
 export const Square: FC<SquareProps> = memo(function Square({
@@ -30,6 +31,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   leftSqIndex,
   droppedDominoes2,
   isTurned,
+  direction,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -47,7 +49,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   }, [isOver])
 
   useEffect(() => {
-    onIsOverChange(index, isOver) // Notify the Board component of isOver change
+    onIsOverChange(direction === 'left' ? index : index - 1, isOver) // Notify the Board component of isOver change
   }, [isOver])
 
   let borderClass = 'border-2'
@@ -60,17 +62,21 @@ export const Square: FC<SquareProps> = memo(function Square({
   const firstColumnCheck = leftSqIndex % 8 !== 0 || isTurned
   let isLeftSquareActive = leftSqIndex === index && firstColumnCheck && canDrop // Check if it's the left square
   let backgroundColor = 'snow'
+  let borderColor = 'border-gray-200'
   if (isActive || isLeftSquareActive) {
+    borderColor = 'border-green-400'
     backgroundColor = 'darkgreen'
   } else if (canDrop) {
     backgroundColor = 'lightgray'
+    borderColor = 'border-gray-200'
   }
   return (
     <div
-      className={` h-20 w-20 border-gray-200 ${borderClass} bg-yellow-500 ring-gray-200 relative shadow-lg z-20`}
+      className={` h-20 w-20 ${borderClass} ${borderColor} bg-yellow-500 ring-gray-200 relative shadow-lg z-20`}
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
+      {}
       {hasStar && <Image src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
       {lastDroppedItem && (
         <div className={`h-[78px] w-[78px]  shadow-lg z-20 `}>
