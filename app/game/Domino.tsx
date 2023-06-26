@@ -54,21 +54,32 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   const getCursorPosition = (x: number) => {
     if (dominoRef.current) {
       const dominoRect = dominoRef.current.getBoundingClientRect()
-      const dominoCenter = dominoRect.left + dominoRect.width / 2
-      const position = x > dominoCenter ? 'right' : 'left'
-      return position
+      const dominoCenterX = dominoRect.left + dominoRect.width / 2
+      const dominoCenterY = dominoRect.top + dominoRect.height / 2 + 10
+      if (isTurned) {
+        const position = x > dominoCenterY ? 'down' : 'top'
+        return position
+      } else {
+        const position = x > dominoCenterX ? 'right' : 'left'
+        return position
+      }
     }
     return ''
   }
   useEffect(() => {
-    const temp = currentOffset && getCursorPosition(currentOffset.x)
-    temp && setDirection(temp)
+    if (isTurned) {
+      const temp = currentOffset && getCursorPosition(currentOffset.y)
+      temp && setDirection(temp)
+    } else {
+      const temp = currentOffset && getCursorPosition(currentOffset.x)
+      temp && setDirection(temp)
+    }
   }, [currentOffset])
 
   return (
     <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'} ${isDropped && 'opacity-50'} flex  ml-10 justify-center items-center`}>
-      <div ref={drag}>
-        <div ref={dominoRef} style={{ ...style, opacity }} className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px]'} flex  mt-6`}>
+      <div ref={dominoRef}>
+        <div ref={drag} style={{ ...style, opacity }} className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
             <Image src={img} alt="kep" width={80} height={80} className="w-full h-full pbject-cover" draggable="false" />
           </div>

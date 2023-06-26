@@ -43,6 +43,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   } */
 
   const [isTurned, setIsTurned] = useState(false)
+  const [turnCount, setTurnCount] = useState<number>(0)
 
   useEffect(() => {
     const newSquares = MapSetter(Squares)
@@ -67,32 +68,24 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [sqIndex, setSqIndex] = useState<number>(0)
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
 
-  const handleMirrorClick = () => {
-    const tempimg: string = Domino.img
-    const tempname: string = Domino.firstname
-    const newDomino = update(Domino, {
-      $set: {
-        firstname: Domino.secondname,
-        img: Domino.secondimg,
-        secondname: tempname,
-        secondimg: tempimg,
-      },
-    })
-    setDomino(newDomino)
-  }
-
   const isDominoPlacedCorrectly = (index: number) => {
-    const square = Squares[index]
+    let square = Squares[index]
+    if (Squares[index - 1]) direction === 'right' ? (square = Squares[index - 1]) : ''
+    else return false
     if (isTurned) {
-      return (
-        !square.lastDroppedItem &&
-        (sqIndex === index - 8 || sqIndex === index) &&
-        sqIndex < 56 &&
-        (leftSqIndex === +8 || leftSqIndex === index + 8) &&
-        Squares[index + 8].accepts.includes('D')
-      )
+      return direction == 'top'
+        ? !square.lastDroppedItem &&
+            (sqIndex === index - 8 || sqIndex === index) &&
+            sqIndex < 56 &&
+            (leftSqIndex === +8 || leftSqIndex === index + 8) &&
+            Squares[index + 8].accepts.includes('D')
+        : !square.lastDroppedItem &&
+            (sqIndex === index - 8 || sqIndex === index) &&
+            sqIndex < 56 &&
+            (leftSqIndex === +8 || leftSqIndex === index + 8) &&
+            Squares[index + 8].accepts.includes('D')
     } else {
-      return direction == 'left'
+      return direction === 'left'
         ? !square.lastDroppedItem &&
             (sqIndex === index - 1 || sqIndex === index) &&
             sqIndex % 8 !== 7 &&
@@ -127,6 +120,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
     const fillIndex: number = isTurned ? index + 8 : index + 1
+    console.log(Squares[index].accepts.includes('D'))
     const verticalNeighborValid =
       isValidNeighbour(index, -8, firstname) ||
       isValidNeighbour(fillIndex, -8, secondname) ||
@@ -137,8 +131,17 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       isValidNeighbour(fillIndex, -1, secondname) ||
       isValidNeighbour(index, 1, firstname) ||
       isValidNeighbour(fillIndex, 1, secondname)
+    console.log('horizontal: ' + isValidNeighbour(index, -1, firstname))
+    console.log('vertical: ' + isValidNeighbour(index, -8, firstname))
 
-    if (isValidNeighbour(index, 1, firstname) && index % 8 === 0 && !verticalNeighborValid) {
+    console.log(index)
+    if (
+      (isValidNeighbour(index, 1, firstname) || isValidNeighbour(fillIndex, 1, secondname)) &&
+      index % 8 === 0 &&
+      !verticalNeighborValid &&
+      !isValidNeighbour(fillIndex, -1, secondname) &&
+      !isValidNeighbour(index, -1, firstname)
+    ) {
       return false
     }
     return verticalNeighborValid || horizontalNeighborValid
@@ -179,8 +182,33 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     [droppedDominoNames, Squares],
   )
 
-  const handleTurnClick = () => {
+  const MirrorDomino = () => {
+    const tempimg: string = Domino.img
+    const tempname: string = Domino.firstname
+    const newDomino = update(Domino, {
+      $set: {
+        firstname: Domino.secondname,
+        img: Domino.secondimg,
+        secondname: tempname,
+        secondimg: tempimg,
+      },
+    })
+    setDomino(newDomino)
+  }
+
+  const handleRightTurnClick = () => {
     setIsTurned(!isTurned)
+    if (turnCount === 1 || turnCount === 3) {
+      MirrorDomino()
+    }
+    setTurnCount((turnCount + 1) % 4)
+  }
+  const handleLeftTurnClick = () => {
+    setIsTurned(!isTurned)
+    if (turnCount === 0 || turnCount === 2) {
+      MirrorDomino()
+    }
+    setTurnCount((turnCount + 1) % 4)
   }
 
   useEffect(() => {
@@ -204,7 +232,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       }) */
     }
   }, [Squares, score])
-
   return (
     <div className="h-full w-full flex gap-2 relative">
       <div className="h-[640px] w-[640px] grid grid-cols-8 grid-rows-8">
@@ -213,7 +240,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             hasStar={hasStar}
-            onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : index, item)}
+            onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : direction === 'down' ? index - 8 : index, item)}
             isActive={
               isActive && over && isDominoPlacedCorrectly(index) && !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem /* &&
               areNeighboursValid(index, Domino.firstname, Domino.secondname) */
@@ -243,11 +270,11 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           setDirection={setDirection}
         />
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">
-          <button className="" onClick={handleMirrorClick}>
-            Mirror
+          <button className="" onClick={handleLeftTurnClick}>
+            Turn left
           </button>
-          <button className="" onClick={handleTurnClick}>
-            Turn
+          <button className="" onClick={handleRightTurnClick}>
+            Turn right
           </button>
         </div>
       </div>

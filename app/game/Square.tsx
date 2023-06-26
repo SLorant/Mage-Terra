@@ -49,7 +49,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   }, [isOver])
 
   useEffect(() => {
-    onIsOverChange(direction === 'left' ? index : index - 1, isOver) // Notify the Board component of isOver change
+    onIsOverChange(direction === 'left' || direction === 'top' ? index : direction === 'down' ? index - 8 : index - 1, isOver) // Notify the Board component of isOver change
   }, [isOver])
 
   let borderClass = 'border-2'
@@ -63,16 +63,18 @@ export const Square: FC<SquareProps> = memo(function Square({
   let isLeftSquareActive = leftSqIndex === index && firstColumnCheck && canDrop // Check if it's the left square
   let backgroundColor = 'snow'
   let borderColor = 'border-gray-200'
+  let animation = ''
   if (isActive || isLeftSquareActive) {
     borderColor = 'border-green-400'
     backgroundColor = 'darkgreen'
+    animation = 'transition ease-in-out duration-200'
   } else if (canDrop) {
     backgroundColor = 'lightgray'
     borderColor = 'border-gray-200'
   }
   return (
     <div
-      className={` h-20 w-20 ${borderClass} ${borderColor} bg-yellow-500 ring-gray-200 relative shadow-lg z-20`}
+      className={` h-20 w-20 ${borderClass} ${borderColor} ${animation} bg-yellow-500 ring-gray-200 relative shadow-lg z-20`}
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
