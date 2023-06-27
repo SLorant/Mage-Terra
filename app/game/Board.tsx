@@ -24,8 +24,8 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     img: '/cave-05.svg',
     secondimg: '/mountains-01.svg',
   })
-  const nameArray: string[] = ['F', 'W', 'C']
-  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg']
+  const nameArray: string[] = ['Cave', 'Swamp', 'Mt', 'City', 'Field']
+  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg', '/village-01.svg', '/field-01.svg']
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
 
