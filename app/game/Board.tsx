@@ -9,9 +9,10 @@ import { projectDatabase } from '@/firebase/config'
 import { onValue, ref, set, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
+import { rowLength, mapLength } from './MapConfig'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped }) {
-  const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
+  const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
     hasStar: false,
@@ -25,7 +26,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     secondimg: '/mountains-01.svg',
   })
   const nameArray: string[] = ['Cave', 'Swamp', 'Mt', 'City', 'Field']
-  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg', '/village-01.svg', '/field-01.svg']
+  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg', '/village-01.svg', '/field2-01.svg']
 
   const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
 
@@ -70,33 +71,58 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   const isDominoPlacedCorrectly = (index: number) => {
     let square = Squares[index]
-    if (Squares[index - 1]) direction === 'right' ? (square = Squares[index - 1]) : ''
+    index = direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index
+    const fillIndex: number = isTurned ? index + rowLength : index + 1
+    if (
+      (isTurned ? index < mapLength - rowLength : index % rowLength !== rowLength - 1) &&
+      Squares[index] &&
+      !Squares[index].lastDroppedItem &&
+      !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
+      areNeighboursValid(index, Domino.firstname, Domino.secondname) &&
+      Squares[fillIndex].accepts.includes('D') &&
+      Squares[index].accepts.includes('D') /*&&
+      (sqIndex === index - 1 || sqIndex === index)  &&
+      (leftSqIndex === +1 ||
+        leftSqIndex === (direction === 'right' ? index + 1 : direction === 'down' ? index + rowLength : direction === 'left' ? index - 1 : index - rowLength)) */
+    ) {
+      return true
+    } else return false
+    /*  return isTurned
+      ? index < 56
+      : index % rowLength !== 7 &&
+          Squares[index] &&
+          !Squares[index].lastDroppedItem &&
+          !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
+          areNeighboursValid(index, Domino.firstname, Domino.secondname) &&
+          Squares[fillIndex].accepts.includes('D') &&
+          Squares[index].accepts.includes('D')  */
+    /* if (Squares[index - 1]) direction === 'right' ? (square = Squares[index - 1]) : ''
     else return false
     if (isTurned) {
       return direction == 'top'
         ? !square.lastDroppedItem &&
-            (sqIndex === index - 8 || sqIndex === index) &&
+            (sqIndex === index - rowLength || sqIndex === index) &&
             sqIndex < 56 &&
-            (leftSqIndex === +8 || leftSqIndex === index + 8) &&
-            Squares[index + 8].accepts.includes('D')
+            (leftSqIndex === +rowLength || leftSqIndex === index + rowLength) &&
+            Squares[index + rowLength].accepts.includes('D')
         : !square.lastDroppedItem &&
-            (sqIndex === index - 8 || sqIndex === index) &&
+            (sqIndex === index - rowLength || sqIndex === index) &&
             sqIndex < 56 &&
-            (leftSqIndex === +8 || leftSqIndex === index + 8) &&
-            Squares[index + 8].accepts.includes('D')
+            (leftSqIndex === +rowLength || leftSqIndex === index + rowLength) &&
+            Squares[index + rowLength].accepts.includes('D')
     } else {
       return direction === 'left'
         ? !square.lastDroppedItem &&
             (sqIndex === index - 1 || sqIndex === index) &&
-            sqIndex % 8 !== 7 &&
+            sqIndex % rowLength !== 7 &&
             (leftSqIndex === +1 || leftSqIndex === index + 1) &&
             Squares[index + 1].accepts.includes('D')
         : !square.lastDroppedItem &&
             (sqIndex === index - 1 || sqIndex === index) &&
-            sqIndex % 8 !== 7 &&
+            sqIndex % rowLength !== 7 &&
             (leftSqIndex === +1 || leftSqIndex === index + 1) &&
             Squares[index].accepts.includes('D')
-    }
+    } */
   }
 
   const handleIsOverChange = useCallback(
@@ -104,8 +130,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       if (isOver) {
         setSqIndex(index)
         setOver(true)
-        if (Squares[index] && Squares[index].lastDroppedItem == null) setLeftSqIndex(isTurned ? index + 8 : index + 1)
-        else setLeftSqIndex(-1)
+        if (Squares[index] && Squares[index].lastDroppedItem == null) {
+          //setLeftSqIndex(isTurned ? index + rowLength : index + 1)
+          setLeftSqIndex(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : direction === 'left' ? index + 1 : index + rowLength)
+        } else setLeftSqIndex(-1)
       }
     },
     [Squares],
@@ -119,25 +147,25 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }
 
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
-    const fillIndex: number = isTurned ? index + 8 : index + 1
-    console.log(Squares[index].accepts.includes('D'))
+    const fillIndex: number = isTurned ? index + rowLength : index + 1
+    //console.log(Squares[index].accepts.includes('D'))
     const verticalNeighborValid =
-      isValidNeighbour(index, -8, firstname) ||
-      isValidNeighbour(fillIndex, -8, secondname) ||
-      isValidNeighbour(index, 8, firstname) ||
-      isValidNeighbour(fillIndex, 8, secondname)
+      isValidNeighbour(index, -rowLength, firstname) ||
+      isValidNeighbour(fillIndex, -rowLength, secondname) ||
+      isValidNeighbour(index, rowLength, firstname) ||
+      isValidNeighbour(fillIndex, rowLength, secondname)
     const horizontalNeighborValid =
       isValidNeighbour(index, -1, firstname) ||
       isValidNeighbour(fillIndex, -1, secondname) ||
       isValidNeighbour(index, 1, firstname) ||
       isValidNeighbour(fillIndex, 1, secondname)
-    console.log('horizontal: ' + isValidNeighbour(index, -1, firstname))
-    console.log('vertical: ' + isValidNeighbour(index, -8, firstname))
+    /*   console.log('horizontal: ' + isValidNeighbour(index, -1, firstname))
+    console.log('vertical: ' + isValidNeighbour(index, -rowLength, firstname))
 
-    console.log(index)
+    console.log(index) */
     if (
       (isValidNeighbour(index, 1, firstname) || isValidNeighbour(fillIndex, 1, secondname)) &&
-      index % 8 === 0 &&
+      index % rowLength === 0 &&
       !verticalNeighborValid &&
       !isValidNeighbour(fillIndex, -1, secondname) &&
       !isValidNeighbour(index, -1, firstname)
@@ -151,16 +179,16 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     (index: number, item: { firstname: string; secondname: string; img: string; secondimg: string }) => {
       let { firstname, secondname, /*img*/ secondimg } = item
 
-      const fillIndex: number = isTurned ? index + 8 : index + 1
+      const fillIndex: number = isTurned ? index + rowLength : index + 1
       setIsActive(false)
 
       setLeftSqIndex(-1)
       //dominoIndexes.set(index, item)
       if (
-        (isTurned ? index < 56 : index % 8 !== 7) &&
+        (isTurned ? index < 56 : index % rowLength !== rowLength - 1) &&
         Squares[index] &&
         !Squares[index].lastDroppedItem &&
-        !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem &&
+        !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
         areNeighboursValid(index, firstname, secondname) &&
         Squares[fillIndex].accepts.includes('D') &&
         Squares[index].accepts.includes('D')
@@ -234,15 +262,19 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [Squares, score])
   return (
     <div className="h-full w-full flex gap-2 relative">
-      <div className="h-[640px] w-[640px] grid grid-cols-8 grid-rows-8">
+      <div className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             hasStar={hasStar}
-            onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : direction === 'down' ? index - 8 : index, item)}
+            onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index, item)}
             isActive={
-              isActive && over && isDominoPlacedCorrectly(index) && !Squares[isTurned ? index + 8 : index + 1].lastDroppedItem /* &&
+              isActive &&
+              over &&
+              isDominoPlacedCorrectly(index) &&
+              !Squares[direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : direction === 'top' ? index + rowLength : index + 1]
+                .lastDroppedItem /* &&
               areNeighboursValid(index, Domino.firstname, Domino.secondname) */
             }
             setIsActive={setIsActive}
@@ -253,6 +285,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             droppedDominoes2={droppedDominoes2}
             isTurned={isTurned}
             direction={direction}
+            isDominoPlacedCorrectly={isDominoPlacedCorrectly}
           />
         ))}
       </div>

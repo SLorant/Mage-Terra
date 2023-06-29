@@ -1,5 +1,5 @@
 import { SquareState } from './Interfaces'
-
+import { rowLength } from './MapConfig'
 export const ScoreCounter = (squares: SquareState[]): number => {
   const maxSequenceLengths: { [type: string]: { length: number; starCount: number } } = {}
   const visited: boolean[] = Array(squares.length).fill(false)
@@ -36,8 +36,8 @@ export const ScoreCounter = (squares: SquareState[]): number => {
     const neighbors = [
       squareIndex - 1, // left neighbor
       squareIndex + 1, // right neighbor
-      squareIndex - 8, // top neighbor
-      squareIndex + 8, // bottom neighbor
+      squareIndex - rowLength, // top neighbor
+      squareIndex + rowLength, // bottom neighbor
     ]
     const sequence = [squares[squareIndex]]
 

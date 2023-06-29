@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { memo } from 'react'
 import Image from 'next/image'
-
+import { rowLength } from './MapConfig'
 type DroppedDominoes = [number, number]
 export interface SquareProps {
   accept: string[]
@@ -16,8 +16,8 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
   for (let i = 0; i < droppedDominoes.length; i++) {
     if (index === droppedDominoes[i][0] && index + 1 === droppedDominoes[i][1]) borderClass = 'border-l-2 border-b-2 border-t-2'
     if (index === droppedDominoes[i][1] && index - 1 === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-t-2'
-    if (index === droppedDominoes[i][0] && index + 8 === droppedDominoes[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
-    if (index === droppedDominoes[i][1] && index - 8 === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
+    if (index === droppedDominoes[i][0] && index + rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
+    if (index === droppedDominoes[i][1] && index - rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
   }
   let squareColor = 'bg-transparent'
 
