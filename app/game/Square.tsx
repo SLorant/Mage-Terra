@@ -18,7 +18,7 @@ export interface SquareProps {
   droppedDominoes2: DroppedDomino2[]
   isTurned: boolean
   direction: string
-  isDominoPlacedCorrectly: (index: number) => boolean
+  isLeftSquareActive: boolean
 }
 
 export const Square: FC<SquareProps> = memo(function Square({
@@ -34,7 +34,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   droppedDominoes2,
   isTurned,
   direction,
-  isDominoPlacedCorrectly,
+  isLeftSquareActive,
 }) {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept,
@@ -52,7 +52,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   }, [isOver])
 
   useEffect(() => {
-    onIsOverChange(direction === 'left' || direction === 'top' ? index : direction === 'down' ? index - rowLength : index - 1, isOver) // Notify the Board component of isOver change
+    onIsOverChange(direction === 'left' || direction === 'top' ? index : direction === 'down' ? index - rowLength : index - 1, isOver)
   }, [isOver])
 
   let borderClass = 'border-2'
@@ -62,22 +62,15 @@ export const Square: FC<SquareProps> = memo(function Square({
     if (index === droppedDominoes2[i][0] && index + rowLength === droppedDominoes2[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
     if (index === droppedDominoes2[i][1] && index - rowLength === droppedDominoes2[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
   }
+
   const firstColumnCheck = leftSqIndex % rowLength !== 0 || isTurned
-  const indextoCheck = direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index - 1
-  let isLeftSquareActive =
-    isDominoPlacedCorrectly(
-      direction === 'right' ? index + 1 : direction === 'down' ? index + rowLength : direction === 'left' ? index - 1 : index - rowLength,
-    ) &&
-    isOver &&
-    canDrop // Check if it's the left square
-  isLeftSquareActive && console.log(index + '| left index:' + leftSqIndex)
   let backgroundColor = 'snow'
   let borderColor = 'border-gray-200'
   let animation = ''
-  if (isActive || isLeftSquareActive) {
+  if (isActive || (isLeftSquareActive && canDrop && firstColumnCheck)) {
     borderColor = 'border-green-400'
     backgroundColor = 'darkgreen'
-    animation = 'transition ease-in-out duration-200'
+    animation = 'transition ease-in-out  duration-200'
   } else if (canDrop) {
     backgroundColor = 'lightgray'
     borderColor = 'border-gray-200'
@@ -88,7 +81,6 @@ export const Square: FC<SquareProps> = memo(function Square({
       style={{ backgroundColor }}
       ref={drop}
       data-testid="Square">
-      {}
       {hasStar && <Image src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
       {lastDroppedItem && (
         <div className={`h-[92px] w-[92px]  shadow-lg z-20 `}>

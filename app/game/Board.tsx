@@ -70,69 +70,35 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
 
   const isDominoPlacedCorrectly = (index: number) => {
-    let square = Squares[index]
-    index = direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index
-    const fillIndex: number = isTurned ? index + rowLength : index + 1
-    if (
-      (isTurned ? index < mapLength - rowLength : index % rowLength !== rowLength - 1) &&
-      Squares[index] &&
-      !Squares[index].lastDroppedItem &&
-      !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
-      areNeighboursValid(index, Domino.firstname, Domino.secondname) &&
-      Squares[fillIndex].accepts.includes('D') &&
-      Squares[index].accepts.includes('D') /*&&
-      (sqIndex === index - 1 || sqIndex === index)  &&
-      (leftSqIndex === +1 ||
-        leftSqIndex === (direction === 'right' ? index + 1 : direction === 'down' ? index + rowLength : direction === 'left' ? index - 1 : index - rowLength)) */
-    ) {
-      return true
-    } else return false
-    /*  return isTurned
-      ? index < 56
-      : index % rowLength !== 7 &&
-          Squares[index] &&
-          !Squares[index].lastDroppedItem &&
-          !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
-          areNeighboursValid(index, Domino.firstname, Domino.secondname) &&
-          Squares[fillIndex].accepts.includes('D') &&
-          Squares[index].accepts.includes('D')  */
-    /* if (Squares[index - 1]) direction === 'right' ? (square = Squares[index - 1]) : ''
-    else return false
     if (isTurned) {
-      return direction == 'top'
-        ? !square.lastDroppedItem &&
-            (sqIndex === index - rowLength || sqIndex === index) &&
-            sqIndex < 56 &&
-            (leftSqIndex === +rowLength || leftSqIndex === index + rowLength) &&
-            Squares[index + rowLength].accepts.includes('D')
-        : !square.lastDroppedItem &&
-            (sqIndex === index - rowLength || sqIndex === index) &&
-            sqIndex < 56 &&
-            (leftSqIndex === +rowLength || leftSqIndex === index + rowLength) &&
-            Squares[index + rowLength].accepts.includes('D')
+      const adjacentSquare = direction == 'top' ? Squares[index + rowLength] : Squares[index]
+      return (
+        adjacentSquare &&
+        !adjacentSquare.lastDroppedItem &&
+        sqIndex === index &&
+        sqIndex < mapLength - rowLength &&
+        leftSqIndex === index + rowLength &&
+        adjacentSquare.accepts.includes('D')
+      )
     } else {
-      return direction === 'left'
-        ? !square.lastDroppedItem &&
-            (sqIndex === index - 1 || sqIndex === index) &&
-            sqIndex % rowLength !== 7 &&
-            (leftSqIndex === +1 || leftSqIndex === index + 1) &&
-            Squares[index + 1].accepts.includes('D')
-        : !square.lastDroppedItem &&
-            (sqIndex === index - 1 || sqIndex === index) &&
-            sqIndex % rowLength !== 7 &&
-            (leftSqIndex === +1 || leftSqIndex === index + 1) &&
-            Squares[index].accepts.includes('D')
-    } */
+      const adjacentSquare = direction == 'left' ? Squares[index + 1] : Squares[index]
+      return (
+        adjacentSquare &&
+        !adjacentSquare.lastDroppedItem &&
+        sqIndex === index &&
+        sqIndex % rowLength !== rowLength - 1 &&
+        leftSqIndex === index + 1 &&
+        adjacentSquare.accepts.includes('D')
+      )
+    }
   }
-
   const handleIsOverChange = useCallback(
     (index: number, isOver: boolean) => {
       if (isOver) {
         setSqIndex(index)
         setOver(true)
         if (Squares[index] && Squares[index].lastDroppedItem == null) {
-          //setLeftSqIndex(isTurned ? index + rowLength : index + 1)
-          setLeftSqIndex(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : direction === 'left' ? index + 1 : index + rowLength)
+          setLeftSqIndex(isTurned ? index + rowLength : index + 1)
         } else setLeftSqIndex(-1)
       }
     },
@@ -148,7 +114,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   function areNeighboursValid(index: number, firstname: string, secondname: string): boolean {
     const fillIndex: number = isTurned ? index + rowLength : index + 1
-    //console.log(Squares[index].accepts.includes('D'))
     const verticalNeighborValid =
       isValidNeighbour(index, -rowLength, firstname) ||
       isValidNeighbour(fillIndex, -rowLength, secondname) ||
@@ -159,10 +124,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       isValidNeighbour(fillIndex, -1, secondname) ||
       isValidNeighbour(index, 1, firstname) ||
       isValidNeighbour(fillIndex, 1, secondname)
-    /*   console.log('horizontal: ' + isValidNeighbour(index, -1, firstname))
-    console.log('vertical: ' + isValidNeighbour(index, -rowLength, firstname))
 
-    console.log(index) */
     if (
       (isValidNeighbour(index, 1, firstname) || isValidNeighbour(fillIndex, 1, secondname)) &&
       index % rowLength === 0 &&
@@ -269,14 +231,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             lastDroppedItem={lastDroppedItem}
             hasStar={hasStar}
             onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index, item)}
-            isActive={
-              isActive &&
-              over &&
-              isDominoPlacedCorrectly(index) &&
-              !Squares[direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : direction === 'top' ? index + rowLength : index + 1]
-                .lastDroppedItem /* &&
-              areNeighboursValid(index, Domino.firstname, Domino.secondname) */
-            }
+            isActive={isActive && over && isDominoPlacedCorrectly(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index)}
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}
@@ -285,7 +240,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             droppedDominoes2={droppedDominoes2}
             isTurned={isTurned}
             direction={direction}
-            isDominoPlacedCorrectly={isDominoPlacedCorrectly}
+            isLeftSquareActive={
+              leftSqIndex === (direction === 'left' || direction === 'top' ? index : direction === 'down' ? index + rowLength : index + 1) &&
+              !Squares[direction === 'left' || direction === 'top' ? index : direction === 'down' ? index + rowLength : index + 1].lastDroppedItem
+            }
           />
         ))}
       </div>
@@ -296,11 +254,12 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           firstname={Domino.firstname}
           secondname={Domino.secondname}
           isDropped={isDropped}
-          setIsActive={setIsActive}
           img={Domino.img}
           secondimg={Domino.secondimg}
           isTurned={isTurned}
+          setIsActive={setIsActive}
           setDirection={setDirection}
+          setLeftSqIndex={setLeftSqIndex}
         />
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">
           <button className="" onClick={handleLeftTurnClick}>
