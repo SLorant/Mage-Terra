@@ -1,10 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ref, set } from 'firebase/database'
 import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
 import { Amaranth } from 'next/font/google'
+import Image from 'next/image'
 
 const amaranth = Amaranth({
   weight: '400',
@@ -42,6 +43,7 @@ export default function Home() {
       <div className="mb-10">
         <h1 className="text-6xl">LOGO</h1>
       </div>
+      <Image className="absolute top-20 left-20 z-0" height={500} width={500} src={'/mage.gif'} alt="asd"></Image>
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-1/2 w-1/2 flex flex-col items-center justify-center">
         <p className="mb-20">Random bevezető mondat lorem ipsum izébizé</p>
         <div className="gap-20 flex items-center justify-center">

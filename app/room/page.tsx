@@ -56,7 +56,10 @@ export default function Home() {
         const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
         set(dataRef, 'New player')
       }
+      const hostRef = ref(projectDatabase, `/${room}/Host`)
+      const hostDisconnectRef = onDisconnect(hostRef)
       const playerDisconnectRef = onDisconnect(playerRef)
+      hostDisconnectRef.remove()
       playerDisconnectRef.remove()
 
       /*  const connectedRef = ref(projectDatabase, '.info/connected')
@@ -75,30 +78,37 @@ export default function Home() {
       })
       const playersRef = ref(projectDatabase, `/${room}`)
       onValue(playersRef, (snapshot) => {
-        const data = snapshot.val()
-        console.log(data)
+        const data: { Host: string } = snapshot.val()
 
         if (data) {
-          const playerIds = Object.keys(data)
-          //otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
-          if (playerIds.length === 1) {
-            const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Host`)
-            set(dataRef, true)
+          const elements = Object.keys(data)
+          const playerIds = elements.filter((id) => id !== 'Host')
+          if (data && data.Host && data.Host.length > 0) {
+            //const dataRef = ref(projectDatabase, `/${room}/Host`)
+            //set(dataRef, false)
             setHostExists(true)
-          } else setHostExists(false)
+          }
+          if (playerIds.length === 1) {
+            const dataRef = ref(projectDatabase, `/${room}/Host`)
+            set(dataRef, uniqueId)
+            setHostExists(true)
+          } else if (data.Host === undefined) {
+            const dataRef = ref(projectDatabase, `/${room}/Host`)
+            set(dataRef, uniqueId)
+            setHostExists(true)
+          }
+
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
             onValue(dataRef3, (snapshot) => {
-              const data: { Name: string; Host: boolean } = snapshot.val()
+              console.log('happened')
+              const data: { Name: string; Host: string } = snapshot.val()
               if (data && data.Name) {
                 const nameData = data.Name
                 setReadNames((prevReadNames) => ({
                   ...prevReadNames,
                   [otherId]: nameData,
                 }))
-              }
-              if (data && data.Host) {
-                setHostExists(true)
               }
             })
           })
@@ -123,17 +133,23 @@ export default function Home() {
       )),
     )
   }, [readNames])
+
   useEffect(() => {
+    // console.log(readNames)
     if (hostExists === false) {
       const IdArray = Object.keys(readNames)
       //const randomIndex = Math.floor(Math.random() * IdArray.length)
-      console.log(IdArray[1])
-      const dataRef = ref(projectDatabase, `/${room}/${IdArray[0]}/Host`)
-      set(dataRef, true)
-      setHostExists(true)
+      console.log(IdArray[0])
+      console.log(uniqueId)
+      /* if (IdArray.length > 1 && IdArray[0] === uniqueId) {
+        const dataRef = ref(projectDatabase, `/${room}/${IdArray[0]}/Host`)
+        set(dataRef, true)
+        setHostExists(true)
+      } */
     }
-  }, [hostExists])
-  console.log(Object.keys(readNames))
+  }, [hostExists, readNames])
+
+  //console.log(Object.keys(readNames))
   return (
     <main className="flex h-screen flex-col items-center justify-center text-white font-sans">
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[700px] flex flex-col items-center justify-center gap-10">
