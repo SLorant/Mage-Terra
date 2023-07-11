@@ -54,6 +54,7 @@ export default function Home() {
             Create private room
           </button>
         </div>
+
         <p className="text-xl mt-20 mb-2">New to the game?</p>
         <button className="px-12 rounded-md py-6 text-xl bg-[#CFCEFB] text-black opacity-50" disabled>
           Play the tutorial
