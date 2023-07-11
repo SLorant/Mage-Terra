@@ -11,11 +11,13 @@ export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
+
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
   const [hostId, setHostId] = useState('')
   const [currentPlayers, setCurrentPlayers] = useState(100)
   const [readNames, setReadNames] = useState<{ [key: string]: string }>({})
+  const [isSpectator, setIsSpectator] = useState(false)
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -90,6 +92,7 @@ export default function Home() {
         } else setCurrentPlayers(0)
       })
     }
+
     return () => {
       const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
       off(dataRef2)
@@ -100,21 +103,13 @@ export default function Home() {
       // Állítólag nem jó az off
     }
   }, [uniqueId, room])
-  const [placeHolders, setPlaceHolders] = useState<any[]>([])
-  useEffect(() => {
-    setPlaceHolders(
-      Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
-        <div key={`placeholder-${index}`} className="flex ml-4 py-2 mt-4 px-8 rounded-lg border-2 border-white opacity-50"></div>
-      )),
-    )
-  }, [readNames])
-
+  const [isVisible, setIsVisible] = useState(false)
   useEffect(() => {
     if (uniqueId !== '') {
       console.log(currentPlayers)
       if (currentPlayers < 2) {
-        const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
-        set(dataRef, 0)
+        /* const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
+        set(dataRef, 0) */
         const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
         if (playerName === '') {
           setPlayerName('New player')
@@ -125,6 +120,7 @@ export default function Home() {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
         }
+        setIsSpectator(false)
         const hostRef = ref(projectDatabase, `/${room}/Host`)
         const hostDisconnectRef = onDisconnect(hostRef)
         const playerDisconnectRef = onDisconnect(playerRef)
@@ -132,67 +128,123 @@ export default function Home() {
         playerDisconnectRef.remove()
       } else if (Object.keys(readNames).includes(uniqueId)) {
         console.log('ok')
+        setIsSpectator(false)
       } else if (currentPlayers === 100) {
         console.log('first render')
-      } else alert('Room is full')
+      } else {
+        setIsSpectator(true)
+        setIsVisible(true)
+      }
     }
   }, [uniqueId, currentPlayers])
+
+  const [placeHolders, setPlaceHolders] = useState<any[]>([])
+  useEffect(() => {
+    setPlaceHolders(
+      Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
+        <div key={`placeholder-${index}`} className="flex ml-4 py-2 mt-4 px-8 rounded-lg border-2 border-white opacity-50"></div>
+      )),
+    )
+  }, [readNames])
+  const handleGoBack = () => {
+    setIsVisible(false)
+    const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+    set(dataRef, null)
+    router.push(`/`)
+  }
   return (
-    <main className="flex h-screen flex-col items-center justify-center text-white font-sans">
-      <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[700px] flex flex-col items-center justify-center gap-10">
-        <button className="px-16 rounded-md py-5 text-2xl bg-[#CFCEFB] text-black" onClick={handleCopyLink}>
-          Copy link
-        </button>
-        <div className="flex">
-          <Image src="/avatars-04.png" alt="dropped" width={100} height={100} className="w-36 h-40 " unoptimized />
+    <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
+      <button className="" onClick={handleGoBack}>
+        Go Back
+      </button>
+      <div className={`${isVisible && 'opacity-40'} bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[800px] flex flex-col items-center justify-center `}>
+        <div className="mb-8">
+          To invite your friends,
+          <button className="px-4 rounded-sm py-2 mx-4 text-2xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleCopyLink}>
+            copy this link
+          </button>
+          and send it to them!
+        </div>
+        <h2 className="italic text-2xl mt-4 mb-2">Choose your name and avatar</h2>
+        <div className="flex flex-col  items-center justify-center mb-8">
+          <Image src="/avatars-04.png" alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
           <div className="flex flex-col ml-8">
-            Choose a name and an avatar
             <div className="mt-4">
               <input className="text-lg rounded-lg" type="text" value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="Your name" />
-              <button className="px-4 ml-4 rounded-md py-1 text-lg bg-[#EFCEFB] text-black" onClick={handleConfirmName}>
-                OK
+              <button
+                className={`${isSpectator && 'opacity-50'} px-4 ml-4 rounded-md py-1 text-lg bg-[#EFCEFB] text-black`}
+                onClick={handleConfirmName}
+                disabled={isSpectator ? true : false}>
+                Ready
               </button>
             </div>
           </div>
         </div>
-        <div className="grid h-auto w-auto grid-cols-2 grid-rows-3">
+        <div className="grid h-auto w-[auto] gap-x-6 grid-cols-2 grid-rows-3">
           {Object.entries(readNames).map(([playerId, name]) => (
-            <div
-              key={playerId}
-              className={`flex w-[250px] relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
+            <div className="relative" key={playerId}>
+              <div className="absolute left-0 z-40 top-1">
+                <Image height={60} width={60} src="/avatars-04.png" alt="playeravatar"></Image>
+              </div>
+              <div
+                className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
             ${name.length > 5 ? 'text-lg' : name.length > 10 ? 'text-md' : 'text-xl'}`}>
-              {name === playerName && playerId === uniqueId && name === 'New player'
-                ? 'You'
-                : name === playerName && playerId === uniqueId
-                ? name + ' (you)'
-                : name}
-              {name === 'New player' && <span className="ml-8">...</span>}
-              {playerId === hostId && (
-                <span className="absolute right-4 ml-8">
-                  <svg width="23" height="17" viewBox="0 0 23 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <g clipPath="url(#clip0_29_148)">
-                      <path d="M0 13.1797H0.4301H23V0L0 13.1797Z" fill="white" />
-                      <path d="M23 13.1797H22.5699H0V0L23 13.1797Z" fill="white" />
-                      <path d="M11.5 0.114624L5.75 4.19092L11.5 8.26721L17.25 4.19092L11.5 0.114624Z" fill="white" />
-                      <path d="M23 15.2179H0V17.0001H23V15.2179Z" fill="white" />
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_29_148">
-                        <rect width="23" height="17" fill="white" />
-                      </clipPath>
-                    </defs>
-                  </svg>
-                </span>
-              )}
-              {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
+                {playerId === hostId && (
+                  <span className="absolute left-14">
+                    <svg width="23" height="17" viewBox="0 0 23 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g clipPath="url(#clip0_29_148)">
+                        <path d="M0 13.1797H0.4301H23V0L0 13.1797Z" fill="white" />
+                        <path d="M23 13.1797H22.5699H0V0L23 13.1797Z" fill="white" />
+                        <path d="M11.5 0.114624L5.75 4.19092L11.5 8.26721L17.25 4.19092L11.5 0.114624Z" fill="white" />
+                        <path d="M23 15.2179H0V17.0001H23V15.2179Z" fill="white" />
+                      </g>
+                      <defs>
+                        <clipPath id="clip0_29_148">
+                          <rect width="23" height="17" fill="white" />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </span>
+                )}
+                <p className="ml-8">
+                  {name === playerName && playerId === uniqueId && name === 'New player'
+                    ? 'You'
+                    : name === playerName && playerId === uniqueId
+                    ? name + ' (you)'
+                    : name}
+                  {name === 'New player' && <span className="absolute right-2 bottom-3">...</span>}
+                </p>
+                {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
+              </div>
             </div>
           ))}
           {placeHolders}
         </div>
-        <button className="px-16 rounded-md py-5 text-2xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
-          Start game
-        </button>
+        {uniqueId === hostId ? (
+          <button className="px-8 mt-6 rounded-md py-2 text-3xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
+            Start game
+          </button>
+        ) : (
+          <div className="mt-6">Wait for the host to start the match</div>
+        )}
       </div>
+      {isSpectator && isVisible && (
+        <div className="w-1/3 h-1/3 absolute z-50 bg-[#EFCEFB] flex flex-col justify-around items-center rounded-md">
+          <h2 className="text-3xl mt-8 text-black">The room is full</h2>
+          <div className="flex">
+            <button className="px-4 rounded-sm py-2 mx-4 text-3xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleGoBack}>
+              Go Back
+            </button>
+            <button
+              className="px-4 rounded-sm py-2 mx-4 text-2xl bg-[#B8AFE0] text-[#2F1F55]"
+              onClick={() => {
+                setIsVisible(false)
+              }}>
+              Wait for someone to quit
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
