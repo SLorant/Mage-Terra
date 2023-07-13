@@ -141,7 +141,7 @@ export default function Home() {
         </div>
         <aside className="flex flex-col h-full justify-start gap-2 mb-40">
           {Object.entries(readBoards).map(([playerId, playerSquares]) => (
-            <div key={playerId} className="h-auto w-auto grid grid-cols-8 grid-rows-8">
+            <div key={playerId} className="h-auto w-auto grid grid-cols-7 grid-rows-7">
               {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
                 <MiniSquare
                   accept={accepts}

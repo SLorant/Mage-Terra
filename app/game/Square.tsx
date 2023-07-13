@@ -87,7 +87,7 @@ export const Square: FC<SquareProps> = memo(function Square({
           <Image src={lastDroppedItem.img} alt="dropped" width={500} height={500} className="w-full h-full " />
         </div>
       )}
-      {accept.length === 0 && (
+      {accept.includes('W') && (
         <div className={`h-[92px] w-[92px]  shadow-lg z-20 `}>
           <Image src="/wasteland-01.svg" alt="dropped" width={500} height={500} className="w-full h-full " />
         </div>

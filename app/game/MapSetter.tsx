@@ -14,7 +14,7 @@ export const MapSetter = (Squares: SquareState[]): SquareState[] => {
     [32]: { hasStar: { $set: true } },
     ...specificIndexes.reduce((result: Record<number, any>, index) => {
       if (Squares[index]) {
-        result[index] = { accepts: { $set: [] } }
+        result[index] = { accepts: { $set: ['W'] } }
       }
       return result
     }, {}),

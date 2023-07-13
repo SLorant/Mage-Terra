@@ -11,12 +11,12 @@ export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
-
+  const avatars: string[] = ['avatars-01.png', 'avatars-02.png', 'avatars-03.png']
   const [playerName, setPlayerName] = useState('')
   const [uniqueId, setUniqueId] = useState('')
   const [hostId, setHostId] = useState('')
   const [currentPlayers, setCurrentPlayers] = useState(100)
-  const [readNames, setReadNames] = useState<{ [key: string]: string }>({})
+  const [readNames, setReadNames] = useState<{ [key: string]: [string, string] }>({})
   const [isSpectator, setIsSpectator] = useState(false)
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
@@ -28,7 +28,8 @@ export default function Home() {
   const handleConfirmName = () => {
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
     set(dataRef, inputName)
-
+    const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
+    set(avatarRef, avatarPath)
     setPlayerName(inputName)
     setInputName('')
   }
@@ -77,12 +78,13 @@ export default function Home() {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
             onValue(dataRef3, (snapshot) => {
               console.log('happened')
-              const data: { Name: string } = snapshot.val()
-              if (data && data.Name) {
+              const data: { Name: string; Avatar: string } = snapshot.val()
+              if (data && data.Name && data.Avatar) {
                 const nameData = data.Name
+                const avatarData = data.Avatar
                 setReadNames((prevReadNames) => ({
                   ...prevReadNames,
-                  [otherId]: nameData,
+                  [otherId]: [nameData, avatarData],
                 }))
 
                 setCurrentPlayers(playerIds.length)
@@ -115,17 +117,19 @@ export default function Home() {
           setPlayerName('New player')
           setReadNames((prevReadNames) => ({
             ...prevReadNames,
-            [uniqueId]: 'New player',
+            [uniqueId]: ['New player', 'avatar-1.png'],
           }))
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
+          const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
+          set(avatarRef, 'avatar-1.png')
         }
         setIsSpectator(false)
         const hostRef = ref(projectDatabase, `/${room}/Host`)
         const hostDisconnectRef = onDisconnect(hostRef)
-        const playerDisconnectRef = onDisconnect(playerRef)
+        //const playerDisconnectRef = onDisconnect(playerRef)
         hostDisconnectRef.remove()
-        playerDisconnectRef.remove()
+        //playerDisconnectRef.remove()
       } else if (Object.keys(readNames).includes(uniqueId)) {
         console.log('ok')
         setIsSpectator(false)
@@ -152,6 +156,21 @@ export default function Home() {
     set(dataRef, null)
     router.push(`/`)
   }
+  const [currentAvatar, setCurrentAvatar] = useState(1)
+  const [avatarPath, setAvatarPath] = useState('avatar-1.png')
+  const handleNextAv = () => {
+    if (currentAvatar > 11) {
+      setCurrentAvatar(1)
+    } else setCurrentAvatar(currentAvatar + 1)
+  }
+  const handlePrevAv = () => {
+    if (currentAvatar < 2) {
+      setCurrentAvatar(12)
+    } else setCurrentAvatar(currentAvatar - 1)
+  }
+  useEffect(() => {
+    setAvatarPath(`avatar-${currentAvatar}.png`)
+  }, [currentAvatar])
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
       <button className="" onClick={handleGoBack}>
@@ -167,7 +186,16 @@ export default function Home() {
         </div>
         <h2 className="italic text-2xl mt-4 mb-2">Choose your name and avatar</h2>
         <div className="flex flex-col  items-center justify-center mb-8">
-          <Image src="/avatars-04.png" alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
+          <div className="flex justify-center items-center gap-4 text-3xl">
+            <button className="prev" onClick={handlePrevAv}>
+              &#10094;
+            </button>
+            <Image src={avatarPath} alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
+
+            <button className="next" onClick={handleNextAv}>
+              &#10095;
+            </button>
+          </div>
           <div className="flex flex-col ml-8">
             <div className="mt-4">
               <input className="text-lg rounded-lg" type="text" value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="Your name" />
@@ -181,10 +209,10 @@ export default function Home() {
           </div>
         </div>
         <div className="grid h-auto w-[auto] gap-x-6 grid-cols-2 grid-rows-3">
-          {Object.entries(readNames).map(([playerId, name]) => (
+          {Object.entries(readNames).map(([playerId, [name, avatar]]) => (
             <div className="relative" key={playerId}>
               <div className="absolute left-0 z-40 top-1">
-                <Image height={60} width={60} src="/avatars-04.png" alt="playeravatar"></Image>
+                <Image height={60} width={60} src={`/${avatar}`} alt="playeravatar"></Image>
               </div>
               <div
                 className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white

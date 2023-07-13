@@ -1,5 +1,5 @@
 import update from 'immutability-helper'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useRef } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
@@ -35,7 +35,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
   const [droppedDominoes2, setDroppedDominoes2] = useState<DroppedDomino2[]>([])
   const [direction, setDirection] = useState<string>('left')
-
+  const [firstRender, setFirstRender] = useState(true)
   /* function isDropped(DominoName: string) {
     return droppedDominoNames.indexOf(DominoName) > -1
   } */
@@ -47,8 +47,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [turnCount, setTurnCount] = useState<number>(0)
 
   useEffect(() => {
-    const newSquares = MapSetter(Squares)
-    setSquares(newSquares)
+    if (firstRender) {
+      const newSquares = MapSetter(Squares)
+      setSquares(newSquares)
+    }
   }, [isTurned])
 
   useEffect(() => {
@@ -200,22 +202,52 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     }
     setTurnCount((turnCount + 1) % 4)
   }
+  //let firstRender = useRef(true)
 
   useEffect(() => {
     if (uniqueId !== '') {
-      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
-      const dataRef2 = ref(projectDatabase, `/${room}/${uniqueId}`)
-      const squaresData = Squares.map((square) => ({
-        accepts: square.accepts,
-        lastDroppedItem: square.lastDroppedItem,
-        hasStar: square.hasStar,
-      }))
-      const updatedData = {
-        Squares: squaresData,
-        droppedDominoes: droppedDominoes2,
+      const boardRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
+      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      if (firstRender) {
+        onValue(dataRef, (snapshot) => {
+          const data: { Score: number; didDrop: boolean } = snapshot.val()
+          if (data && data.Score && data.didDrop) {
+            //setScore(data.Score)
+            setIsDropped(data.didDrop)
+          }
+          onValue(boardRef, (snapshot) => {
+            const data: { Squares: any; droppedDominoes: DroppedDomino2[] } = snapshot.val()
+
+            //console.log(mappedSquaresData)
+            if (data && data.Squares && data.droppedDominoes) {
+              const mappedSquaresData = data.Squares
+              const updatedSquares = Squares.map((square, index) => ({
+                accepts: mappedSquaresData[index].accepts,
+                lastDroppedItem: mappedSquaresData[index].lastDroppedItem ? mappedSquaresData[index].lastDroppedItem : null,
+                hasStar: mappedSquaresData[index].hasStar,
+              }))
+              setSquares(updatedSquares)
+              setDroppedDominoes2(data.droppedDominoes)
+            }
+          })
+        })
+        //firstRender.current = false
+        setFirstRender(false)
       }
-      set(dataRef, updatedData)
-      up(dataRef2, { Score: score, didDrop: isDropped })
+      if (!firstRender) {
+        const squaresData = Squares.map((square) => ({
+          accepts: square.accepts,
+          lastDroppedItem: square.lastDroppedItem,
+          hasStar: square.hasStar,
+        }))
+        const updatedData = {
+          Squares: squaresData,
+          droppedDominoes: droppedDominoes2,
+        }
+        set(boardRef, updatedData)
+        up(dataRef, { Score: score, didDrop: isDropped })
+      }
+
       /* const dataRef3 = ref(projectDatabase, `/${room}/round`)
       onValue(dataRef3, (snapshot) => {
         const data = snapshot.val()
@@ -249,7 +281,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       </div>
 
       <div className="w-28 ml-4 mt-72  flex justify-center items-center flex-col absolute bottom-6 -right-36">
-        <div className="text-xl  text-white">Your score: {score}</div>
         <DominoComponent
           firstname={Domino.firstname}
           secondname={Domino.secondname}
