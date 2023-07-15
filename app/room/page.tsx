@@ -77,7 +77,6 @@ export default function Home() {
           playerIds.forEach((otherId) => {
             const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
             onValue(dataRef3, (snapshot) => {
-              console.log('happened')
               const data: { Name: string; Avatar: string } = snapshot.val()
               if (data && data.Name && data.Avatar) {
                 const nameData = data.Name

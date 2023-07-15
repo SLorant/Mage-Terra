@@ -104,7 +104,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         } else setLeftSqIndex(-1)
       }
     },
-    [Squares],
+    [Squares, isTurned],
   )
 
   function isValidNeighbour(index: number, targetIndex: number, firstname: string): boolean {
@@ -171,7 +171,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         }
       }
     },
-    [droppedDominoNames, Squares],
+    [droppedDominoNames, Squares, isTurned],
   )
 
   const MirrorDomino = () => {
@@ -203,7 +203,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     setTurnCount((turnCount + 1) % 4)
   }
   //let firstRender = useRef(true)
-
+  console.log(direction)
   useEffect(() => {
     if (uniqueId !== '') {
       const boardRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
@@ -211,10 +211,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       if (firstRender) {
         onValue(dataRef, (snapshot) => {
           const data: { Score: number; didDrop: boolean } = snapshot.val()
-          if (data && data.Score && data.didDrop) {
+          /* if (data && data.Score && data.didDrop) {
             //setScore(data.Score)
             setIsDropped(data.didDrop)
-          }
+          } */
           onValue(boardRef, (snapshot) => {
             const data: { Squares: any; droppedDominoes: DroppedDomino2[] } = snapshot.val()
 
@@ -245,15 +245,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           droppedDominoes: droppedDominoes2,
         }
         set(boardRef, updatedData)
-        up(dataRef, { Score: score, didDrop: isDropped })
+        up(dataRef, { Score: score })
       }
-
-      /* const dataRef3 = ref(projectDatabase, `/${room}/round`)
-      onValue(dataRef3, (snapshot) => {
-        const data = snapshot.val()
-      }) */
     }
-  }, [Squares, score])
+  }, [Squares])
   return (
     <div className="h-full w-full flex gap-2 relative">
       <div className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>

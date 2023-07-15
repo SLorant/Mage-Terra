@@ -3,7 +3,7 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
-import { ref, onValue, update } from 'firebase/database'
+import { ref, onValue, update, onDisconnect, set } from 'firebase/database'
 import { useState, useEffect } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { MiniSquare } from './MiniSquare'
@@ -27,7 +27,6 @@ export default function Home() {
   }
 
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
-  const [playerDrops, setPlayerDrops] = useState<{ [key: string]: boolean }>({})
   /* const [playerInfos, setPlayerInfos] = useState<number[]>([]) */
 
   type DroppedDominoes = [number, number]
@@ -37,17 +36,31 @@ export default function Home() {
   const room = searchParams.get('roomId')
   const [isDropped, setIsDropped] = useState<boolean>(false)
   const [round, setRound] = useState<number>(1)
-
+  const [discPlayers, setDiscPlayers] = useState(0)
   // Save the unique ID in local storage
   let otherPlayerIds: Array<string>
+  const [hostId, setHostId] = useState('')
+  const [firstRender, setFirstRender] = useState(true)
 
+  useEffect(() => {
+    if (uniqueId !== '') {
+      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}/Disconnected`)
+      set(playerRef, false)
+      const playerDisconnectRef = onDisconnect(playerRef)
+      playerDisconnectRef.set(true)
+    }
+  }, [uniqueId])
+
+  // szét kéne szedni
   useEffect(() => {
     let storedUniqueId = localStorage.getItem('uniqueId')
     storedUniqueId && setUniqueId(storedUniqueId)
-
+    setDiscPlayers(0)
     const playersRef = ref(projectDatabase, `/${room}`)
+
     onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
+      const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         const playerIds = Object.keys(data)
         otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
@@ -85,6 +98,7 @@ export default function Home() {
           }
           onValue(playerInfoRef, (snapshot) => {
             const data: { Score: number; Name: string; didDrop: boolean } = snapshot.val()
+            const data2: { Disconnected: boolean } = snapshot.val()
             if (data && data.Score && data.Name) {
               const scoreData = data.Score
               const nameData = data.Name
@@ -93,21 +107,21 @@ export default function Home() {
                 [otherId]: { name: nameData, score: scoreData },
               }))
             }
-            if (data && data.didDrop && otherId !== 'gameStarted' && otherId !== 'round') {
-              const dropData = data.didDrop
-              setPlayerDrops((prevPlayerDrops) => ({
-                ...prevPlayerDrops,
-                [otherId]: dropData,
-              }))
-            } /* else if (data && data.didDrop === undefined && otherId !== 'gameStarted' && otherId !== 'round') {
-              console.log('initial playerdrop set')
-              setPlayerDrops((prevPlayerDrops) => ({
-                ...prevPlayerDrops,
-                [otherId]: false,
-              }))
-            } */
+            if (data2 && data2.Disconnected === true && otherId !== 'gameStarted' && otherId !== 'round') {
+              console.log('disc')
+              setDiscPlayers(discPlayers + 1)
+            }
           })
         })
+      }
+      if (dataHost && dataHost.Host) {
+        setHostId(dataHost.Host)
+      }
+      if (firstRender) {
+        if (dataHost && dataHost.round) {
+          setRound(dataHost.round)
+        }
+        setFirstRender(false)
       }
     })
   }, [])
@@ -118,19 +132,45 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    const allTrue = Object.values(playerDrops).every((value) => value === true)
-    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-    if (allTrue && uniqueId) {
-      update(playerRef, { didDrop: false })
-      setIsDropped(false)
-      const updatedPlayerDrops = Object.fromEntries(Object.entries(playerDrops).map(([key, _]) => [key, false]))
-      setPlayerDrops(updatedPlayerDrops)
+    setIsDropped(false)
+    const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
+    if (uniqueId !== '' && uniqueId === hostId) {
+      const updateObject = { [uniqueId]: false }
+      update(playerRef, updateObject)
     }
-  }, [playerDrops])
+  }, [round])
 
   useEffect(() => {
-    setIsDropped(false)
-  }, [round])
+    console.log(discPlayers)
+    if (discPlayers > 0 && discPlayers === 2) {
+      const playersRef = ref(projectDatabase, `/${room}`)
+      const playersDisconnectRef = onDisconnect(playersRef)
+      playersDisconnectRef.set(null)
+      //set(playersRef, null)
+    }
+  }, [discPlayers])
+
+  useEffect(() => {
+    const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
+    if (uniqueId !== '') {
+      const updateObject = { [uniqueId]: isDropped }
+      update(playersRef, updateObject)
+    }
+    if (uniqueId !== '' && uniqueId === hostId) {
+      const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
+
+      onValue(playersRef, (snapshot) => {
+        const data = snapshot.val()
+        const allTrue = Object.values(data).every((value) => value === true)
+        if (allTrue) {
+          setRound(round + 1)
+          const roundRef = ref(projectDatabase, `/${room}/round`)
+          set(roundRef, round + 1)
+        }
+      })
+    }
+  }, [isDropped])
+
   return (
     <main className="flex h-screen  items-center justify-center font-sans ">
       <div className="flex  items-center justify-center gap-10 bg-purple-700 w-[1000px]">
