@@ -108,7 +108,7 @@ export default function Home() {
   useEffect(() => {
     if (uniqueId !== '') {
       console.log(currentPlayers)
-      if (currentPlayers < 2) {
+      if (currentPlayers < 4) {
         /* const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
         set(dataRef, 0) */
         const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)

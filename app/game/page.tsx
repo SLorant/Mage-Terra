@@ -3,13 +3,13 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
-import { ref, onValue, update, onDisconnect, set } from 'firebase/database'
+import { ref, onValue, update, onDisconnect, set, get } from 'firebase/database'
 import { useState, useEffect } from 'react'
 import { ItemTypes } from '../ItemTypes'
-import { MiniSquare } from './MiniSquare'
 import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
 import { SquareState } from './Interfaces'
+import ScoreBoards from './ScoreBoard'
 
 export default function Home() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
@@ -29,8 +29,8 @@ export default function Home() {
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
   /* const [playerInfos, setPlayerInfos] = useState<number[]>([]) */
 
-  type DroppedDominoes = [number, number]
-  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([])
+  /* type DroppedDominoes = [number, number]
+  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([]) */
   const [uniqueId, setUniqueId] = useState('')
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
@@ -41,7 +41,6 @@ export default function Home() {
   let otherPlayerIds: Array<string>
   const [hostId, setHostId] = useState('')
   const [firstRender, setFirstRender] = useState(true)
-
   useEffect(() => {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}/Disconnected`)
@@ -57,13 +56,21 @@ export default function Home() {
     storedUniqueId && setUniqueId(storedUniqueId)
     setDiscPlayers(0)
     const playersRef = ref(projectDatabase, `/${room}`)
-
-    onValue(playersRef, (snapshot) => {
+    //console.log(get(playersRef))
+    setIsDropped(false)
+    const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
+    if (uniqueId !== '' && uniqueId === hostId) {
+      const updateObject = { [uniqueId]: false }
+      update(playerRef, updateObject)
+    }
+    return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         const playerIds = Object.keys(data)
-        otherPlayerIds = playerIds.filter((id) => id !== localStorage.getItem('uniqueId'))
+        otherPlayerIds = playerIds.filter((id) => {
+          return id !== localStorage.getItem('uniqueId') && id !== 'round' && id !== 'gameStarted' && id !== 'doneWithAction' && id !== 'Host'
+        })
         const initialReadBoards = otherPlayerIds.reduce((acc, playerId) => {
           acc[playerId] = []
           return acc
@@ -76,7 +83,7 @@ export default function Home() {
           const playerInfoRef = ref(projectDatabase, `/${room}/${otherId}`)
           if (otherId !== localStorage.getItem('uniqueId')) {
             onValue(playerBoardsRef, (snapshot) => {
-              const data: { Squares: SquareState[]; droppedDominoes: DroppedDominoes[] } = snapshot.val()
+              const data: { Squares: SquareState[] /* droppedDominoes: DroppedDominoes[] */ } = snapshot.val()
 
               if (data && data.Squares) {
                 const squaresData = data.Squares.map((square) => ({
@@ -90,25 +97,21 @@ export default function Home() {
                   [otherId]: squaresData,
                 }))
               }
-              if (data && data.droppedDominoes) {
+              /*  if (data && data.droppedDominoes) {
                 const dominoData = data.droppedDominoes
                 setDroppedDominoes(dominoData)
-              }
+              } */
             })
           }
-          onValue(playerInfoRef, (snapshot) => {
+          return onValue(playerInfoRef, (snapshot) => {
             const data: { Score: number; Name: string; didDrop: boolean } = snapshot.val()
             const data2: { Disconnected: boolean } = snapshot.val()
             if (data && data.Score && data.Name) {
               const scoreData = data.Score
               const nameData = data.Name
-              setPlayerInfos((prevPlayerInfos) => ({
-                ...prevPlayerInfos,
-                [otherId]: { name: nameData, score: scoreData },
-              }))
+              addPlayerInfo(otherId, nameData, scoreData)
             }
             if (data2 && data2.Disconnected === true && otherId !== 'gameStarted' && otherId !== 'round') {
-              console.log('disc')
               setDiscPlayers(discPlayers + 1)
             }
           })
@@ -117,31 +120,17 @@ export default function Home() {
       if (dataHost && dataHost.Host) {
         setHostId(dataHost.Host)
       }
-      if (firstRender) {
-        if (dataHost && dataHost.round) {
-          setRound(dataHost.round)
-        }
-        setFirstRender(false)
-      }
     })
-  }, [])
+  }, [round])
 
   useEffect(() => {
     const newSquares = MapSetter(readSquares)
     setReadSquares(newSquares)
   }, [])
 
-  useEffect(() => {
-    setIsDropped(false)
-    const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
-    if (uniqueId !== '' && uniqueId === hostId) {
-      const updateObject = { [uniqueId]: false }
-      update(playerRef, updateObject)
-    }
-  }, [round])
+  useEffect(() => {}, [round])
 
   useEffect(() => {
-    console.log(discPlayers)
     if (discPlayers > 0 && discPlayers === 2) {
       const playersRef = ref(projectDatabase, `/${room}`)
       const playersDisconnectRef = onDisconnect(playersRef)
@@ -152,6 +141,7 @@ export default function Home() {
 
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
+    const roomRef = ref(projectDatabase, `/${room}`)
     if (uniqueId !== '') {
       const updateObject = { [uniqueId]: isDropped }
       update(playersRef, updateObject)
@@ -169,41 +159,34 @@ export default function Home() {
         }
       })
     }
+    onValue(roomRef, (snapshot) => {
+      const dataHost: { Host: string; round: number } = snapshot.val()
+      if (dataHost && dataHost.round && uniqueId !== hostId) {
+        setRound(dataHost.round)
+      }
+    })
   }, [isDropped])
 
+  const addPlayerInfo = (otherId: string, nameData: string, scoreData: number) => {
+    setPlayerInfos((prevPlayerInfos) => {
+      const updatedPlayerInfos = {
+        ...prevPlayerInfos,
+        [otherId]: { name: nameData, score: scoreData },
+      }
+      const sortedPlayerInfosArray = Object.entries(updatedPlayerInfos).sort(([, a], [, b]) => b.score - a.score)
+      const sortedPlayerInfos = Object.fromEntries(sortedPlayerInfosArray)
+      return sortedPlayerInfos
+    })
+  }
   return (
     <main className="flex h-screen  items-center justify-center font-sans ">
-      <div className="flex  items-center justify-center gap-10 bg-purple-700 w-[1000px]">
-        <div className="mt-20 flex items-center justify-center  bg-purple-700 h-[640px] gap-0 shadow-md">
+      <div className="flex items-top justify-center gap-10 bg-[#110928] w-[1000px]">
+        <div className="mt-20  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
           <DndProvider backend={HTML5Backend}>
             <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
           </DndProvider>
         </div>
-        <aside className="flex flex-col h-full justify-start gap-2 mb-40">
-          {Object.entries(readBoards).map(([playerId, playerSquares]) => (
-            <div key={playerId} className="h-auto w-auto grid grid-cols-7 grid-rows-7">
-              {playerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-                <MiniSquare
-                  accept={accepts}
-                  lastDroppedItem={lastDroppedItem}
-                  hasStar={hasStar}
-                  index={squareIndex}
-                  key={`player-${playerId}-square-${squareIndex}`}
-                  droppedDominoes={droppedDominoes}
-                />
-              ))}
-            </div>
-          ))}
-          <div className="flex flex-col text-xl text-white  items-center text-center">
-            <h3 className="col-span-2  text-3xl mb-2">Scores</h3>
-            {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
-              <div key={playerId} className="border-t-2 w-40 justify-between items-center flex border-gray-200">
-                <div>{playerId === uniqueId ? name + ' (you)' : name}</div>
-                <div>{score}</div>
-              </div>
-            ))}
-          </div>
-        </aside>
+        <ScoreBoards uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
       </div>
     </main>
   )

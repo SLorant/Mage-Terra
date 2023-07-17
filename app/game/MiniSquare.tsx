@@ -8,17 +8,17 @@ export interface SquareProps {
   lastDroppedItem?: any
   hasStar: boolean
   index: number
-  droppedDominoes: DroppedDominoes[]
+  //droppedDominoes: DroppedDominoes[]
 }
 
-export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDroppedItem, hasStar, index, droppedDominoes }) {
+export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDroppedItem, hasStar, index /* droppedDominoes */ }) {
   let borderClass = 'border-2'
-  for (let i = 0; i < droppedDominoes.length; i++) {
+  /* for (let i = 0; i < droppedDominoes.length; i++) {
     if (index === droppedDominoes[i][0] && index + 1 === droppedDominoes[i][1]) borderClass = 'border-l-2 border-b-2 border-t-2'
     if (index === droppedDominoes[i][1] && index - 1 === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-t-2'
     if (index === droppedDominoes[i][0] && index + rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
     if (index === droppedDominoes[i][1] && index - rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
-  }
+  } */
   let squareColor = 'bg-transparent'
 
   if (lastDroppedItem) {
@@ -39,7 +39,8 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
         squareColor = 'bg-blue'
         break
       }
-      case 'Ruin': {
+
+      case 'Field': {
         squareColor = 'bg-orange'
         break
       }
@@ -50,10 +51,10 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
     }
   }
   return (
-    <div className={` h-10 w-10 border-gray-200 ${borderClass} bg-gray-100 ring-gray-200 relative shadow-lg z-20`} data-testid="Square">
+    <div className={` h-6 w-6 border-gray-200  bg-darkblue ring-gray-200 relative shadow-lg z-20`} data-testid="Square">
       {hasStar && <Image draggable="false" src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
-      {lastDroppedItem && <div className={`h-[39px] w-[39px]  shadow-lg z-20 ${squareColor}`}></div>}
-      {(accept === undefined || accept.length === 0) && <div className={`h-[39px] w-[39px]  shadow-lg z-20 bg-grey`}></div>}
+      {lastDroppedItem && <div className={`h-[24px] w-[24px]  shadow-lg z-20 ${squareColor}`}></div>}
+      {accept.includes('W') && <div className={`h-[24px] w-[24px]  shadow-lg z-20 bg-black`}></div>}
     </div>
   )
 })

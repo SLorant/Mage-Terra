@@ -193,6 +193,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     if (turnCount === 1 || turnCount === 3) {
       MirrorDomino()
     }
+
     setTurnCount((turnCount + 1) % 4)
   }
   const handleLeftTurnClick = () => {
@@ -203,7 +204,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     setTurnCount((turnCount + 1) % 4)
   }
   //let firstRender = useRef(true)
-  console.log(direction)
   useEffect(() => {
     if (uniqueId !== '') {
       const boardRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
@@ -249,6 +249,16 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       }
     }
   }, [Squares])
+  const [rotationAngle, setRotationAngle] = useState(0)
+  const handleRotationClick = () => {
+    if (rotationAngle === 360) setRotationAngle(90)
+    else setRotationAngle((prevAngle) => prevAngle + 90)
+    setIsTurned(!isTurned)
+    if (turnCount === 0 || turnCount === 2) {
+      MirrorDomino()
+    }
+    setTurnCount((turnCount + 1) % 4)
+  }
   return (
     <div className="h-full w-full flex gap-2 relative">
       <div className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
@@ -275,20 +285,28 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div className="w-28 ml-4 mt-72  flex justify-center items-center flex-col absolute bottom-6 -right-36">
-        <DominoComponent
-          firstname={Domino.firstname}
-          secondname={Domino.secondname}
-          isDropped={isDropped}
-          img={Domino.img}
-          secondimg={Domino.secondimg}
-          isTurned={isTurned}
-          setIsActive={setIsActive}
-          setDirection={setDirection}
-          setLeftSqIndex={setLeftSqIndex}
-        />
+      <div className="w-28 ml-4   flex justify-center items-center  absolute -bottom-40 -right-60 ">
+        <div
+          style={{
+            transform: `rotate(${rotationAngle}deg)`,
+            transition: 'transform 0.3s ease', // Optional: add a smooth transition
+            cursor: 'pointer', // Optional: show pointer cursor when it's clickable
+          }}>
+          <DominoComponent
+            firstname={Domino.firstname}
+            secondname={Domino.secondname}
+            isDropped={isDropped}
+            img={Domino.img}
+            secondimg={Domino.secondimg}
+            isTurned={isTurned}
+            setIsActive={setIsActive}
+            setDirection={setDirection}
+            setLeftSqIndex={setLeftSqIndex}
+            rotationAngle={rotationAngle}
+          />
+        </div>
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">
-          <button className="" onClick={handleLeftTurnClick}>
+          <button className="" onClick={handleRotationClick}>
             Turn left
           </button>
           <button className="" onClick={handleRightTurnClick}>
