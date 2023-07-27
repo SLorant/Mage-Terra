@@ -285,13 +285,8 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div className="w-28 ml-4   flex justify-center items-center  absolute -bottom-40 -right-60 ">
-        <div
-          style={{
-            transform: `rotate(${rotationAngle}deg)`,
-            transition: 'transform 0.3s ease', // Optional: add a smooth transition
-            cursor: 'pointer', // Optional: show pointer cursor when it's clickable
-          }}>
+      <div className="w-28 ml-4   flex justify-center items-center  absolute -bottom-10 -right-60 ">
+        <div>
           <DominoComponent
             firstname={Domino.firstname}
             secondname={Domino.secondname}
@@ -306,7 +301,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           />
         </div>
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">
-          <button className="" onClick={handleRotationClick}>
+          <button className="" onClick={handleLeftTurnClick}>
             Turn left
           </button>
           <button className="" onClick={handleRightTurnClick}>

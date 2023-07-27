@@ -1,7 +1,11 @@
 import { useEffect, useState, memo, FC } from 'react'
 import { ScoreBoardProps } from './Interfaces'
 import { MiniSquare } from './MiniSquare'
-export const ScoreBoard: FC<ScoreBoardProps> = memo(function Board({ uniqueId, playerInfos, readBoards }) {
+import { MapSetter } from './MapSetter'
+import { ItemTypes } from '../ItemTypes'
+import { SquareState } from './Interfaces'
+import { rowLength, mapLength } from './MapConfig'
+export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
   const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number }[]>([])
   useEffect(() => {
     // Calculate the rank for each player
@@ -34,7 +38,17 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function Board({ uniqueId, p
     if (currentBoard === 0) setCurrentBoard(Object.keys(readBoards).length - 1)
     else setCurrentBoard(currentBoard - 1)
   }
-  const firstPlayerSquares = Object.values(readBoards)[currentBoard] || []
+  const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
+    accepts: [ItemTypes.DOMINO],
+    lastDroppedItem: null,
+    hasStar: false,
+  }))
+  const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
+  useEffect(() => {
+    const newSquares = MapSetter(Squares)
+    setSquares(newSquares)
+  }, [])
+  const firstPlayerSquares = Object.values(readBoards)[currentBoard] || Squares
 
   return (
     <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 ">

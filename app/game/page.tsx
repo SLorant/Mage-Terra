@@ -9,7 +9,7 @@ import { ItemTypes } from '../ItemTypes'
 import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
 import { SquareState } from './Interfaces'
-import ScoreBoards from './ScoreBoard'
+import ScoreBoard from './ScoreBoard'
 
 export default function Home() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
@@ -76,7 +76,7 @@ export default function Home() {
           return acc
         }, {} as { [playerId: string]: SquareState[] }) // Type assertion
 
-        setReadBoards(initialReadBoards)
+        //setReadBoards(initialReadBoards)
 
         playerIds.forEach((otherId) => {
           const playerBoardsRef = ref(projectDatabase, `/${room}/${otherId}/Board`)
@@ -128,7 +128,7 @@ export default function Home() {
     setReadSquares(newSquares)
   }, [])
 
-  useEffect(() => {}, [round])
+  console.log(readBoards)
 
   useEffect(() => {
     if (discPlayers > 0 && discPlayers === 2) {
@@ -186,7 +186,7 @@ export default function Home() {
             <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
           </DndProvider>
         </div>
-        <ScoreBoards uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
+        <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
       </div>
     </main>
   )

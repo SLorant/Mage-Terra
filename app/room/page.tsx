@@ -1,5 +1,5 @@
 'use client'
-import { set, ref, onValue, update, off, onDisconnect, remove } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect, DataSnapshot } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -7,29 +7,58 @@ import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
 
+const useRoomData = (room: string, uniqueId: string) => {
+  const [hostId, setHostId] = useState('')
+  const [currentPlayers, setCurrentPlayers] = useState(100)
+  const [readNames, setReadNames] = useState<{ [key: string]: { Name: string; Avatar: number } }>({})
+  useEffect(() => {
+    const roomRef = ref(projectDatabase, `/${room}`)
+    const handleRoomData = (snapshot: DataSnapshot) => {
+      const data = snapshot.val()
+      if (data) {
+        const { Host, ...playersData } = data
+        setHostId(Host || uniqueId)
+        const dataRef = ref(projectDatabase, `/${room}/Host`)
+        console.log('setting host')
+        set(dataRef, Host || uniqueId)
+        setReadNames(playersData)
+        setCurrentPlayers(Object.keys(playersData).length)
+      }
+    }
+
+    return onValue(roomRef, handleRoomData)
+  }, [room, uniqueId])
+
+  return { hostId, readNames, currentPlayers }
+}
+
 export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
-  const avatars: string[] = ['avatars-01.png', 'avatars-02.png', 'avatars-03.png']
-  const [playerName, setPlayerName] = useState('')
+  const [playerName, setPlayerName] = useState('New Player')
   const [uniqueId, setUniqueId] = useState('')
-  const [hostId, setHostId] = useState('')
-  const [currentPlayers, setCurrentPlayers] = useState(100)
-  const [readNames, setReadNames] = useState<{ [key: string]: [string, string] }>({})
   const [isSpectator, setIsSpectator] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+  const [currentAvatar, setCurrentAvatar] = useState(1)
+  const [inputName, setInputName] = useState('')
+
+  if (room === null) {
+    return <div>Wrong room ID</div>
+  }
+  const { hostId, readNames, currentPlayers } = useRoomData(room, uniqueId)
+
   const handlePlayGame = () => {
     router.push(`/game?roomId=${room}`)
     const dataRef = ref(projectDatabase, `/${room}`)
     update(dataRef, { gameStarted: true })
   }
-  const [inputName, setInputName] = useState('')
 
   const handleConfirmName = () => {
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
     set(dataRef, inputName)
     const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
-    set(avatarRef, avatarPath)
+    set(avatarRef, currentAvatar)
     setPlayerName(inputName)
     setInputName('')
   }
@@ -48,93 +77,28 @@ export default function Home() {
       }
     }
   }, [])
+
   useEffect(() => {
     if (uniqueId !== '') {
-      const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
-      onValue(dataRef2, (snapshot) => {
-        const data = snapshot.val()
-        if (data) router.push(`/game?roomId=${room}`)
-      })
-      const playersRef = ref(projectDatabase, `/${room}`)
-      onValue(playersRef, (snapshot) => {
-        const data: { Host: string } = snapshot.val()
-        if (data) {
-          const elements = Object.keys(data)
-          const playerIds = elements.filter((id) => id !== 'Host')
-          if (data && data.Host && data.Host.length > 0) {
-            setHostId(data.Host)
-          }
-          if (playerIds.length === 1) {
-            const dataRef = ref(projectDatabase, `/${room}/Host`)
-            set(dataRef, uniqueId)
-            setHostId(uniqueId)
-          } else if (data.Host === undefined) {
-            const dataRef = ref(projectDatabase, `/${room}/Host`)
-            set(dataRef, uniqueId)
-            setHostId(uniqueId)
-          }
-          setReadNames({})
-          playerIds.forEach((otherId) => {
-            const dataRef3 = ref(projectDatabase, `/${room}/${otherId}`)
-            onValue(dataRef3, (snapshot) => {
-              const data: { Name: string; Avatar: string } = snapshot.val()
-              if (data && data.Name && data.Avatar) {
-                const nameData = data.Name
-                const avatarData = data.Avatar
-                setReadNames((prevReadNames) => ({
-                  ...prevReadNames,
-                  [otherId]: [nameData, avatarData],
-                }))
-
-                setCurrentPlayers(playerIds.length)
-              }
-            })
-          })
-        } else setCurrentPlayers(0)
-      })
-    }
-
-    return () => {
-      const dataRef2 = ref(projectDatabase, `/${room}/gameStarted`)
-      off(dataRef2)
-
-      const playersRef = ref(projectDatabase, `/${room}`)
-      off(playersRef)
-
-      // Állítólag nem jó az off
-    }
-  }, [uniqueId, room])
-  const [isVisible, setIsVisible] = useState(false)
-  useEffect(() => {
-    if (uniqueId !== '') {
-      console.log(currentPlayers)
-      if (currentPlayers < 4) {
-        /* const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Score`)
-        set(dataRef, 0) */
-        const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-        if (playerName === '') {
-          setPlayerName('New player')
-          setReadNames((prevReadNames) => ({
-            ...prevReadNames,
-            [uniqueId]: ['New player', 'avatar-1.png'],
-          }))
+      if (currentPlayers !== 100 && currentPlayers < 4) {
+        if (playerName === 'New Player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
           const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
-          set(avatarRef, 'avatar-1.png')
+          set(avatarRef, currentAvatar)
         }
         setIsSpectator(false)
+        setIsVisible(false)
+        const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
         const hostRef = ref(projectDatabase, `/${room}/Host`)
         const hostDisconnectRef = onDisconnect(hostRef)
-        //const playerDisconnectRef = onDisconnect(playerRef)
+        const playerDisconnectRef = onDisconnect(playerRef)
         hostDisconnectRef.remove()
-        //playerDisconnectRef.remove()
+        playerDisconnectRef.remove()
       } else if (Object.keys(readNames).includes(uniqueId)) {
-        console.log('ok')
         setIsSpectator(false)
-      } else if (currentPlayers === 100) {
-        console.log('first render')
-      } else {
+        setIsVisible(false)
+      } else if (currentPlayers !== 100) {
         setIsSpectator(true)
         setIsVisible(true)
       }
@@ -155,8 +119,6 @@ export default function Home() {
     set(dataRef, null)
     router.push(`/`)
   }
-  const [currentAvatar, setCurrentAvatar] = useState(1)
-  const [avatarPath, setAvatarPath] = useState('avatar-1.png')
   const handleNextAv = () => {
     if (currentAvatar > 11) {
       setCurrentAvatar(1)
@@ -167,9 +129,9 @@ export default function Home() {
       setCurrentAvatar(12)
     } else setCurrentAvatar(currentAvatar - 1)
   }
-  useEffect(() => {
-    setAvatarPath(`avatar-${currentAvatar}.png`)
-  }, [currentAvatar])
+
+  const avatar = `avatar-${currentAvatar}.png`
+
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
       <button className="" onClick={handleGoBack}>
@@ -189,7 +151,7 @@ export default function Home() {
             <button className="prev" onClick={handlePrevAv}>
               &#10094;
             </button>
-            <Image src={avatarPath} alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
+            <Image src={avatar} alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
 
             <button className="next" onClick={handleNextAv}>
               &#10095;
@@ -208,14 +170,14 @@ export default function Home() {
           </div>
         </div>
         <div className="grid h-auto w-[auto] gap-x-6 grid-cols-2 grid-rows-3">
-          {Object.entries(readNames).map(([playerId, [name, avatar]]) => (
+          {Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
             <div className="relative" key={playerId}>
               <div className="absolute left-0 z-40 top-1">
-                <Image height={60} width={60} src={`/${avatar}`} alt="playeravatar"></Image>
+                <Image height={60} width={60} src={`/avatar-${Avatar}.png`} alt="playeravatar"></Image>
               </div>
               <div
                 className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
-            ${name.length > 5 ? 'text-lg' : name.length > 10 ? 'text-md' : 'text-xl'}`}>
+            ${Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
                 {playerId === hostId && (
                   <span className="absolute left-14">
                     <svg width="23" height="17" viewBox="0 0 23 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -234,12 +196,12 @@ export default function Home() {
                   </span>
                 )}
                 <p className="ml-8">
-                  {name === playerName && playerId === uniqueId && name === 'New player'
+                  {Name === playerName && playerId === uniqueId && Name === 'New player'
                     ? 'You'
-                    : name === playerName && playerId === uniqueId
-                    ? name + ' (you)'
-                    : name}
-                  {name === 'New player' && <span className="absolute right-2 bottom-3">...</span>}
+                    : Name === playerName && playerId === uniqueId
+                    ? Name + ' (you)'
+                    : Name}
+                  {Name === 'New player' && <span className="absolute right-2 bottom-3">...</span>}
                 </p>
                 {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
               </div>

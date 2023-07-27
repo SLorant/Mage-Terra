@@ -79,23 +79,26 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     }
   }, [currentOffset])
 
-  useEffect(() => {
+  /*  useEffect(() => {
     //rotationAngle === 90 && setRotation(90)ű
     console.log(rotationAngle)
-    if (rotationAngle === 180) setRotation(270)
-    else if (rotationAngle % 270 === 0) setRotation(270)
-    else if (rotationAngle % 90 === 0) setRotation(270)
-    else setRotation(90)
-  }, [rotationAngle])
+    if (rotationAngle === 180) setRotation(180)
+    else if (rotationAngle % 270 === 0) setRotation(90)
+    else if (rotationAngle % 360 === 0) setRotation(0)
+    else setRotation(270)
+  }, [rotationAngle]) */
   return (
-    <div className={` ${isDropped && 'opacity-50'}  flex  ml-10 justify-center items-center`}>
+    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'}   ${isDropped && 'opacity-50'}  flex  ml-10 justify-center items-center`}>
       <div ref={dominoRef}>
-        <div ref={drag} style={{ opacity, border: '1px dashed gray' }} className={` cursor-move flex  mt-6`}>
+        <div
+          ref={drag}
+          style={{ opacity, border: '1px dashed gray' }}
+          className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} cursor-move flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover -rotate-[${rotation}deg]`} draggable="false" />
+            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" />
           </div>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover -rotate-[${rotation}deg]`} draggable="false" />
+            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" />
           </div>
         </div>
       </div>
