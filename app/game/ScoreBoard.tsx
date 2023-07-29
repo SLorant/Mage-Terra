@@ -49,7 +49,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     setSquares(newSquares)
   }, [])
   const firstPlayerSquares = Object.values(readBoards)[currentBoard] || Squares
-
   return (
     <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 ">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">

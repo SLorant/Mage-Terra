@@ -1,14 +1,15 @@
 'use client'
-import { set, ref, onValue, update, onDisconnect, DataSnapshot } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove, OnDisconnect } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
+import useStore from '../IdStore'
 
 const useRoomData = (room: string, uniqueId: string) => {
   const [hostId, setHostId] = useState('')
+  const router = useRouter()
   const [currentPlayers, setCurrentPlayers] = useState(100)
   const [readNames, setReadNames] = useState<{ [key: string]: { Name: string; Avatar: number } }>({})
   useEffect(() => {
@@ -16,13 +17,14 @@ const useRoomData = (room: string, uniqueId: string) => {
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { Host, ...playersData } = data
+        const { gameStarted, Host, ...playersData } = data
         setHostId(Host || uniqueId)
         const dataRef = ref(projectDatabase, `/${room}/Host`)
         console.log('setting host')
         set(dataRef, Host || uniqueId)
         setReadNames(playersData)
         setCurrentPlayers(Object.keys(playersData).length)
+        gameStarted === true && router.push(`/game?roomId=${room}`)
       }
     }
 
@@ -37,21 +39,23 @@ export default function Home() {
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
   const [playerName, setPlayerName] = useState('New Player')
-  const [uniqueId, setUniqueId] = useState('')
+  //const [uniqueId, setUniqueId] = useState('')
   const [isSpectator, setIsSpectator] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [currentAvatar, setCurrentAvatar] = useState(1)
   const [inputName, setInputName] = useState('')
+  //const [uniqueId, updateUniqueId] = useStore((state) => [state.uniqueId, state.updateUniqueId])
+  const { uniqueId, initializeUniqueId } = useStore()
 
   if (room === null) {
     return <div>Wrong room ID</div>
   }
   const { hostId, readNames, currentPlayers } = useRoomData(room, uniqueId)
 
-  const handlePlayGame = () => {
-    router.push(`/game?roomId=${room}`)
+  const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
-    update(dataRef, { gameStarted: true })
+    await update(dataRef, { gameStarted: true })
+    router.push(`/game?roomId=${room}`)
   }
 
   const handleConfirmName = () => {
@@ -67,19 +71,18 @@ export default function Home() {
   }
   useEffect(() => {
     if (uniqueId === '') {
-      let storedUniqueId = localStorage.getItem('uniqueId')
-      if (storedUniqueId) {
-        setUniqueId(storedUniqueId)
-      } else {
-        const newUniqueId = uuidv4()
-        setUniqueId(newUniqueId)
-        localStorage.setItem('uniqueId', newUniqueId)
-      }
+      initializeUniqueId()
     }
   }, [])
 
   useEffect(() => {
     if (uniqueId !== '') {
+      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      const hostRef = ref(projectDatabase, `/${room}/Host`)
+      const hostDisconnectRef = onDisconnect(hostRef)
+      const playerDisconnectRef = onDisconnect(playerRef)
+      hostDisconnectRef.remove()
+      playerDisconnectRef.remove()
       if (currentPlayers !== 100 && currentPlayers < 4) {
         if (playerName === 'New Player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
@@ -89,12 +92,6 @@ export default function Home() {
         }
         setIsSpectator(false)
         setIsVisible(false)
-        const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-        const hostRef = ref(projectDatabase, `/${room}/Host`)
-        const hostDisconnectRef = onDisconnect(hostRef)
-        const playerDisconnectRef = onDisconnect(playerRef)
-        hostDisconnectRef.remove()
-        playerDisconnectRef.remove()
       } else if (Object.keys(readNames).includes(uniqueId)) {
         setIsSpectator(false)
         setIsVisible(false)
@@ -102,7 +99,12 @@ export default function Home() {
         setIsSpectator(true)
         setIsVisible(true)
       }
+      return () => {
+        playerDisconnectRef.cancel()
+        hostDisconnectRef.cancel()
+      }
     }
+    return
   }, [uniqueId, currentPlayers])
 
   const [placeHolders, setPlaceHolders] = useState<any[]>([])
@@ -131,7 +133,6 @@ export default function Home() {
   }
 
   const avatar = `avatar-${currentAvatar}.png`
-
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
       <button className="" onClick={handleGoBack}>

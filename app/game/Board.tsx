@@ -206,7 +206,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   //let firstRender = useRef(true)
   useEffect(() => {
     if (uniqueId !== '') {
-      const boardRef = ref(projectDatabase, `/${room}/${uniqueId}/Board`)
+      const boardRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       if (firstRender) {
         onValue(dataRef, (snapshot) => {
@@ -221,7 +221,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             //console.log(mappedSquaresData)
             if (data && data.Squares && data.droppedDominoes) {
               const mappedSquaresData = data.Squares
-              const updatedSquares = Squares.map((square, index) => ({
+              const updatedSquares = Squares.map((_square, index) => ({
                 accepts: mappedSquaresData[index].accepts,
                 lastDroppedItem: mappedSquaresData[index].lastDroppedItem ? mappedSquaresData[index].lastDroppedItem : null,
                 hasStar: mappedSquaresData[index].hasStar,
@@ -244,7 +244,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           Squares: squaresData,
           droppedDominoes: droppedDominoes2,
         }
-        set(boardRef, updatedData)
+        up(boardRef, updatedData)
         up(dataRef, { Score: score })
       }
     }

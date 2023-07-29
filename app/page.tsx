@@ -8,6 +8,7 @@ import { Amaranth } from 'next/font/google'
 import Image from 'next/image'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import floatingdominoes from './animations/floatingdominos.json'
+import useStore from './IdStore'
 
 const amaranth = Amaranth({
   weight: '400',
@@ -17,19 +18,13 @@ const amaranth = Amaranth({
 
 export default function Home() {
   const router = useRouter()
-  const [uniqueId, setUniqueId] = useState('')
+  //const [uniqueId, setUniqueId] = useState('')
   const [roomId, setRoomId] = useState('')
+  const { uniqueId, initializeUniqueId } = useStore()
 
   useEffect(() => {
     if (uniqueId === '') {
-      let storedUniqueId = localStorage.getItem('uniqueId')
-      if (storedUniqueId) {
-        setUniqueId(storedUniqueId)
-      } else {
-        const newUniqueId = uuidv4()
-        setUniqueId(newUniqueId)
-        localStorage.setItem('uniqueId', newUniqueId)
-      }
+      initializeUniqueId()
     }
     if (roomId === '') {
       const newUniqueId = uuidv4()
