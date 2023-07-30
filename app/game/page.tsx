@@ -3,15 +3,15 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
-import { ref, onValue, update, onDisconnect, set, get } from 'firebase/database'
+import { ref, onValue, update, onDisconnect, set, runTransaction } from 'firebase/database'
 import { useState, useEffect, useRef } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
 import { SquareState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
-import { useRouter } from 'next/navigation'
-import useStore from '../IdStore'
+import { useStore, usePlayerStore } from '../IdStore'
+import VictoryScreen from './VictoryScreen'
 
 export default function Home() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
@@ -27,93 +27,75 @@ export default function Home() {
     name: string
     score: number
   }
-  const router = useRouter()
+  const { playerCount } = usePlayerStore()
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
-  /* const [playerInfos, setPlayerInfos] = useState<number[]>([]) */
 
-  /* type DroppedDominoes = [number, number]
-  const [droppedDominoes, setDroppedDominoes] = useState<DroppedDominoes[]>([]) */
-  //const [uniqueId, setUniqueId] = useState('')
   const { uniqueId, initializeUniqueId } = useStore()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
   const [isDropped, setIsDropped] = useState<boolean>(false)
   const [round, setRound] = useState<number>(1)
-  const [discPlayers, setDiscPlayers] = useState(0)
   const [hostId, setHostId] = useState('')
+  const victory = useRef(false)
   const firstRender = useRef(true)
 
   useEffect(() => {
     if (uniqueId !== '') {
-      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}/Disconnected`)
-      set(playerRef, false)
+      const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
+      const roomRef = ref(projectDatabase, `/${room}`)
       const playerDisconnectRef = onDisconnect(playerRef)
-      playerDisconnectRef.set(true)
+      playerDisconnectRef.update({ [uniqueId]: true })
+      onValue(playerRef, (snapshot) => {
+        const data = snapshot.val()
+        if (data) {
+          const playerIds = Object.keys(data)
+          playerIds && console.log(playerIds.length)
+          if (playerIds.length === playerCount - 1) {
+            victory.current = true
+            set(roomRef, null)
+          }
+        }
+      })
     }
-  }, [uniqueId])
+  }, [uniqueId, playerInfos])
 
   useEffect(() => {
-    if (firstRender.current === false) {
-      setDiscPlayers(0)
-      const playersRef = ref(projectDatabase, `/${room}`)
-      setIsDropped(false)
-      const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
-      if (uniqueId !== '' && uniqueId === hostId) {
-        const updateObject = { [uniqueId]: false }
-        update(playerRef, updateObject)
-      }
-      onValue(playersRef, (snapshot) => {
-        const data = snapshot.val()
-        const dataHost: { Host: string; round: number } = snapshot.val()
-        if (data) {
-          snapshot.forEach((userSnapshot) => {
-            const playerId: string = userSnapshot.key ?? ''
-            const squaresData: SquareState[] = userSnapshot.child('Squares').val()
-            if (squaresData !== null && playerId !== localStorage.getItem('uniqueId')) {
-              setReadSquares(squaresData)
-              setReadBoards((prevReadBoards) => ({
-                ...prevReadBoards,
-                [playerId]: squaresData,
-              }))
-            }
-            const scoreData: number = userSnapshot.child('Score').val()
-            const nameData: string = userSnapshot.child('Name').val()
-            if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData)
+    setIsDropped(false)
+    const playersRef = ref(projectDatabase, `/${room}`)
 
-            const discData: boolean = userSnapshot.child('Disconnected').val()
-            if (discData && uniqueId === hostId) {
-              //console.log(userSnapshot.key)
-              setDiscPlayers(discPlayers + 1)
-            }
-          })
-        }
-        if (dataHost && dataHost.Host) {
-          setHostId(dataHost.Host)
-        } else if (uniqueId !== '') {
-          setHostId(uniqueId)
-          console.log(uniqueId)
-          const dataRef = ref(projectDatabase, `/${room}/Host`)
-          set(dataRef, uniqueId)
-        }
-      })
+    const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
+    if (uniqueId !== '' && uniqueId === hostId && victory.current === false) {
+      const updateObject = { [uniqueId]: false }
+      update(playerRef, updateObject)
     }
+    onValue(playersRef, (snapshot) => {
+      const data = snapshot.val()
+      const dataHost: { Host: string; round: number } = snapshot.val()
+      if (data) {
+        snapshot.forEach((userSnapshot) => {
+          const playerId: string = userSnapshot.key ?? ''
+          const squaresData: SquareState[] = userSnapshot.child('Squares').val()
+          if (squaresData !== null && playerId !== localStorage.getItem('uniqueId')) {
+            setReadSquares(squaresData)
+            setReadBoards((prevReadBoards) => ({
+              ...prevReadBoards,
+              [playerId]: squaresData,
+            }))
+          }
+          const scoreData: number = userSnapshot.child('Score').val()
+          const nameData: string = userSnapshot.child('Name').val()
+          if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData)
+        })
+      }
+      if (dataHost && dataHost.Host) {
+        setHostId(dataHost.Host)
+      } else if (uniqueId !== '' && victory.current === false) {
+        setHostId(uniqueId)
+        const dataRef = ref(projectDatabase, `/${room}/Host`)
+        set(dataRef, uniqueId)
+      }
+    })
   }, [uniqueId, round])
-
-  /*  useEffect(() => {
-    console.log(uniqueId)
-      const playersRef = ref(projectDatabase, `/${room}/Host`)
-      onValue(playersRef, (snapshot) => {
-        const dataHost: string = snapshot.val()
-        if (dataHost) {
-          setHostId(dataHost)
-        } else {
-          setHostId(uniqueId)
-          console.log(uniqueId)
-          const dataRef = ref(projectDatabase, `/${room}/Host`)
-          set(dataRef, uniqueId)
-        }
-      })
-  }, [uniqueId, room]) */
 
   useEffect(() => {
     const newSquares = MapSetter(readSquares)
@@ -125,38 +107,7 @@ export default function Home() {
       }
       firstRender.current = false
     }
-
-    console.log(uniqueId)
   }, [])
-  console.log(uniqueId)
-  useEffect(() => {
-    if (uniqueId !== '') {
-      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}/Disconnected`)
-      set(playerRef, false)
-      /* const playersDisconnectRef = onDisconnect(playersRef)
-        playersDisconnectRef.remove() */
-
-      disconnectPlayers()
-    }
-  }, [discPlayers])
-
-  const disconnectPlayers = async () => {
-    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}/Disconnected`)
-    const playerDisconnectRef = onDisconnect(playerRef)
-    console.log(discPlayers)
-    const hostRef = ref(projectDatabase, `/${room}/Host`)
-    const hostDisconnectRef = onDisconnect(hostRef)
-    hostDisconnectRef.remove()
-    await playerDisconnectRef.set(true)
-    if (discPlayers > 0 && discPlayers === 2) {
-      console.log('asd')
-      const playersRef = ref(projectDatabase, `/${room}`)
-      //const playersDisconnectRef = onDisconnect(playersRef)
-      await set(playersRef, null)
-      router.push('/')
-      //set(playersRef, null)
-    }
-  }
 
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
@@ -169,11 +120,13 @@ export default function Home() {
       const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
       onValue(playersRef, (snapshot) => {
         const data = snapshot.val()
-        const allTrue = Object.values(data).every((value) => value === true)
-        if (allTrue) {
-          setRound(round + 1)
-          const roundRef = ref(projectDatabase, `/${room}/round`)
-          set(roundRef, round + 1)
+        if (data) {
+          const allTrue = Object.values(data).every((value) => value === true)
+          if (allTrue) {
+            setRound(round + 1)
+            const roundRef = ref(projectDatabase, `/${room}/round`)
+            set(roundRef, round + 1)
+          }
         }
       })
     }
@@ -207,6 +160,7 @@ export default function Home() {
         </div>
         <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
       </div>
+      {victory.current && <VictoryScreen />}
     </main>
   )
 }

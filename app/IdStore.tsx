@@ -8,8 +8,15 @@ type Action = {
   initializeUniqueId: () => void
   updateUniqueId: (uniqueId: string) => void
 }
+type playerState = {
+  playerCount: number
+}
 
-const useStore = create<State & Action>((set) => ({
+type playerAction = {
+  updatePlayerCount: (playerCount: number) => void
+}
+
+export const useStore = create<State & Action>((set) => ({
   uniqueId: '',
   initializeUniqueId: () => {
     let storedUniqueId = localStorage.getItem('uniqueId')
@@ -24,4 +31,7 @@ const useStore = create<State & Action>((set) => ({
   updateUniqueId: (uniqueId) => set(() => ({ uniqueId: uniqueId })),
 }))
 
-export default useStore
+export const usePlayerStore = create<playerState & playerAction>((set) => ({
+  playerCount: 0,
+  updatePlayerCount: (count) => set(() => ({ playerCount: count })),
+}))

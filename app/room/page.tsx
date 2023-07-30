@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
-import useStore from '../IdStore'
+import { useStore, usePlayerStore } from '../IdStore'
 
 const useRoomData = (room: string, uniqueId: string) => {
   const [hostId, setHostId] = useState('')
@@ -46,6 +46,7 @@ export default function Home() {
   const [inputName, setInputName] = useState('')
   //const [uniqueId, updateUniqueId] = useStore((state) => [state.uniqueId, state.updateUniqueId])
   const { uniqueId, initializeUniqueId } = useStore()
+  const [playerCount, updatePlayerCount] = usePlayerStore((state) => [state.playerCount, state.updatePlayerCount])
 
   if (room === null) {
     return <div>Wrong room ID</div>
@@ -54,8 +55,14 @@ export default function Home() {
 
   const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
-    await update(dataRef, { gameStarted: true })
-    router.push(`/game?roomId=${room}`)
+    if (currentPlayers === 1) {
+      alert('Need more players to start the game')
+    } else {
+      if (uniqueId === hostId) {
+        await update(dataRef, { gameStarted: true })
+      }
+      router.push(`/game?roomId=${room}`)
+    }
   }
 
   const handleConfirmName = () => {
@@ -78,11 +85,14 @@ export default function Home() {
   useEffect(() => {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-      const hostRef = ref(projectDatabase, `/${room}/Host`)
-      const hostDisconnectRef = onDisconnect(hostRef)
       const playerDisconnectRef = onDisconnect(playerRef)
-      hostDisconnectRef.remove()
       playerDisconnectRef.remove()
+      updatePlayerCount(currentPlayers)
+      if (uniqueId === hostId) {
+        const hostRef = ref(projectDatabase, `/${room}/Host`)
+        const hostDisconnectRef = onDisconnect(hostRef)
+        hostDisconnectRef.remove()
+      }
       if (currentPlayers !== 100 && currentPlayers < 4) {
         if (playerName === 'New Player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
@@ -98,10 +108,6 @@ export default function Home() {
       } else if (currentPlayers !== 100) {
         setIsSpectator(true)
         setIsVisible(true)
-      }
-      return () => {
-        playerDisconnectRef.cancel()
-        hostDisconnectRef.cancel()
       }
     }
     return

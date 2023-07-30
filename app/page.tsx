@@ -8,7 +8,7 @@ import { Amaranth } from 'next/font/google'
 import Image from 'next/image'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import floatingdominoes from './animations/floatingdominos.json'
-import useStore from './IdStore'
+import { useStore } from './IdStore'
 
 const amaranth = Amaranth({
   weight: '400',
