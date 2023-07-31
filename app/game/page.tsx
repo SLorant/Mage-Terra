@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
 import { SquareState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
-import { useStore, usePlayerStore } from '../IdStore'
+import { useStore, usePlayerStore } from '../useStore'
 import VictoryScreen from './VictoryScreen'
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
   }))
 
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
-  const [readBoards, setReadBoards] = useState<{ [playerId: string]: SquareState[] }>({})
+  const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
 
   interface PlayerInfo {
     name: string
@@ -38,18 +38,17 @@ export default function Home() {
   const [hostId, setHostId] = useState('')
   const victory = useRef(false)
   const firstRender = useRef(true)
-
   useEffect(() => {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
       const roomRef = ref(projectDatabase, `/${room}`)
       const playerDisconnectRef = onDisconnect(playerRef)
       playerDisconnectRef.update({ [uniqueId]: true })
+      if (victory.current) playerDisconnectRef.cancel()
       onValue(playerRef, (snapshot) => {
         const data = snapshot.val()
         if (data) {
           const playerIds = Object.keys(data)
-          playerIds && console.log(playerIds.length)
           if (playerIds.length === playerCount - 1) {
             victory.current = true
             set(roomRef, null)
@@ -68,22 +67,23 @@ export default function Home() {
       const updateObject = { [uniqueId]: false }
       update(playerRef, updateObject)
     }
-    onValue(playersRef, (snapshot) => {
+    return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         snapshot.forEach((userSnapshot) => {
           const playerId: string = userSnapshot.key ?? ''
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
+          const nameData: string = userSnapshot.child('Name').val()
+
           if (squaresData !== null && playerId !== localStorage.getItem('uniqueId')) {
             setReadSquares(squaresData)
             setReadBoards((prevReadBoards) => ({
               ...prevReadBoards,
-              [playerId]: squaresData,
+              [playerId]: [squaresData, nameData],
             }))
           }
           const scoreData: number = userSnapshot.child('Score').val()
-          const nameData: string = userSnapshot.child('Name').val()
           if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData)
         })
       }
@@ -118,7 +118,7 @@ export default function Home() {
     }
     if (uniqueId !== '' && uniqueId === hostId) {
       const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
-      onValue(playersRef, (snapshot) => {
+      const unsubscribePlayers = onValue(playersRef, (snapshot) => {
         const data = snapshot.val()
         if (data) {
           const allTrue = Object.values(data).every((value) => value === true)
@@ -129,13 +129,15 @@ export default function Home() {
           }
         }
       })
+      return () => unsubscribePlayers()
     }
-    onValue(roomRef, (snapshot) => {
+    const unsubscribeRoom = onValue(roomRef, (snapshot) => {
       const data: { Host: string; round: number } = snapshot.val()
       if (data && data.round && uniqueId !== hostId) {
         setRound(data.round)
       }
     })
+    return () => unsubscribeRoom()
   }, [isDropped])
 
   const addPlayerInfo = (otherId: string, nameData: string, scoreData: number) => {

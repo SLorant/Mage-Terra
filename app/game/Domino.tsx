@@ -13,7 +13,6 @@ export interface DominoProps {
   setIsActive: Dispatch<SetStateAction<boolean>>
   setDirection: Dispatch<SetStateAction<string>>
   setLeftSqIndex: Dispatch<SetStateAction<number>>
-  rotationAngle: number
 }
 
 export const DominoComponent: FC<DominoProps> = memo(function Domino({
@@ -26,7 +25,6 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   isTurned,
   setDirection,
   setLeftSqIndex,
-  rotationAngle,
 }) {
   const dominoRef = useRef<HTMLDivElement>(null)
   const [{ opacity, isDragging, canDrag }, drag] = useDrag(
@@ -68,7 +66,6 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     }
     return ''
   }
-  const [rotation, setRotation] = useState(0)
   useEffect(() => {
     if (isTurned) {
       const temp = currentOffset && getCursorPosition(currentOffset.y)
@@ -78,15 +75,6 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
       temp && setDirection(temp)
     }
   }, [currentOffset])
-
-  /*  useEffect(() => {
-    //rotationAngle === 90 && setRotation(90)ű
-    console.log(rotationAngle)
-    if (rotationAngle === 180) setRotation(180)
-    else if (rotationAngle % 270 === 0) setRotation(90)
-    else if (rotationAngle % 360 === 0) setRotation(0)
-    else setRotation(270)
-  }, [rotationAngle]) */
   return (
     <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'}   ${isDropped && 'opacity-50'}  flex  ml-10 justify-center items-center`}>
       <div ref={dominoRef}>
@@ -95,10 +83,10 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
           style={{ opacity, border: '1px dashed gray' }}
           className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} cursor-move flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" />
+            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" unoptimized />
           </div>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" />
+            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" unoptimized />
           </div>
         </div>
       </div>

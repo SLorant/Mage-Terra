@@ -1,15 +1,16 @@
 import update from 'immutability-helper'
-import { FC, useEffect, useRef } from 'react'
+import { FC, useEffect, useMemo, useRef } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
 import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
-import { onValue, ref, set, update as up } from 'firebase/database'
+import { ref, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
 import { BoardProps, DominoState, SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
+import { DominoSetter } from './DominoSetter'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
@@ -25,51 +26,27 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     img: '/cave-05.svg',
     secondimg: '/mountains-01.svg',
   })
-  const nameArray: string[] = ['Cave', 'Swamp', 'Mt', 'City', 'Field']
-  const imgArray: string[] = ['/cave-05.svg', '/swamp-02.svg', '/mountains-01.svg', '/village-01.svg', '/field2-01.svg']
 
-  const [droppedDominoNames, setDroppedDominoNames] = useState<string[]>([])
-
-  type DroppedDomino = [number, number, DominoState]
-  type DroppedDomino2 = [number, number]
+  type DroppedDomino = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
-  const [droppedDominoes2, setDroppedDominoes2] = useState<DroppedDomino2[]>([])
   const [direction, setDirection] = useState<string>('left')
-  const [firstRender, setFirstRender] = useState(true)
-  /* function isDropped(DominoName: string) {
-    return droppedDominoNames.indexOf(DominoName) > -1
-  } */
-  /* function isDropped() {
-    return droppedDominoNames.length > 0
-  } */
-
   const [isTurned, setIsTurned] = useState(false)
   const [turnCount, setTurnCount] = useState<number>(0)
-
-  useEffect(() => {
-    if (firstRender) {
-      const newSquares = MapSetter(Squares)
-      setSquares(newSquares)
-    }
-  }, [isTurned])
-
-  useEffect(() => {
-    const randomItemIndex = Math.floor(Math.random() * nameArray.length)
-    const randomItemIndex2 = Math.floor(Math.random() * nameArray.length)
-    const [randomName, randomName2] = [nameArray[randomItemIndex], nameArray[randomItemIndex2]]
-    const [randomImg, randomImg2] = [imgArray[randomItemIndex], imgArray[randomItemIndex2]]
-    setDomino({ firstname: randomName, img: randomImg, secondname: randomName2, secondimg: randomImg2 })
-  }, [droppedDominoNames])
-
   const [score, setScore] = useState<number>(0)
-  useEffect(() => {
-    setScore(ScoreCounter(Squares))
-  }, [droppedDominoes])
-
   const [isActive, setIsActive] = useState<boolean>(false)
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
+
+  useEffect(() => {
+    const newSquares = MapSetter(Squares)
+    setSquares(newSquares)
+  }, [])
+
+  useMemo(() => {
+    setDomino(DominoSetter())
+    setScore(ScoreCounter(Squares))
+  }, [droppedDominoes])
 
   const isDominoPlacedCorrectly = (index: number) => {
     if (isTurned) {
@@ -158,20 +135,15 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         Squares[index].accepts.includes('D')
       ) {
         setIsDropped(true)
-        setDroppedDominoes([...droppedDominoes, [index, fillIndex, item]])
-        setDroppedDominoes2([...droppedDominoes2, [index, fillIndex]])
+        setDroppedDominoes([...droppedDominoes, [index, fillIndex]])
         const newSquares = update(Squares, {
           [fillIndex]: { lastDroppedItem: { $set: { firstname: secondname, img: secondimg } } },
           [index]: { lastDroppedItem: { $set: item } },
         })
         setSquares(newSquares)
-
-        if (firstname) {
-          setDroppedDominoNames(update(droppedDominoNames, { $push: [firstname] }))
-        }
       }
     },
-    [droppedDominoNames, Squares, isTurned],
+    [Squares, isTurned],
   )
 
   const MirrorDomino = () => {
@@ -203,62 +175,23 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     }
     setTurnCount((turnCount + 1) % 4)
   }
-  //let firstRender = useRef(true)
   useEffect(() => {
     if (uniqueId !== '') {
-      const boardRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-      if (firstRender) {
-        onValue(dataRef, (snapshot) => {
-          const data: { Score: number; didDrop: boolean } = snapshot.val()
-          /* if (data && data.Score && data.didDrop) {
-            //setScore(data.Score)
-            setIsDropped(data.didDrop)
-          } */
-          onValue(boardRef, (snapshot) => {
-            const data: { Squares: any; droppedDominoes: DroppedDomino2[] } = snapshot.val()
-
-            //console.log(mappedSquaresData)
-            if (data && data.Squares && data.droppedDominoes) {
-              const mappedSquaresData = data.Squares
-              const updatedSquares = Squares.map((_square, index) => ({
-                accepts: mappedSquaresData[index].accepts,
-                lastDroppedItem: mappedSquaresData[index].lastDroppedItem ? mappedSquaresData[index].lastDroppedItem : null,
-                hasStar: mappedSquaresData[index].hasStar,
-              }))
-              setSquares(updatedSquares)
-              setDroppedDominoes2(data.droppedDominoes)
-            }
-          })
-        })
-        //firstRender.current = false
-        setFirstRender(false)
+      const squaresData = Squares.map((square) => ({
+        accepts: square.accepts,
+        lastDroppedItem: square.lastDroppedItem,
+        hasStar: square.hasStar,
+      }))
+      const updatedData = {
+        Squares: squaresData,
+        droppedDominoes: droppedDominoes,
       }
-      if (!firstRender) {
-        const squaresData = Squares.map((square) => ({
-          accepts: square.accepts,
-          lastDroppedItem: square.lastDroppedItem,
-          hasStar: square.hasStar,
-        }))
-        const updatedData = {
-          Squares: squaresData,
-          droppedDominoes: droppedDominoes2,
-        }
-        up(boardRef, updatedData)
-        up(dataRef, { Score: score })
-      }
+      up(dataRef, updatedData)
+      up(dataRef, { Score: score })
     }
   }, [Squares])
-  const [rotationAngle, setRotationAngle] = useState(0)
-  const handleRotationClick = () => {
-    if (rotationAngle === 360) setRotationAngle(90)
-    else setRotationAngle((prevAngle) => prevAngle + 90)
-    setIsTurned(!isTurned)
-    if (turnCount === 0 || turnCount === 2) {
-      MirrorDomino()
-    }
-    setTurnCount((turnCount + 1) % 4)
-  }
+
   return (
     <div className="h-full w-full flex gap-2 relative">
       <div className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
@@ -274,7 +207,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             index={index}
             key={index}
             leftSqIndex={leftSqIndex} // Pass the left square index
-            droppedDominoes2={droppedDominoes2}
+            droppedDominoes={droppedDominoes}
             isTurned={isTurned}
             direction={direction}
             isLeftSquareActive={
@@ -297,7 +230,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             setIsActive={setIsActive}
             setDirection={setDirection}
             setLeftSqIndex={setLeftSqIndex}
-            rotationAngle={rotationAngle}
           />
         </div>
         <div className="text-white ml-10 mt-4 text-xl flex gap-6">

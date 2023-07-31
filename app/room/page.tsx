@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
-import { useStore, usePlayerStore } from '../IdStore'
+import { useStore, usePlayerStore } from '../useStore'
 
 const useRoomData = (room: string, uniqueId: string) => {
   const [hostId, setHostId] = useState('')
@@ -20,7 +20,6 @@ const useRoomData = (room: string, uniqueId: string) => {
         const { gameStarted, Host, ...playersData } = data
         setHostId(Host || uniqueId)
         const dataRef = ref(projectDatabase, `/${room}/Host`)
-        console.log('setting host')
         set(dataRef, Host || uniqueId)
         setReadNames(playersData)
         setCurrentPlayers(Object.keys(playersData).length)

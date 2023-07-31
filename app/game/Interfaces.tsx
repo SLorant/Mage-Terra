@@ -13,7 +13,7 @@ interface PlayerInfo {
 export interface ScoreBoardProps {
   uniqueId: string
   playerInfos: { [key: string]: PlayerInfo }
-  readBoards: { [playerId: string]: SquareState[] }
+  readBoards: { [playerId: string]: [SquareState[], string] }
 }
 
 export interface SquareState {
@@ -42,7 +42,7 @@ export interface BoardState {
   Squares: SquareSpec[]
   Domino: DominoSpec[]
 }
-type DroppedDomino2 = [number, number]
+type DroppedDomino = [number, number]
 export interface SquareProps {
   accept: string[]
   lastDroppedItem?: any
@@ -53,7 +53,7 @@ export interface SquareProps {
   index: number
   onIsOverChange: (index: number, isOver: boolean) => void
   leftSqIndex: number
-  droppedDominoes2: DroppedDomino2[]
+  droppedDominoes: DroppedDomino[]
   isTurned: boolean
   direction: string
   isLeftSquareActive: boolean

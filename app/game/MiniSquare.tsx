@@ -23,11 +23,11 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
 
   if (lastDroppedItem) {
     switch (lastDroppedItem.firstname) {
-      case 'Cave': {
+      case 'Dungeon': {
         squareColor = 'bg-purple'
         break
       }
-      case 'Swamp': {
+      case 'Lagoon': {
         squareColor = 'bg-pink'
         break
       }
@@ -35,7 +35,7 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
         squareColor = 'bg-green'
         break
       }
-      case 'City': {
+      case 'Village': {
         squareColor = 'bg-blue'
         break
       }
@@ -44,7 +44,7 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
         squareColor = 'bg-orange'
         break
       }
-      case 'CaveSwampMtCityFieldRuin': {
+      case 'DungeonLagoonMtVillageFieldRuin': {
         squareColor = 'bg-white'
         break
       }

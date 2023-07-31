@@ -6,12 +6,13 @@ import { ItemTypes } from '../ItemTypes'
 import { SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
-  const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number }[]>([])
+  const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string }[]>([])
   useEffect(() => {
     // Calculate the rank for each player
-    const rankedPlayersData = Object.entries(playerInfos).map(([playerId, { score }]) => ({
+    const rankedPlayersData = Object.entries(playerInfos).map(([playerId, { score, name }]) => ({
       playerId,
       score,
+      name,
     }))
 
     rankedPlayersData.sort((a, b) => b.score - a.score)
@@ -19,6 +20,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     setRankedPlayers(
       rankedPlayersData.map((player, index) => ({
         playerId: player.playerId,
+        name: player.name,
         rank: index + 1,
       })),
     )
@@ -48,9 +50,10 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     const newSquares = MapSetter(Squares)
     setSquares(newSquares)
   }, [])
-  const firstPlayerSquares = Object.values(readBoards)[currentBoard] || Squares
+  const firstPlayerSquares = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][0] : Squares
+  const boardName: string = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][1] : ''
   return (
-    <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 ">
+    <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 relative">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
         {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
           <div
@@ -64,18 +67,19 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
           </div>
         ))}
       </div>
-      <div className="mt-32 gap-4 flex  h-[165px] w-[240px] ">
-        <button className="z-50 text-3xl text-white" onClick={handlePrevBoard}>
+      <div className="absolute bottom-10 gap-4 flex  h-[165px] w-[240px] ">
+        <button className="z-50 text-3xl text-white mb-2" onClick={handlePrevBoard}>
           &#10094;
         </button>
-
-        <div className="h-[165px] w-[165px] grid grid-cols-7 grid-rows-7">
-          {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-            <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
-          ))}
+        <div className="flex flex-col items-center justify-center">
+          <div className="h-[165px] w-[165px] grid grid-cols-7 grid-rows-7">
+            {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
+              <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
+            ))}
+          </div>
+          <p className="text-darkblue mt-2">{boardName}'s map</p>
         </div>
-
-        <button className="z-50 text-3xl text-white" onClick={handleNextBoard}>
+        <button className="z-50 text-3xl text-white mb-2" onClick={handleNextBoard}>
           &#10095;
         </button>
       </div>
