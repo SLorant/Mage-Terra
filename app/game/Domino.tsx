@@ -83,10 +83,10 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
           style={{ opacity, border: '1px dashed gray' }}
           className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} cursor-move flex  mt-6`}>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" unoptimized />
+            <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
           </div>
           <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
-            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full pbject-cover`} draggable="false" unoptimized />
+            <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
           </div>
         </div>
       </div>

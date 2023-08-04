@@ -8,10 +8,11 @@ import { useState, useEffect, useRef } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { useSearchParams } from 'next/navigation'
 import { MapSetter } from './MapSetter'
-import { SquareState } from './Interfaces'
+import { SquareState, PlayerInfo, DominoState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
 import { useStore, usePlayerStore } from '../useStore'
 import VictoryScreen from './VictoryScreen'
+import Trading from './Trading'
 
 export default function Home() {
   const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
@@ -23,10 +24,6 @@ export default function Home() {
   const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
 
-  interface PlayerInfo {
-    name: string
-    score: number
-  }
   const { playerCount } = usePlayerStore()
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
 
@@ -38,6 +35,13 @@ export default function Home() {
   const [hostId, setHostId] = useState('')
   const victory = useRef(false)
   const firstRender = useRef(true)
+  const [Domino, setDomino] = useState<DominoState>({
+    firstname: 'F',
+    secondname: 'C',
+    img: '/cave-05.svg',
+    secondimg: '/mountains-01.svg',
+  })
+
   useEffect(() => {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
@@ -58,15 +62,38 @@ export default function Home() {
     }
   }, [uniqueId, playerInfos])
 
+  const [countdown, setCountdown] = useState(30)
+  const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
+  useEffect(() => {
+    let timer: any
+
+    if (round > 1 && countdown > 0 && victory.current === false) {
+      timer = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1)
+      }, 1000)
+    }
+
+    if (countdown === 0) {
+      setIsRoundOver(true)
+    }
+
+    return () => {
+      clearInterval(timer)
+    }
+  }, [countdown, round])
+
   useEffect(() => {
     setIsDropped(false)
     const playersRef = ref(projectDatabase, `/${room}`)
-
+    if (round > 14) {
+      victory.current = true
+      set(playersRef, null)
+    }
     const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
-    if (uniqueId !== '' && uniqueId === hostId && victory.current === false) {
+    /*  if (uniqueId !== '' && uniqueId === hostId && victory.current === false) {
       const updateObject = { [uniqueId]: false }
       update(playerRef, updateObject)
-    }
+    } */
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const dataHost: { Host: string; round: number } = snapshot.val()
@@ -76,7 +103,7 @@ export default function Home() {
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
           const nameData: string = userSnapshot.child('Name').val()
 
-          if (squaresData !== null && playerId !== localStorage.getItem('uniqueId')) {
+          if (squaresData !== null) {
             setReadSquares(squaresData)
             setReadBoards((prevReadBoards) => ({
               ...prevReadBoards,
@@ -84,7 +111,8 @@ export default function Home() {
             }))
           }
           const scoreData: number = userSnapshot.child('Score').val()
-          if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData)
+          const avatarData: string = userSnapshot.child('Avatar').val()
+          if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData, avatarData)
         })
       }
       if (dataHost && dataHost.Host) {
@@ -112,7 +140,7 @@ export default function Home() {
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
     const roomRef = ref(projectDatabase, `/${room}`)
-    if (uniqueId !== '') {
+    if (uniqueId !== '' && victory.current === false) {
       const updateObject = { [uniqueId]: isDropped }
       update(playersRef, updateObject)
     }
@@ -126,6 +154,8 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
+            setCountdown(30)
+            setIsRoundOver(false)
           }
         }
       })
@@ -134,18 +164,22 @@ export default function Home() {
     const unsubscribeRoom = onValue(roomRef, (snapshot) => {
       const data: { Host: string; round: number } = snapshot.val()
       if (data && data.round && uniqueId !== hostId) {
-        setRound(data.round)
+        if (round !== data.round) {
+          setRound(data.round)
+          setCountdown(30)
+          setIsRoundOver(false)
+        }
       }
     })
     return () => unsubscribeRoom()
-  }, [isDropped])
+  }, [isDropped, isRoundOver])
 
-  const addPlayerInfo = (otherId: string, nameData: string, scoreData: number) => {
+  const addPlayerInfo = (otherId: string, nameData: string, scoreData: number, avatarData: string) => {
     scoreData = scoreData ?? 0
     setPlayerInfos((prevPlayerInfos) => {
       const updatedPlayerInfos = {
         ...prevPlayerInfos,
-        [otherId]: { name: nameData, score: scoreData },
+        [otherId]: { name: nameData, score: scoreData, avatar: avatarData },
       }
       const sortedPlayerInfosArray = Object.entries(updatedPlayerInfos).sort(([, a], [, b]) => b.score - a.score)
       const sortedPlayerInfos = Object.fromEntries(sortedPlayerInfosArray)
@@ -154,15 +188,20 @@ export default function Home() {
   }
   return (
     <main className="flex h-screen  items-center justify-center font-sans ">
-      <div className="flex items-top justify-center gap-10 bg-[#110928] w-[1000px]">
-        <div className="mt-20  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
+      <div className="flex items-top justify-center gap-10 bg-[#110928] w-[1000px] relative">
+        <div className="mt-20  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
           <DndProvider backend={HTML5Backend}>
-            <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} />
+            <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} Domino={Domino} setDomino={setDomino} />
           </DndProvider>
         </div>
+        {round % 2 === 0 && <Trading room={room} uniqueId={uniqueId} Domino={Domino} round={round} hostId={hostId} />}
+
         <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
       </div>
-      {victory.current && <VictoryScreen />}
+      {victory.current && <VictoryScreen uniqueId={uniqueId} playerInfos={playerInfos} />}
+      <div>
+        <p>Countdown: {countdown} seconds</p>
+      </div>
     </main>
   )
 }

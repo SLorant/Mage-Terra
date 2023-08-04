@@ -5,10 +5,13 @@ export interface BoardProps {
   room: string | null
   isDropped: boolean
   setIsDropped: Dispatch<SetStateAction<boolean>>
+  Domino: DominoState
+  setDomino: Dispatch<SetStateAction<DominoState>>
 }
-interface PlayerInfo {
+export interface PlayerInfo {
   name: string
   score: number
+  avatar: string
 }
 export interface ScoreBoardProps {
   uniqueId: string
@@ -57,4 +60,15 @@ export interface SquareProps {
   isTurned: boolean
   direction: string
   isLeftSquareActive: boolean
+}
+export interface VictoryScreenProps {
+  playerInfos: { [key: string]: PlayerInfo }
+  uniqueId: string
+}
+export interface TradingProps {
+  room: string | null
+  uniqueId: string
+  Domino: DominoState
+  round: number
+  hostId: string
 }

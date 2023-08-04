@@ -7,7 +7,7 @@ import { projectDatabase } from '@/firebase/config'
 import { Amaranth } from 'next/font/google'
 import Image from 'next/image'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
-import floatingdominoes from './animations/floatingdominos.json'
+import dominoes from './animations/dominos.json'
 import { useStore } from './useStore'
 
 const amaranth = Amaranth({
@@ -51,8 +51,8 @@ export default function Home() {
         <h1 className="text-6xl">LOGO</h1>
       </div>
       <div className="absolute top-0 left-0 z-0">
-        <Image className="ml-20" height={500} width={500} src="/homemage.png" alt="asd"></Image>
-        <Lottie className="w-[100px] h-[100px] absolute top-0 left-0" animationData={floatingdominoes} lottieRef={lottieRef} />
+        <Image className="" height={1000} width={1000} src="/homemage.png" alt="asd"></Image>
+        <Lottie className="w-[700px] h-[700px] absolute top-0 -left-4" animationData={dominoes} lottieRef={lottieRef} />
       </div>
       <div className="bg-[#170e2ea3] text-xl mb-20 rounded-lg h-1/2 w-1/2 flex flex-col items-center justify-center">
         <p className="mb-20">Random bevezető mondat lorem ipsum izébizé</p>

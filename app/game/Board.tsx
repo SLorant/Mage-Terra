@@ -8,24 +8,17 @@ import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, update as up } from 'firebase/database'
 import { MapSetter } from './MapSetter'
-import { BoardProps, DominoState, SquareState } from './Interfaces'
+import { BoardProps, SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
 
-export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped }) {
+export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
     hasStar: false,
   }))
   const [Squares, setSquares] = useState<SquareState[]>(initialSquares)
-
-  const [Domino, setDomino] = useState<DominoState>({
-    firstname: 'F',
-    secondname: 'C',
-    img: '/cave-05.svg',
-    secondimg: '/mountains-01.svg',
-  })
 
   type DroppedDomino = [number, number]
   const [droppedDominoes, setDroppedDominoes] = useState<DroppedDomino[]>([])
@@ -47,6 +40,13 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     setDomino(DominoSetter())
     setScore(ScoreCounter(Squares))
   }, [droppedDominoes])
+
+  useEffect(() => {
+    if (uniqueId !== '') {
+      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      up(dataRef, { Domino: Domino })
+    }
+  }, [Domino])
 
   const isDominoPlacedCorrectly = (index: number) => {
     if (isTurned) {

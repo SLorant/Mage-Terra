@@ -5,14 +5,16 @@ import { MapSetter } from './MapSetter'
 import { ItemTypes } from '../ItemTypes'
 import { SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
+import Image from 'next/image'
 export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
-  const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string }[]>([])
+  const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string; avatar: string }[]>([])
   useEffect(() => {
     // Calculate the rank for each player
-    const rankedPlayersData = Object.entries(playerInfos).map(([playerId, { score, name }]) => ({
+    const rankedPlayersData = Object.entries(playerInfos).map(([playerId, { score, name, avatar }]) => ({
       playerId,
       score,
       name,
+      avatar,
     }))
 
     rankedPlayersData.sort((a, b) => b.score - a.score)
@@ -21,6 +23,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       rankedPlayersData.map((player, index) => ({
         playerId: player.playerId,
         name: player.name,
+        avatar: player.avatar,
         rank: index + 1,
       })),
     )
@@ -55,15 +58,18 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
   return (
     <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 relative">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
-        {Object.entries(playerInfos).map(([playerId, { name, score }]) => (
+        {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
           <div
             key={playerId}
             className={`${
               getRankByPlayerId(playerId) % 2 === 0 ? 'bg-grey' : 'bg-lightpurplepurple'
-            } text-darkblue w-full h-10 justify-between items-center flex `}>
+            } text-darkblue w-full h-10 justify-start items-center flex relative`}>
             <div className="ml-4">{getRankByPlayerId(playerId)}</div>
-            <div>{playerId === uniqueId ? name + ' (you)' : name}</div>
-            <div className="mr-4">{score}</div>
+            <div className="ml-4">
+              <Image height={30} width={30} src={`/avatar-${avatar}.png`} alt="playeravatar" unoptimized></Image>
+            </div>
+            <div className="ml-4">{playerId === uniqueId ? name + ' (you)' : name}</div>
+            <div className="mr-4 absolute right-2">{score} p</div>
           </div>
         ))}
       </div>

@@ -1,5 +1,4 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
 import { Amaranth } from 'next/font/google'
 const amaranth = Amaranth({
   weight: '400',
