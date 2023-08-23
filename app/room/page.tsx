@@ -17,7 +17,7 @@ const useRoomData = (room: string, uniqueId: string) => {
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, ...playersData } = data
+        const { gameStarted, Host, doneWithAction, ...playersData } = data
         setHostId(Host || uniqueId)
         const dataRef = ref(projectDatabase, `/${room}/Host`)
         set(dataRef, Host || uniqueId)
@@ -138,6 +138,7 @@ export default function Home() {
   }
 
   const avatar = `avatar-${currentAvatar}.png`
+  console.log(readNames)
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
       <button className="" onClick={handleGoBack}>
@@ -176,43 +177,44 @@ export default function Home() {
           </div>
         </div>
         <div className="grid h-auto w-[auto] gap-x-6 grid-cols-2 grid-rows-3">
-          {Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
-            <div className="relative" key={playerId}>
-              <div className="absolute left-0 z-40 top-1">
-                <Image height={60} width={60} src={`/avatar-${Avatar}.png`} alt="playeravatar"></Image>
-              </div>
-              <div
-                className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
+          {Object.keys(readNames).length > 0 &&
+            Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
+              <div className="relative" key={playerId}>
+                <div className="absolute left-0 z-40 top-1">
+                  <Image height={60} width={60} src={`/avatar-${Avatar}.png`} alt="playeravatar"></Image>
+                </div>
+                <div
+                  className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
             ${Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
-                {playerId === hostId && (
-                  <span className="absolute left-14">
-                    <svg width="23" height="17" viewBox="0 0 23 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <g clipPath="url(#clip0_29_148)">
-                        <path d="M0 13.1797H0.4301H23V0L0 13.1797Z" fill="white" />
-                        <path d="M23 13.1797H22.5699H0V0L23 13.1797Z" fill="white" />
-                        <path d="M11.5 0.114624L5.75 4.19092L11.5 8.26721L17.25 4.19092L11.5 0.114624Z" fill="white" />
-                        <path d="M23 15.2179H0V17.0001H23V15.2179Z" fill="white" />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_29_148">
-                          <rect width="23" height="17" fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </span>
-                )}
-                <p className="ml-8">
-                  {Name === playerName && playerId === uniqueId && Name === 'New player'
-                    ? 'You'
-                    : Name === playerName && playerId === uniqueId
-                    ? Name + ' (you)'
-                    : Name}
-                  {Name === 'New player' && <span className="absolute right-2 bottom-3">...</span>}
-                </p>
-                {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
+                  {playerId === hostId && (
+                    <span className="absolute left-14">
+                      <svg width="23" height="17" viewBox="0 0 23 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clipPath="url(#clip0_29_148)">
+                          <path d="M0 13.1797H0.4301H23V0L0 13.1797Z" fill="white" />
+                          <path d="M23 13.1797H22.5699H0V0L23 13.1797Z" fill="white" />
+                          <path d="M11.5 0.114624L5.75 4.19092L11.5 8.26721L17.25 4.19092L11.5 0.114624Z" fill="white" />
+                          <path d="M23 15.2179H0V17.0001H23V15.2179Z" fill="white" />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0_29_148">
+                            <rect width="23" height="17" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </span>
+                  )}
+                  <p className="ml-8">
+                    {Name === playerName && playerId === uniqueId && Name === 'New player'
+                      ? 'You'
+                      : Name === playerName && playerId === uniqueId
+                      ? Name + ' (you)'
+                      : Name}
+                    {Name === 'New player' && <span className="absolute right-2 bottom-3">...</span>}
+                  </p>
+                  {/*  {name === playerName && playerId === uniqueId ? name + ' (you)' : name} */}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           {placeHolders}
         </div>
         {uniqueId === hostId ? (

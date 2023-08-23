@@ -3,14 +3,14 @@ import { rowLength } from './MapConfig'
 export const ScoreCounter = (squares: SquareState[]): number => {
   const maxSequenceLengths: { [type: string]: { length: number; starCount: number } } = {}
   const visited: boolean[] = Array(squares.length).fill(false)
+  const visitedForStar: boolean[] = Array(squares.length).fill(false)
 
   for (let i = 0; i < squares.length; i++) {
     const type = squares[i].lastDroppedItem?.firstname
     if (!visited[i] && type) {
-      const sequence = getConnectedSequence(i, type)
+      const sequence = getConnectedSequence(i, type, false)
       const sequenceLength = sequence.length
       const starCount = sequence.filter((square) => square.hasStar).length
-
       if (!maxSequenceLengths[type] || sequenceLength > maxSequenceLengths[type].length) {
         maxSequenceLengths[type] = { length: sequenceLength, starCount: starCount }
       }
@@ -21,18 +21,33 @@ export const ScoreCounter = (squares: SquareState[]): number => {
   for (const type in maxSequenceLengths) {
     const sequenceLength = maxSequenceLengths[type].length
     const starCount = maxSequenceLengths[type].starCount
-    const sequenceScore = sequenceLength * (starCount + 1)
-    score += sequenceScore
+    if (starCount === 0) score += sequenceLength
+  }
+
+  for (let i = 0; i < squares.length; i++) {
+    const type = squares[i].lastDroppedItem?.firstname
+    if (!visitedForStar[i] && type) {
+      const sequence = getConnectedSequence(i, type, true)
+      const starCount = sequence.filter((square) => square.hasStar).length
+      if (starCount > 0) {
+        score += sequence.length * (starCount + 1)
+      }
+    }
   }
 
   return score
 
-  function getConnectedSequence(squareIndex: number, type: string): SquareState[] {
-    if (squareIndex < 0 || squareIndex >= squares.length || visited[squareIndex] || squares[squareIndex].lastDroppedItem?.firstname !== type) {
+  function getConnectedSequence(squareIndex: number, type: string, forStar: boolean): SquareState[] {
+    if (
+      squareIndex < 0 ||
+      squareIndex >= squares.length ||
+      (forStar ? visitedForStar[squareIndex] : visited[squareIndex]) ||
+      squares[squareIndex].lastDroppedItem?.firstname !== type
+    ) {
       return []
     }
 
-    visited[squareIndex] = true
+    forStar ? (visitedForStar[squareIndex] = true) : (visited[squareIndex] = true)
     const neighbors = [
       squareIndex - 1, // left neighbor
       squareIndex + 1, // right neighbor
@@ -42,7 +57,7 @@ export const ScoreCounter = (squares: SquareState[]): number => {
     const sequence = [squares[squareIndex]]
 
     for (const neighbor of neighbors) {
-      sequence.push(...getConnectedSequence(neighbor, type))
+      sequence.push(...getConnectedSequence(neighbor, type, forStar))
     }
 
     return sequence

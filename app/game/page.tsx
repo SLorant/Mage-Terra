@@ -36,8 +36,8 @@ export default function Home() {
   const victory = useRef(false)
   const firstRender = useRef(true)
   const [Domino, setDomino] = useState<DominoState>({
-    firstname: 'F',
-    secondname: 'C',
+    firstname: 'Dungeon',
+    secondname: 'Mt',
     img: '/cave-05.svg',
     secondimg: '/mountains-01.svg',
   })
@@ -62,7 +62,7 @@ export default function Home() {
     }
   }, [uniqueId, playerInfos])
 
-  const [countdown, setCountdown] = useState(30)
+  const [countdown, setCountdown] = useState(100)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   useEffect(() => {
     let timer: any
@@ -112,6 +112,10 @@ export default function Home() {
           }
           const scoreData: number = userSnapshot.child('Score').val()
           const avatarData: string = userSnapshot.child('Avatar').val()
+          const dominoData: DominoState = userSnapshot.child('Domino').val()
+          if (playerId === uniqueId) {
+            setDomino(dominoData)
+          }
           if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData, avatarData)
         })
       }
@@ -150,7 +154,7 @@ export default function Home() {
         const data = snapshot.val()
         if (data) {
           const allTrue = Object.values(data).every((value) => value === true)
-          if (allTrue) {
+          if (allTrue /* || isRoundOver */) {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
@@ -194,7 +198,6 @@ export default function Home() {
             <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} Domino={Domino} setDomino={setDomino} />
           </DndProvider>
         </div>
-        {round % 2 === 0 && <Trading room={room} uniqueId={uniqueId} Domino={Domino} round={round} hostId={hostId} />}
 
         <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
       </div>
@@ -205,3 +208,5 @@ export default function Home() {
     </main>
   )
 }
+/*{round % 2 === 0 && <Trading room={room} uniqueId={uniqueId} Domino={Domino} round={round} hostId={hostId} setIsRoundOver={setIsRoundOver} />}
+ */

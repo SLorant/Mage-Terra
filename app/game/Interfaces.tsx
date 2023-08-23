@@ -71,4 +71,5 @@ export interface TradingProps {
   Domino: DominoState
   round: number
   hostId: string
+  setIsRoundOver: Dispatch<SetStateAction<boolean>>
 }
