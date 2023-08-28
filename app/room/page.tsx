@@ -1,8 +1,8 @@
 'use client'
-import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove, OnDisconnect } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
 import { useStore, usePlayerStore } from '../useStore'
@@ -12,6 +12,7 @@ const useRoomData = (room: string, uniqueId: string) => {
   const router = useRouter()
   const [currentPlayers, setCurrentPlayers] = useState(100)
   const [readNames, setReadNames] = useState<{ [key: string]: { Name: string; Avatar: number } }>({})
+  const firstRender = useRef(true)
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}`)
     const handleRoomData = (snapshot: DataSnapshot) => {
@@ -21,7 +22,23 @@ const useRoomData = (room: string, uniqueId: string) => {
         setHostId(Host || uniqueId)
         const dataRef = ref(projectDatabase, `/${room}/Host`)
         set(dataRef, Host || uniqueId)
-        setReadNames(playersData)
+
+        if (firstRender.current) {
+          setReadNames(playersData)
+          firstRender.current = false
+        }
+        if (Host !== '') {
+          const sortedNamesArray = Object.entries(playersData).sort((a, b) => {
+            if (a[0] === Host) return -1 // Move host player to the beginning
+            if (b[0] === Host) return 1
+            return 0
+          })
+          const sortedReadNames = sortedNamesArray.reduce((obj: any, [key, value]) => {
+            obj[key] = value
+            return obj
+          }, {})
+          setReadNames(sortedReadNames)
+        }
         setCurrentPlayers(Object.keys(playersData).length)
         gameStarted === true && router.push(`/game?roomId=${room}`)
       }
@@ -30,7 +47,7 @@ const useRoomData = (room: string, uniqueId: string) => {
     return onValue(roomRef, handleRoomData)
   }, [room, uniqueId])
 
-  return { hostId, readNames, currentPlayers }
+  return { hostId, readNames, setReadNames, currentPlayers }
 }
 
 export default function Home() {
@@ -50,7 +67,7 @@ export default function Home() {
   if (room === null) {
     return <div>Wrong room ID</div>
   }
-  const { hostId, readNames, currentPlayers } = useRoomData(room, uniqueId)
+  const { hostId, readNames, setReadNames, currentPlayers } = useRoomData(room, uniqueId)
 
   const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -82,16 +99,32 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    if (hostId !== '') {
+      const sortedNamesArray = Object.entries(readNames).sort((a, b) => {
+        if (a[0] === hostId) return -1 // Move host player to the beginning
+        if (b[0] === hostId) return 1
+        return 0
+      })
+      const sortedReadNames = sortedNamesArray.reduce((obj: any, [key, value]) => {
+        obj[key] = value
+        return obj
+      }, {})
+      setReadNames(sortedReadNames)
+    }
+    if (uniqueId === hostId) {
+      const hostRef = ref(projectDatabase, `/${room}/Host`)
+      const hostDisconnectRef = onDisconnect(hostRef)
+      hostDisconnectRef.remove()
+    }
+  }, [hostId, currentPlayers, room, uniqueId])
+
+  useEffect(() => {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const playerDisconnectRef = onDisconnect(playerRef)
       playerDisconnectRef.remove()
       updatePlayerCount(currentPlayers)
-      if (uniqueId === hostId) {
-        const hostRef = ref(projectDatabase, `/${room}/Host`)
-        const hostDisconnectRef = onDisconnect(hostRef)
-        hostDisconnectRef.remove()
-      }
+
       if (currentPlayers !== 100 && currentPlayers < 4) {
         if (playerName === 'New Player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
@@ -120,8 +153,13 @@ export default function Home() {
       )),
     )
   }, [readNames])
+
   const handleGoBack = () => {
     setIsVisible(false)
+    if (uniqueId === hostId) {
+      const hostRef = ref(projectDatabase, `/${room}/Host`)
+      set(hostRef, null)
+    }
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
     set(dataRef, null)
     router.push(`/`)
@@ -138,7 +176,7 @@ export default function Home() {
   }
 
   const avatar = `avatar-${currentAvatar}.png`
-  console.log(readNames)
+
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
       <button className="" onClick={handleGoBack}>

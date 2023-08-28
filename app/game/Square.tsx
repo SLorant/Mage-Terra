@@ -61,7 +61,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   }
   return (
     <div className={` h-20 w-20 ${borderClass} ${borderColor} ${animation} ${bgColor} relative shadow-lg z-20`} ref={drop} data-testid="Square">
-      {hasStar && <Image src="/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
+      {hasStar && <Image src="/dominoes/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
       {lastDroppedItem && (
         <div className={`h-auto w-auto  shadow-lg z-20 `}>
           <Image src={lastDroppedItem.img} alt="dropped" width={50} height={50} className="w-full h-full " unoptimized />
