@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
 import { useStore, usePlayerStore } from '../useStore'
+import ParallaxImages from '../ParallaxImages'
 
 const useRoomData = (room: string, uniqueId: string) => {
   const [hostId, setHostId] = useState('')
@@ -96,6 +97,8 @@ export default function Home() {
     if (uniqueId === '') {
       initializeUniqueId()
     }
+    const randomAvatar = Math.floor(Math.random() * 12)
+    if (randomAvatar > 0) setCurrentAvatar(randomAvatar)
   }, [])
 
   useEffect(() => {
@@ -149,7 +152,9 @@ export default function Home() {
   useEffect(() => {
     setPlaceHolders(
       Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
-        <div key={`placeholder-${index}`} className="flex ml-4 py-2 mt-4 px-8 rounded-lg border-2 border-white opacity-50"></div>
+        <div
+          key={`placeholder-${index}`}
+          className=" opacity-50 flex w-[300px] mt-9 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple"></div>
       )),
     )
   }, [readNames])
@@ -179,37 +184,61 @@ export default function Home() {
 
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative`}>
-      <button className="" onClick={handleGoBack}>
-        Go Back
-      </button>
-      <div className={`${isVisible && 'opacity-40'} bg-[#170e2ea3] text-xl mb-20 rounded-lg h-[700px] w-[800px] flex flex-col items-center justify-center `}>
-        <div className="mb-8">
+      <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
+      <ParallaxImages />
+
+      <div className={`${isVisible && 'opacity-40'} darkbg text-xl mb-20 rounded-sm h-[80%] w-[800px] flex flex-col items-center justify-center z-50 relative`}>
+        <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>
+          <svg width="17" height="24" viewBox="0 0 17 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M16.3511 5.38048L6.4946 5.36768L6.48826 0.482322L0.110653 6.86207L6.50378 13.2573L6.49743 8.37199L13.3507 8.38089L13.367 20.1162L0.127845 20.0991L0.13282 23.1034L16.3741 23.1234L16.3511 5.38048Z"
+              fill="#B8AFE0"
+            />
+          </svg>
+        </button>
+        <div className="mb-6">
           To invite your friends,
-          <button className="px-4 rounded-sm py-2 mx-4 text-2xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleCopyLink}>
+          <button className="w-[200px] rounded-sm h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242]" onClick={handleCopyLink}>
             copy this link
           </button>
           and send it to them!
         </div>
-        <h2 className="italic text-2xl mt-4 mb-2">Choose your name and avatar</h2>
+        <h2 className="text-3xl  mb-2">Choose your name and avatar</h2>
         <div className="flex flex-col  items-center justify-center mb-8">
-          <div className="flex justify-center items-center gap-4 text-3xl">
-            <button className="prev" onClick={handlePrevAv}>
-              &#10094;
+          <div className="flex justify-center items-center  text-3xl">
+            <button className="prev mt-4" onClick={handlePrevAv}>
+              <svg width="20" height="46" viewBox="0 0 20 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M0 22.8741L19.5025 45.2756V45.2611C17.3079 38.1913 16.1239 30.6722 16.1239 22.8741C16.1239 15.0759 17.3079 7.5568 19.5025 0.487026V0.472534L0 22.8741Z"
+                  fill="white"
+                />
+              </svg>
             </button>
             <Image src={avatar} alt="mainavatar" width={100} height={100} className="w-36 h-40 " unoptimized />
 
-            <button className="next" onClick={handleNextAv}>
-              &#10095;
+            <button className="next mt-4" onClick={handleNextAv}>
+              <svg width="20" height="46" viewBox="0 0 20 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M20 22.8741L0.497559 0.472534V0.487026C2.69217 7.5568 3.87611 15.0759 3.87611 22.8741C3.87611 30.6722 2.69217 38.1913 0.497559 45.2611V45.2756L20 22.8741Z"
+                  fill="white"
+                />
+              </svg>
             </button>
           </div>
-          <div className="flex flex-col ml-8">
+          <div className="flex flex-col">
             <div className="mt-4">
-              <input className="text-lg rounded-lg" type="text" value={inputName} onChange={(e) => setInputName(e.target.value)} placeholder="Your name" />
+              <input
+                className="text-xl w-[200px] h-[40px] px-2"
+                type="text"
+                value={inputName}
+                onChange={(e) => setInputName(e.target.value)}
+                placeholder="Your name"
+              />
               <button
-                className={`${isSpectator && 'opacity-50'} px-4 ml-4 rounded-md py-1 text-lg bg-[#EFCEFB] text-black`}
+                className={`${isSpectator && 'opacity-50'} h-[40px] w-[120px]  bg-lightpurple text-[#130242]`}
                 onClick={handleConfirmName}
                 disabled={isSpectator ? true : false}>
-                Ready
+                <p className="text-xl">I'm ready</p>
               </button>
             </div>
           </div>
@@ -218,11 +247,15 @@ export default function Home() {
           {Object.keys(readNames).length > 0 &&
             Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
               <div className="relative" key={playerId}>
-                <div className="absolute left-0 z-40 top-1">
-                  <Image height={60} width={60} src={`/avatar-${Avatar}.png`} alt="playeravatar"></Image>
+                <div className="absolute z-40 top-5 left-2">
+                  {Avatar === undefined ? (
+                    <Image height={60} width={60} src={`/avatars/avatars_small-1.png`} alt="playeravatar"></Image>
+                  ) : (
+                    <Image height={60} width={60} src={`/avatars/avatars_small-${Avatar}.png`} alt="playeravatar"></Image>
+                  )}
                 </div>
                 <div
-                  className={`flex w-[250px] justify-center relative mt-4 items-center ml-4 py-2 px-8 rounded-lg border-2 border-white
+                  className={`flex w-[300px] justify-center relative mt-9 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple
             ${Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
                   {playerId === hostId && (
                     <span className="absolute left-14">
@@ -256,8 +289,8 @@ export default function Home() {
           {placeHolders}
         </div>
         {uniqueId === hostId ? (
-          <button className="px-8 mt-6 rounded-md py-2 text-3xl bg-[#EFCEFB] text-black" onClick={handlePlayGame}>
-            Start game
+          <button className="w-[200px] mt-6  h-[50px] text-2xl bg-lightpurple text-[#130242]" onClick={handlePlayGame}>
+            <p className="mb-1">start game</p>
           </button>
         ) : (
           <div className="mt-6">Wait for the host to start the match</div>
@@ -280,6 +313,13 @@ export default function Home() {
           </div>
         </div>
       )}
+      <div
+        className="w-3/4 sm:ml-20 absolute bottom-6 sm:bottom-2
+       sm:flex-row flex-col text-xl justify-center items-center opacity-40 h-20 z-30 flex sm:gap-20 text-white">
+        <a className="mb-2">Cookies</a>
+        <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
+        <a className="mb-2">Terms & conditions</a>
+      </div>
     </main>
   )
 }

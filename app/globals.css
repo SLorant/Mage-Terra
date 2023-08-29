@@ -14,7 +14,7 @@ body {
 
 input[type='text'] {
   background: transparent;
-  border: 1px solid white;
+  border: 2px solid white;
 }
 textarea:focus,
 input:focus {
@@ -24,7 +24,7 @@ input:focus {
 .mainbg {
   background: linear-gradient(32deg, rgba(65, 14, 142, 0.7) 0%, rgba(58, 81, 164, 0.7) 100%);
 }
-.mainbutton {
+.darkbg {
   box-shadow: 0px 4px 30px 4px rgba(46, 15, 115, 0.9);
-  background: rgba(19, 2, 66, 0.8);
+  background: rgba(19, 2, 66, 0.85);
 }
