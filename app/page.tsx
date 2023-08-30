@@ -1,7 +1,7 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ref, set } from 'firebase/database'
+import { ref, set, onValue } from 'firebase/database'
 import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
 import { Amaranth } from 'next/font/google'
@@ -17,7 +17,6 @@ const amaranth = Amaranth({
 
 export default function Home() {
   const router = useRouter()
-  //const [uniqueId, setUniqueId] = useState('')
   const [roomId, setRoomId] = useState('')
   const { uniqueId, initializeUniqueId } = useStore()
 
@@ -42,7 +41,57 @@ export default function Home() {
       console.log('Error setting the data: ' + error)
     }
   }
+  const [quickRoom, setQuickRoom] = useState('')
+  const handleQuickPlay = async () => {
+    try {
+      const dataRef = ref(projectDatabase, `/`)
+      let foundQuickRoom = false
+      onValue(
+        dataRef,
+        (snapshot) => {
+          snapshot.forEach((snap) => {
+            console.log(snap.val())
+            const roomKey: string = snap.key ?? ''
+            const isQuickPlay: boolean = snap.child('quickPlay').val()
+            const gameStarted: boolean = snap.child('gameStarted').val()
+            if (isQuickPlay === true && gameStarted !== true) {
+              setQuickRoom(roomKey)
+              foundQuickRoom = true
+              //router.push(`/room?roomId=${roomKey}`)
+            }
+          })
+        },
+        {
+          onlyOnce: true,
+        },
+      )
+      console.log(foundQuickRoom)
+      if (!foundQuickRoom) {
+        const nameRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Name`)
+        await set(nameRef, 'New player')
+        const avatarRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Avatar`)
+        await set(avatarRef, 1)
+        const quickPlayRef = ref(projectDatabase, `/${roomId}/quickPlay`)
+        await set(quickPlayRef, true)
+        router.push(`/room?roomId=${roomId}`)
+      }
+    } catch (error) {
+      console.log('Error setting the data: ' + error)
+    }
+  }
+  useEffect(() => {
+    startQuickPlay()
+  }, [quickRoom])
 
+  const startQuickPlay = async () => {
+    if (quickRoom !== '') {
+      const dataRef = ref(projectDatabase, `/${quickRoom}/${uniqueId}/Name`)
+      await set(dataRef, 'New player')
+      const avatarRef = ref(projectDatabase, `/${quickRoom}/${uniqueId}/Avatar`)
+      await set(avatarRef, 1)
+      router.push(`/room?roomId=${quickRoom}`)
+    }
+  }
   return (
     <main className={`flex h-full mt-6 sm:mt-2 flex-col items-center justify-center text-white ${amaranth.variable} font-sans`}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
@@ -54,7 +103,7 @@ export default function Home() {
         <p className="mb-16 text-2xl text-center hidden md:block">
           Join the party and create the <br /> most powerful magical kingdom
         </p>
-        <button className="darkbg w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white " disabled onClick={handlePlayGame}>
+        <button className="darkbg w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white " onClick={handleQuickPlay}>
           play
         </button>
         <button

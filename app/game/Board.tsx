@@ -11,6 +11,7 @@ import { MapSetter } from './MapSetter'
 import { BoardProps, SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
+import { TurnLeft, TurnRight } from '@/utils/Vectors'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
@@ -218,26 +219,26 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div className="w-28 ml-4   flex justify-center items-center  absolute -bottom-10 -right-60 ">
-        <div>
-          <DominoComponent
-            firstname={Domino.firstname}
-            secondname={Domino.secondname}
-            isDropped={isDropped}
-            img={Domino.img}
-            secondimg={Domino.secondimg}
-            isTurned={isTurned}
-            setIsActive={setIsActive}
-            setDirection={setDirection}
-            setLeftSqIndex={setLeftSqIndex}
-          />
-        </div>
-        <div className="text-white ml-10 mt-4 text-xl flex gap-6">
-          <button className="" onClick={handleLeftTurnClick}>
-            Turn left
+      <div className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-16 -right-96">
+        <div className="text-white ml-4 mt-4 text-xl flex">
+          <button className="absolute top-20 left-20" onClick={handleLeftTurnClick}>
+            <TurnLeft />
           </button>
-          <button className="" onClick={handleRightTurnClick}>
-            Turn right
+          <div>
+            <DominoComponent
+              firstname={Domino.firstname}
+              secondname={Domino.secondname}
+              isDropped={isDropped}
+              img={Domino.img}
+              secondimg={Domino.secondimg}
+              isTurned={isTurned}
+              setIsActive={setIsActive}
+              setDirection={setDirection}
+              setLeftSqIndex={setLeftSqIndex}
+            />
+          </div>
+          <button className="absolute top-20 right-16" onClick={handleRightTurnClick}>
+            <TurnRight />
           </button>
         </div>
       </div>

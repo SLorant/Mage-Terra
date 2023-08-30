@@ -23,6 +23,7 @@ module.exports = {
         grey: '#E1DAFF',
         lightpurple: '#B8AFE0',
         darkblue: '#00184E',
+        darkgrey: '#474747',
       },
     },
   },

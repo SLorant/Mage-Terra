@@ -56,13 +56,13 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
   const firstPlayerSquares = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][0] : Squares
   const boardName: string = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][1] : ''
   return (
-    <aside className="mt-20 w-[300px] bg-lightpurple flex flex-col h-[450px] justify-start items-center gap-2 relative">
+    <aside className="mt-20 w-[300px] bg-grey flex flex-col h-[450px] justify-start items-center gap-2 relative">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
         {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
           <div
             key={playerId}
             className={`${
-              getRankByPlayerId(playerId) % 2 === 0 ? 'bg-grey' : 'bg-lightpurplepurple'
+              getRankByPlayerId(playerId) % 2 === 0 ? 'bg-grey' : 'bg-lightpurple'
             } text-darkblue w-full h-10 justify-start items-center flex relative`}>
             <div className="ml-4">{getRankByPlayerId(playerId)}</div>
             <div className="ml-4">

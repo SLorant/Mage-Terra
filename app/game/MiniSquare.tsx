@@ -2,6 +2,7 @@ import { FC } from 'react'
 import { memo } from 'react'
 import Image from 'next/image'
 import { rowLength } from './MapConfig'
+import { LittleStar } from '@/utils/Vectors'
 type DroppedDominoes = [number, number]
 export interface SquareProps {
   accept: string[]
@@ -51,10 +52,10 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
     }
   }
   return (
-    <div className={` h-6 w-6 border-gray-200  bg-darkblue ring-gray-200 relative shadow-lg z-20`} data-testid="Square">
-      {hasStar && <Image draggable="false" src="/dominoes/starbr.png" alt="star" width={500} height={500} className="absolute top-0 left-0 w-2/3 h-2/3 z-50" />}
+    <div className={` h-6 w-6 border-none  bg-lightpurple ring-none relative z-20`} data-testid="Square">
+      {hasStar && <LittleStar />}
       {lastDroppedItem && <div className={`h-[24px] w-[24px]  shadow-lg z-20 ${squareColor}`}></div>}
-      {accept.includes('W') && <div className={`h-[24px] w-[24px]  shadow-lg z-20 bg-black`}></div>}
+      {accept.includes('W') && <div className={`h-[24px] w-[24px]  shadow-lg z-20 bg-darkgrey`}></div>}
     </div>
   )
 })

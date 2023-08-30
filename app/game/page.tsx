@@ -191,8 +191,8 @@ export default function Home() {
     })
   }
   return (
-    <main className="flex h-screen  items-center justify-center font-sans ">
-      <div className="flex items-top justify-center gap-10 bg-[#110928] w-[1000px] relative">
+    <main className="flex h-screen mainbg items-center justify-center font-sans ">
+      <div className="flex items-top justify-center gap-10 darkbg w-[1000px] relative">
         <div className="mt-20  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
           <DndProvider backend={HTML5Backend}>
             <Board uniqueId={uniqueId} room={room} isDropped={isDropped} setIsDropped={setIsDropped} Domino={Domino} setDomino={setDomino} />
