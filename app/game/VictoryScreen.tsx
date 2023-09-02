@@ -30,24 +30,42 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
     if (playerData) return playerData.rank
     else return 2
   }
+  const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
   return (
-    <div className="absolute left-40 top-40 h-[500px] w-[500px] bg-pink z-50">
+    <div className="absolute mx-auto h-[700px] w-[500px] bg-lightpurple z-50">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
-        {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
-          <div
-            key={playerId}
-            className={`${
-              getRankByPlayerId(playerId) % 2 === 0 ? 'bg-grey' : 'bg-lightpurplepurple'
-            } text-darkblue w-1/2 h-10 justify-between items-center flex `}>
-            {getRankByPlayerId(playerId) === 1 && <div>The winner is: {name}</div>}
-            <div>
-              <Image height={60} width={60} src={`/avatar-${avatar}.png`} alt="playeravatar"></Image>
+        {Object.entries(playerInfos).map(
+          ([playerId, { name, avatar }]) =>
+            getRankByPlayerId(playerId) === 1 && (
+              <div>
+                <h1 className="text-3xl my-10 text-darkblue">
+                  {' '}
+                  <div>The winner is: {name}!</div>
+                </h1>
+                <Image height={120} width={120} src={`/avatars/avatars_small-${avatar}.png`} alt="playeravatar"></Image>
+              </div>
+            ),
+        )}
+        <div className="w-2/3 largeshadow relative">
+          {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
+            <div
+              key={playerId}
+              id="row"
+              className={`${getRankByPlayerId(playerId) % 2 === 0 ? 'bg-lightpurple' : 'bg-grey'} text-darkblue w-full h-12 justify-start items-center flex `}>
+              <div className="ml-4 text-2xl">{getRankByPlayerId(playerId)}.</div>
+              <div className="ml-4">
+                <Image className="w-9" height={40} width={40} src={`/avatars/avatars_small-${avatar}.png`} alt="playeravatar"></Image>
+              </div>
+              <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
+              <div className="text-2xl mr-4 absolute right-2">{score} p</div>
             </div>
-            <div className="ml-4">{getRankByPlayerId(playerId)}</div>
-            <div>{playerId === uniqueId ? name + ' (you)' : name}</div>
-            <div className="mr-4">{score}</div>
-          </div>
-        ))}
+          ))}
+          {Object.entries(emptyRows).map(([], index) => (
+            <div
+              key={index}
+              className={`${(index + 1) % 2 === 0 ? 'bg-lightpurple' : 'bg-grey'} text-darkblue w-full h-12 justify-start items-center flex `}></div>
+          ))}
+        </div>
       </div>
     </div>
   )

@@ -13,7 +13,7 @@ import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
 import { TurnLeft, TurnRight } from '@/utils/Vectors'
 
-export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino }) {
+export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino, victory }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
@@ -35,7 +35,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   useEffect(() => {
     const newSquares = MapSetter(Squares)
     setSquares(newSquares)
-  }, [])
+  }, [uniqueId])
 
   useMemo(() => {
     setDomino(DominoSetter())
@@ -43,7 +43,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [droppedDominoes])
 
   useEffect(() => {
-    if (uniqueId !== '') {
+    if (uniqueId !== '' && victory.current === false) {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       up(dataRef, { Domino: Domino })
     }
@@ -226,17 +226,18 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
           </button>
           <div>
             <DominoComponent
-              firstname={Domino.firstname}
-              secondname={Domino.secondname}
+              firstname={Domino.firstname ?? 'Dungeon'}
+              secondname={Domino.secondname ?? 'Mt'}
               isDropped={isDropped}
-              img={Domino.img}
-              secondimg={Domino.secondimg}
+              img={Domino.img ?? '/dungeon-05.webp'}
+              secondimg={Domino.secondimg ?? '/mountain-01.webp'}
               isTurned={isTurned}
               setIsActive={setIsActive}
               setDirection={setDirection}
               setLeftSqIndex={setLeftSqIndex}
             />
           </div>
+
           <button className="absolute top-20 right-16" onClick={handleRightTurnClick}>
             <TurnRight />
           </button>

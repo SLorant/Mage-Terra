@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, MutableRefObject } from 'react'
 
 export interface BoardProps {
   uniqueId: string
@@ -7,6 +7,7 @@ export interface BoardProps {
   setIsDropped: Dispatch<SetStateAction<boolean>>
   Domino: DominoState
   setDomino: Dispatch<SetStateAction<DominoState>>
+  victory: MutableRefObject<boolean>
 }
 export interface PlayerInfo {
   name: string

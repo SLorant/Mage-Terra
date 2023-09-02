@@ -9,26 +9,32 @@ import { useStore, usePlayerStore } from '../useStore'
 import ParallaxImages from '../ParallaxImages'
 import { BackButton, PrevAvatar, NextAvatar, HostCrown, Dots } from '@/utils/Vectors'
 
-const useRoomData = (room: string, uniqueId: string) => {
+const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCountdown: any) => {
   const [hostId, setHostId] = useState('')
   const router = useRouter()
   const [currentPlayers, setCurrentPlayers] = useState(100)
   const [readNames, setReadNames] = useState<{ [key: string]: { Name: string; Avatar: number } }>({})
   const firstRender = useRef(true)
+  const [quickPlay, setQuickPlay] = useState<boolean>(false)
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}`)
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, ...playersData } = data
-        setHostId(Host || uniqueId)
-        const dataRef = ref(projectDatabase, `/${room}/Host`)
-        set(dataRef, Host || uniqueId)
-
+        const { gameStarted, Host, doneWithAction, quickPlay, countDown, ...playersData } = data
+        if (wentBack === false) {
+          setHostId(Host || uniqueId)
+          const dataRef = ref(projectDatabase, `/${room}/Host`)
+          set(dataRef, Host || uniqueId)
+        } else {
+          const dataRef = ref(projectDatabase, `/${room}/Host`)
+          set(dataRef, null)
+        }
         if (firstRender.current) {
           setReadNames(playersData)
           firstRender.current = false
         }
+        if (quickPlay) setQuickPlay(true)
         if (Host !== '') {
           const sortedNamesArray = Object.entries(playersData).sort((a, b) => {
             if (a[0] === Host) return -1 // Move host player to the beginning
@@ -40,6 +46,9 @@ const useRoomData = (room: string, uniqueId: string) => {
             return obj
           }, {})
           setReadNames(sortedReadNames)
+          /*  if (hostId !== uniqueId) {
+            setCountdown(180)
+          } */
         }
         setCurrentPlayers(Object.keys(playersData).length)
         gameStarted === true && router.push(`/game?roomId=${room}`)
@@ -49,7 +58,7 @@ const useRoomData = (room: string, uniqueId: string) => {
     return onValue(roomRef, handleRoomData)
   }, [room, uniqueId])
 
-  return { hostId, readNames, setReadNames, currentPlayers }
+  return { hostId, readNames, setReadNames, currentPlayers, quickPlay }
 }
 
 export default function Home() {
@@ -62,15 +71,18 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false)
   const [currentAvatar, setCurrentAvatar] = useState(1)
   const [inputName, setInputName] = useState('')
+  const [countdown, setCountdown] = useState(180)
+
   //const [uniqueId, updateUniqueId] = useStore((state) => [state.uniqueId, state.updateUniqueId])
   const { uniqueId, initializeUniqueId } = useStore()
   const [playerCount, updatePlayerCount] = usePlayerStore((state) => [state.playerCount, state.updatePlayerCount])
   const [error, setError] = useState<string>('')
+  const [wentBack, setWentBack] = useState(false)
 
   if (room === null) {
     return <div>Wrong room ID</div>
   }
-  const { hostId, readNames, setReadNames, currentPlayers } = useRoomData(room, uniqueId)
+  const { hostId, readNames, setReadNames, currentPlayers, quickPlay } = useRoomData(room, uniqueId, wentBack, setCountdown)
 
   const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -125,11 +137,19 @@ export default function Home() {
       const hostRef = ref(projectDatabase, `/${room}/Host`)
       const hostDisconnectRef = onDisconnect(hostRef)
       hostDisconnectRef.remove()
+
+      /*  if (wentBack === false) {
+      } else hostDisconnectRef.cancel() */
+      const playRef = ref(projectDatabase, `/${room}/quickPlay`)
+      const playDisconnectRef = onDisconnect(playRef)
+      if (currentPlayers === 1) {
+        playDisconnectRef.remove()
+      } else playDisconnectRef.cancel()
     }
   }, [hostId, currentPlayers, room, uniqueId])
 
   useEffect(() => {
-    if (uniqueId !== '') {
+    if (uniqueId !== '' && wentBack === false) {
       const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const playerDisconnectRef = onDisconnect(playerRef)
       playerDisconnectRef.remove()
@@ -165,17 +185,54 @@ export default function Home() {
       )),
     )
   }, [readNames])
-
-  const handleGoBack = async () => {
-    setIsVisible(false)
+  const handleGoBack = () => {
+    //setIsVisible(false)
+    setWentBack(true)
     if (uniqueId === hostId) {
       const hostRef = ref(projectDatabase, `/${room}/Host`)
-      await set(hostRef, null)
+      set(hostRef, null)
+      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
+      set(dataRef, null)
+      if (currentPlayers === 1) {
+        const playRef = ref(projectDatabase, `/${room}/quickPlay`)
+        set(playRef, null)
+        const countRef = ref(projectDatabase, `/${room}/countDown`)
+        set(countRef, null)
+      }
     }
     const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-    await set(dataRef, null)
+    set(dataRef, null)
     router.push(`/`)
   }
+
+  useEffect(() => {
+    let timer: any
+    const dataRef = ref(projectDatabase, `/${room}/countDown`)
+    if (uniqueId === hostId && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1)
+      }, 1000)
+      set(dataRef, countdown)
+    }
+
+    onValue(dataRef, (snapshot) => {
+      const data: number = snapshot.val()
+      if (uniqueId !== '' && hostId !== '' && uniqueId !== hostId) {
+        setCountdown(data)
+      }
+
+      if (data && data === 0) {
+        router.push('/')
+      }
+    })
+    return () => {
+      clearInterval(timer)
+    }
+  }, [countdown, uniqueId, hostId])
+  useEffect(() => {
+    setCountdown(180)
+  }, [hostId])
+
   const handleNextAv = () => {
     if (currentAvatar > 11) {
       setCurrentAvatar(1)
@@ -201,16 +258,21 @@ export default function Home() {
         <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>
           <BackButton />
         </button>
-        <div className="mb-8 md:mt-0 mt-14">
-          To invite <span className="md:inline hidden"> your </span>friends,
-          <button
-            className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton"
-            onClick={handleCopyLink}>
-            <p className="hidden md:inline">copy this link</p>
-            <p className="md:hidden inline">tap here</p>
-          </button>
-          <p className="hidden md:inline"> and send it to them!</p>
-        </div>
+        {quickPlay ? (
+          hostId === uniqueId && <div className="mb-8 md:mt-0 mt-14">If you think enough players joined, start the game!</div>
+        ) : (
+          <div className="mb-8 md:mt-0 mt-14">
+            To invite <span className="md:inline hidden"> your </span>friends,
+            <button
+              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton"
+              onClick={handleCopyLink}>
+              <p className="hidden md:inline">copy this link</p>
+              <p className="md:hidden inline">tap here</p>
+            </button>
+            <p className="hidden md:inline"> and send it to them!</p>
+          </div>
+        )}
+        {<p>{countdown}</p>}
         <h2 className="text-2xl md:text-3xl  mb-2">Choose your name and avatar</h2>
         <div className="flex flex-col  items-center justify-center mb-8">
           <div className="flex justify-center items-center  text-3xl">

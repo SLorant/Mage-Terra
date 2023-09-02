@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react'
-import { memo, Dispatch, SetStateAction } from 'react'
+import { memo, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import Image from 'next/image'
 import { rowLength } from './MapConfig'
@@ -59,6 +59,12 @@ export const Square: FC<SquareProps> = memo(function Square({
     bgColor = 'bg-grey'
     borderColor = 'border-lightpurple'
   }
+  const ruins = ['/dominoes/ruin-01.webp', '/dominoes/ruin-02.webp', '/dominoes/ruin-03.webp']
+  //const randomRuin = Math.floor(Math.random() * ruins.length) + 1
+  const [randomRuin, setRandomRuin] = useState(1)
+  useEffect(() => {
+    setRandomRuin(Math.floor(Math.random() * ruins.length) + 1)
+  }, [])
   return (
     <div className={` h-20 w-20 ${borderClass} ${borderColor} ${animation} ${bgColor} relative shadow-lg z-20`} ref={drop} data-testid="Square">
       {hasStar && <Image src="/dominoes/star.svg" alt="star" width={50} height={50} className="absolute top-2.5 left-2.5 w-3/4 h-3/4 z-50" unoptimized />}
@@ -69,14 +75,7 @@ export const Square: FC<SquareProps> = memo(function Square({
       )}
       {accept.includes('W') && (
         <div className={`h-auto w-auto  shadow-lg z-20 `}>
-          <Image
-            src="/wasteland-01.webp"
-            alt="dropped"
-            width={50}
-            height={50}
-            className="w-full h-ful yóyx
-        l "
-          />
+          <Image src={`/dominoes/ruin-0${randomRuin}.webp`} alt="dropped" width={50} height={50} className="w-full h-full" unoptimized />
         </div>
       )}
     </div>

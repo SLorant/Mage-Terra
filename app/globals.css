@@ -34,7 +34,9 @@ input:focus {
 .footer {
   display: none;
 }
-
+.largeshadow {
+  filter: drop-shadow(0px 4px 30px rgba(46, 15, 115, 0.9));
+}
 @media (max-width: 768px) {
   .roomcontainer {
     height: 100% !important;

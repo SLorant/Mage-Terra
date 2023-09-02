@@ -51,30 +51,32 @@ export default function Home() {
         (snapshot) => {
           snapshot.forEach((snap) => {
             console.log(snap.val())
+            let data = snap.val()
+            const { gameStarted, Host, quickPlay, ...playersData } = data
             const roomKey: string = snap.key ?? ''
-            const isQuickPlay: boolean = snap.child('quickPlay').val()
-            const gameStarted: boolean = snap.child('gameStarted').val()
-            if (isQuickPlay === true && gameStarted !== true) {
+            const playerSize = Object.keys(playersData).length
+            if (quickPlay === true && gameStarted !== true && playerSize < 6) {
               setQuickRoom(roomKey)
               foundQuickRoom = true
               //router.push(`/room?roomId=${roomKey}`)
             }
           })
+          if (!foundQuickRoom && quickRoom == '') {
+            const nameRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Name`)
+            set(nameRef, 'New player')
+            const avatarRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Avatar`)
+            set(avatarRef, 1)
+            const quickPlayRef = ref(projectDatabase, `/${roomId}/quickPlay`)
+            set(quickPlayRef, true)
+            router.push(`/room?roomId=${roomId}`)
+          }
         },
+
         {
           onlyOnce: true,
         },
       )
       console.log(foundQuickRoom)
-      if (!foundQuickRoom) {
-        const nameRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Name`)
-        await set(nameRef, 'New player')
-        const avatarRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Avatar`)
-        await set(avatarRef, 1)
-        const quickPlayRef = ref(projectDatabase, `/${roomId}/quickPlay`)
-        await set(quickPlayRef, true)
-        router.push(`/room?roomId=${roomId}`)
-      }
     } catch (error) {
       console.log('Error setting the data: ' + error)
     }
@@ -103,7 +105,9 @@ export default function Home() {
         <p className="mb-16 text-2xl text-center hidden md:block">
           Join the party and create the <br /> most powerful magical kingdom
         </p>
-        <button className="darkbg w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white " onClick={handleQuickPlay}>
+        <button
+          className="darkbg hover:scale-105 transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white "
+          onClick={handleQuickPlay}>
           play
         </button>
         <button
