@@ -7,7 +7,7 @@ import { ref, onValue, update, onDisconnect, set, runTransaction } from 'firebas
 import { useState, useEffect, useRef } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { MapSetter } from './MapSetter'
+import { useMapSetter } from './useMapSetter'
 import { SquareState, PlayerInfo, DominoState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
 import { useStore, usePlayerStore } from '../useStore'
@@ -43,7 +43,10 @@ export default function Home() {
     if (uniqueId !== '') {
       const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
       const roomRef = ref(projectDatabase, `/${room}`)
+      const doneRef = ref(projectDatabase, `/${room}/doneWithAction/${uniqueId}`)
       const playerDisconnectRef = onDisconnect(playerRef)
+      const doneDisconnectRef = onDisconnect(doneRef)
+      doneDisconnectRef.set(null)
       playerDisconnectRef.update({ [uniqueId]: true })
       if (victory.current) playerDisconnectRef.cancel()
       onValue(playerRef, (snapshot) => {
@@ -80,11 +83,11 @@ export default function Home() {
     }
   }, [countdown, round])
   const [isPlayer, setIsPlayer] = useState(false)
-
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     setIsDropped(false)
     const playersRef = ref(projectDatabase, `/${room}`)
-    if (round > 14) {
+    if (round > 4) {
       victory.current = true
       set(playersRef, null)
     }
@@ -95,11 +98,11 @@ export default function Home() {
     } */
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
-      console.log(snapshot.key)
-      const countDown: number = snapshot.child('countDown').val()
-      if (countDown === undefined || countDown === null) router.push('/')
+      const gameStarted: number = snapshot.child('gameStarted').val()
+      if (victory.current === false && (gameStarted === undefined || gameStarted === null)) router.push('/')
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
+        setLoading(false)
         snapshot.forEach((userSnapshot) => {
           const playerId: string = userSnapshot.key ?? ''
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
@@ -137,23 +140,22 @@ export default function Home() {
       }
     })
   }, [uniqueId, round])
+
+  //const newSquares = useMapSetter(readSquares, uniqueId, room ?? '')
+
   useEffect(() => {
-    const newSquares = MapSetter(readSquares)
-    setReadSquares(newSquares)
+    console.log('unique id:' + uniqueId)
+
     console.log('setting map')
     if (firstRender) {
+      /* setReadSquares(newSquares) */
       if (uniqueId === '') {
         initializeUniqueId()
       }
       firstRender.current = false
     }
-    const roomRef = ref(projectDatabase, `/${room}`)
-    return onValue(roomRef, (snapshot) => {
-      console.log(snapshot.key)
-      if (snapshot.key === null) router.push('/')
-    })
   }, [])
-
+  useEffect(() => {}, [uniqueId, hostId])
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
     const roomRef = ref(projectDatabase, `/${room}`)
@@ -167,7 +169,7 @@ export default function Home() {
         const data = snapshot.val()
         if (data) {
           const allTrue = Object.values(data).every((value) => value === true)
-          if (allTrue /* || isRoundOver */) {
+          if (allTrue || isRoundOver) {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
@@ -209,8 +211,8 @@ export default function Home() {
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
       {isPlayer && (
-        <div className="flex items-top justify-center gap-10 darkbg w-[1000px] relative">
-          <div className="mt-20  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
+        <div className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
+          <div className="mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
             <DndProvider backend={HTML5Backend}>
               <Board
                 uniqueId={uniqueId}
@@ -223,22 +225,38 @@ export default function Home() {
               />
             </DndProvider>
           </div>
-
-          <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
+          <div className="flex flex-col justify-center items-center">
+            <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
+            <div className="mt-6 relative">
+              <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
+                  <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
+                </svg>
+                <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
+              </svg>
+            </div>
+          </div>
         </div>
       )}
       {!isPlayer && (
         <div className="w-1/3 h-1/3 absolute z-50 bg-[#EFCEFB] flex flex-col justify-around items-center rounded-md">
-          <h2 className="text-3xl mt-8 text-black">The game has already started</h2>
+          <h2 className="text-3xl mt-8 text-black">{loading ? 'Loading...' : 'The game has already started'}</h2>
           <div className="flex">
-            <button className="px-4 rounded-sm py-2 mx-4 text-3xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleGoBack}>
-              Return to home page
-            </button>
+            {!loading && (
+              <button className="px-4 rounded-sm py-2 mx-4 text-3xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleGoBack}>
+                Return to home page
+              </button>
+            )}
           </div>
         </div>
       )}
-      <div className="darkbg w-full h-full absolute top-0 left-0 z-20"></div>
-      && <VictoryScreen uniqueId={uniqueId} playerInfos={playerInfos} />
+
+      {victory.current && (
+        <div className="absolute flex h-full items-center justify-center w-full top-0 left-0">
+          <div className="darkbg w-full h-full absolute top-0 left-0 z-20"></div>
+          <VictoryScreen uniqueId={uniqueId} playerInfos={playerInfos} />
+        </div>
+      )}
       <div>
         <p>Countdown: {countdown} seconds</p>
       </div>

@@ -74,3 +74,9 @@ export interface TradingProps {
   hostId: string
   setIsRoundOver: Dispatch<SetStateAction<boolean>>
 }
+export interface MapSetterProps {
+  Squares: SquareState[]
+  uniqueId: string
+  room: string
+  mapLoaded: MutableRefObject<boolean>
+}

@@ -8,6 +8,8 @@ import Image from 'next/image'
 import { useStore, usePlayerStore } from '../useStore'
 import ParallaxImages from '../ParallaxImages'
 import { BackButton, PrevAvatar, NextAvatar, HostCrown, Dots } from '@/utils/Vectors'
+import sparkle from '@/app/animations/sparkle.json'
+import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 
 const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCountdown: any) => {
   const [hostId, setHostId] = useState('')
@@ -21,7 +23,7 @@ const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCount
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, countDown, ...playersData } = data
+        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, ...playersData } = data
         if (wentBack === false) {
           setHostId(Host || uniqueId)
           const dataRef = ref(projectDatabase, `/${room}/Host`)
@@ -71,8 +73,8 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false)
   const [currentAvatar, setCurrentAvatar] = useState(1)
   const [inputName, setInputName] = useState('')
-  const [countdown, setCountdown] = useState(180)
-
+  const [countdown, setCountdown] = useState(300)
+  const lottieRef = useRef<LottieRefCurrentProps>(null)
   //const [uniqueId, updateUniqueId] = useStore((state) => [state.uniqueId, state.updateUniqueId])
   const { uniqueId, initializeUniqueId } = useStore()
   const [playerCount, updatePlayerCount] = usePlayerStore((state) => [state.playerCount, state.updatePlayerCount])
@@ -98,7 +100,7 @@ export default function Home() {
 
   const handleConfirmName = () => {
     if (inputName.length === 0) setError('Your name must contain characters')
-    else if (inputName.length > 14) setError('Your name can be max 14 characters')
+    else if (inputName.length > 10) setError('Your name can be max 10 characters')
     else {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
       set(dataRef, inputName)
@@ -110,6 +112,7 @@ export default function Home() {
     }
   }
   async function handleCopyLink() {
+    lottieRef.current?.playSegments([0, 25])
     await navigator.clipboard.writeText(location.href)
   }
   useEffect(() => {
@@ -206,31 +209,35 @@ export default function Home() {
   }
 
   useEffect(() => {
-    let timer: any
-    const dataRef = ref(projectDatabase, `/${room}/countDown`)
-    if (uniqueId === hostId && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prevCountdown) => prevCountdown - 1)
-      }, 1000)
-      set(dataRef, countdown)
-    }
-
-    onValue(dataRef, (snapshot) => {
-      const data: number = snapshot.val()
-      if (uniqueId !== '' && hostId !== '' && uniqueId !== hostId) {
-        setCountdown(data)
+    if (quickPlay) {
+      let timer: any
+      const dataRef = ref(projectDatabase, `/${room}/countDown`)
+      if (uniqueId === hostId && countdown > 0) {
+        timer = setInterval(() => {
+          setCountdown((prevCountdown) => prevCountdown - 1)
+        }, 1000)
+        set(dataRef, countdown)
       }
 
-      if (data && data === 0) {
-        router.push('/')
+      onValue(dataRef, (snapshot) => {
+        const data: number = snapshot.val()
+        if (uniqueId !== '' && hostId !== '' && uniqueId !== hostId) {
+          setCountdown(data)
+        }
+        if (countdown === 1) {
+          handleGoBack()
+        }
+        if (data && data === 1) {
+          handleGoBack()
+        }
+      })
+      return () => {
+        clearInterval(timer)
       }
-    })
-    return () => {
-      clearInterval(timer)
-    }
+    } else return
   }, [countdown, uniqueId, hostId])
   useEffect(() => {
-    setCountdown(180)
+    setCountdown(300)
   }, [hostId])
 
   const handleNextAv = () => {
@@ -264,15 +271,16 @@ export default function Home() {
           <div className="mb-8 md:mt-0 mt-14">
             To invite <span className="md:inline hidden"> your </span>friends,
             <button
-              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton"
+              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative"
               onClick={handleCopyLink}>
               <p className="hidden md:inline">copy this link</p>
               <p className="md:hidden inline">tap here</p>
+              <Lottie className=" absolute -top-4 left-0" autoPlay={false} loop={false} animationData={sparkle} lottieRef={lottieRef} />
             </button>
             <p className="hidden md:inline"> and send it to them!</p>
           </div>
         )}
-        {<p>{countdown}</p>}
+        {quickPlay && <p>{uniqueId === hostId && countdown}</p>}
         <h2 className="text-2xl md:text-3xl  mb-2">Choose your name and avatar</h2>
         <div className="flex flex-col  items-center justify-center mb-8">
           <div className="flex justify-center items-center  text-3xl">
@@ -310,9 +318,9 @@ export default function Home() {
               <div className="relative" key={playerId}>
                 <div className="absolute z-40 top-[18px] left-2">
                   {Avatar === undefined ? (
-                    <Image height={55} width={55} src={`/avatars/avatars_small-1.png`} alt="playeravatar" unoptimized></Image>
+                    <Image height={55} width={55} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
                   ) : (
-                    <Image height={55} width={55} src={`/avatars/avatars_small-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
+                    <Image height={55} width={55} src={`/avatars/avatars-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
                   )}
                 </div>
                 <div

@@ -7,7 +7,7 @@ import { ItemTypes } from '../ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, update as up } from 'firebase/database'
-import { MapSetter } from './MapSetter'
+import { useMapSetter } from './useMapSetter'
 import { BoardProps, SquareState } from './Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
@@ -31,11 +31,19 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
+  //const [mapLoaded, setMapLoaded] = useState(false)
+  const mapLoaded = useRef(false)
+  //const [newSquares, setNewSquares] = useState<SquareState[]>([])
+  //setNewSquares(useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded:mapLoaded }))
+  const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
 
+  //const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
   useEffect(() => {
-    const newSquares = MapSetter(Squares)
-    setSquares(newSquares)
-  }, [uniqueId])
+    console.log(newSquares)
+    const isStartingMap: boolean = Squares.filter((square) => square.lastDroppedItem !== null).length < 5
+    if (newSquares.length > 0 && newSquares.some((square) => square.lastDroppedItem !== null) && mapLoaded.current === true && isStartingMap)
+      setSquares(newSquares)
+  }, [uniqueId, newSquares])
 
   useMemo(() => {
     setDomino(DominoSetter())
@@ -219,7 +227,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-16 -right-96">
+      <div className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-[120px] -right-96">
         <div className="text-white ml-4 mt-4 text-xl flex">
           <button className="absolute top-20 left-20" onClick={handleLeftTurnClick}>
             <TurnLeft />

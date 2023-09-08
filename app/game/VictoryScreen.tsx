@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { VictoryScreenProps } from './Interfaces'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
-  playerInfos && console.log(playerInfos)
+  const router = useRouter()
   const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string; avatar: string }[]>([])
   useEffect(() => {
     // Calculate the rank for each player
@@ -25,6 +26,11 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
       })),
     )
   }, [playerInfos])
+
+  const handleGoBack = () => {
+    router.push(`/`)
+  }
+
   const getRankByPlayerId = (playerId: string): number => {
     const playerData = rankedPlayers.find((player) => player.playerId === playerId)
     if (playerData) return playerData.rank
@@ -32,17 +38,21 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
   }
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
   return (
-    <div className="absolute mx-auto h-[700px] w-[500px] bg-lightpurple z-50">
+    <div className="absolute mx-auto h-[700px] w-[500px] bg-lightpurple z-30">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
         {Object.entries(playerInfos).map(
           ([playerId, { name, avatar }]) =>
             getRankByPlayerId(playerId) === 1 && (
-              <div>
-                <h1 className="text-3xl my-10 text-darkblue">
-                  {' '}
+              <div className="flex flex-col justify-center items-center ">
+                <h1 className="text-3xl mt-8 mb-4 text-darkblue">
                   <div>The winner is: {name}!</div>
                 </h1>
-                <Image height={120} width={120} src={`/avatars/avatars_small-${avatar}.png`} alt="playeravatar"></Image>
+                <div className="mb-10 relative z-20 mt-4 h-[130px] w-full">
+                  <div className="">
+                    <Image className="absolute -top-6 left-20" height={200} width={200} src={`/dominoes/star.svg`} alt="star" unoptimized></Image>
+                  </div>
+                  <Image className="absolute top-0 left-28 z-30" height={120} width={120} src={`/avatar-${avatar}.png`} alt="playeravatar" unoptimized></Image>
+                </div>
               </div>
             ),
         )}
@@ -54,7 +64,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
               className={`${getRankByPlayerId(playerId) % 2 === 0 ? 'bg-lightpurple' : 'bg-grey'} text-darkblue w-full h-12 justify-start items-center flex `}>
               <div className="ml-4 text-2xl">{getRankByPlayerId(playerId)}.</div>
               <div className="ml-4">
-                <Image className="w-9" height={40} width={40} src={`/avatars/avatars_small-${avatar}.png`} alt="playeravatar"></Image>
+                <Image className="w-9" height={40} width={40} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
               </div>
               <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
               <div className="text-2xl mr-4 absolute right-2">{score} p</div>
@@ -63,9 +73,15 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
           {Object.entries(emptyRows).map(([], index) => (
             <div
               key={index}
-              className={`${(index + 1) % 2 === 0 ? 'bg-lightpurple' : 'bg-grey'} text-darkblue w-full h-12 justify-start items-center flex `}></div>
+              className={`${
+                emptyRows.length % 2 === 0 ? (index % 2 === 0 ? 'bg-grey' : 'bg-lightpurple') : (index + 1) % 2 === 0 ? 'bg-grey' : 'bg-lightpurple'
+              }
+             text-darkblue w-full h-12 justify-start items-center flex `}></div>
           ))}
         </div>
+        <button className="darkbutton w-[275px] rounded-sm h-14 mb-6 mt-12 text-2xl  text-white " onClick={handleGoBack}>
+          back to home
+        </button>
       </div>
     </div>
   )

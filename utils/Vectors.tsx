@@ -61,7 +61,7 @@ export const Dots = () => {
 export const TurnLeft = () => {
   return (
     <svg width="32" height="34" viewBox="0 0 32 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g clip-path="url(#clip0_119_18)">
+      <g clipPath="url(#clip0_119_18)">
         <path
           d="M14.5218 0L4.81246 9.86073L0 4.97326L0.00211165 17.7527L12.5833 17.7549L7.77089 12.8674L14.5218 6.01123L26.0831 17.7506L13.0416 30.9955L16.0021 34L32 17.7506L14.5218 0Z"
           fill="white"
@@ -79,7 +79,7 @@ export const TurnLeft = () => {
 export const TurnRight = () => {
   return (
     <svg width="32" height="34" viewBox="0 0 32 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g clip-path="url(#clip0_119_20)">
+      <g clipPath="url(#clip0_119_20)">
         <path
           d="M17.4782 0L0 17.7506L16 34L18.9584 30.9955L5.91897 17.7506L17.4782 6.01123L24.2291 12.8674L19.4167 17.7549L32 17.7506V4.97326L27.1897 9.86073L17.4782 0Z"
           fill="white"
