@@ -53,7 +53,7 @@ export const Square: FC<SquareProps> = memo(function Square({
   let animation = ''
   if (isActive || (isLeftSquareActive && canDrop && firstColumnCheck)) {
     borderColor = 'border-grey'
-    bgColor = 'bg-green'
+    bgColor = 'bg-lightpurple'
     animation = 'transition ease-in-out  duration-200'
   } else if (canDrop) {
     bgColor = 'bg-grey'

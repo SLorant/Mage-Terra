@@ -259,19 +259,25 @@ export default function Home() {
       <ParallaxImages />
 
       <div
+        id="roomcontainer"
         className={`${
           isVisible && 'opacity-40'
-        } darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px] md:overflow-hidden overflow-y-auto flex flex-col items-center justify-start md:justify-center z-50 relative`}>
+        } darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px] md:overflow-hidden overflow-y-auto flex flex-col items-center justify-start md:justify-start z-50 relative`}>
         <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>
           <BackButton />
         </button>
         {quickPlay ? (
-          hostId === uniqueId && <div className="mb-8 md:mt-0 mt-14">If you think enough players joined, start the game!</div>
+          hostId === uniqueId && (
+            <div id="players" className="mb-8  mt-8">
+              If you think enough players joined, start the game!
+            </div>
+          )
         ) : (
-          <div className="mb-8 md:mt-0 mt-14">
+          <div className="mb-8  mt-8" id="players">
             To invite <span className="md:inline hidden"> your </span>friends,
             <button
-              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative"
+              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative
+              transition ease-in-out duration-200 hover:bg-grey"
               onClick={handleCopyLink}>
               <p className="hidden md:inline">copy this link</p>
               <p className="md:hidden inline">tap here</p>
@@ -281,8 +287,10 @@ export default function Home() {
           </div>
         )}
         {quickPlay && <p>{uniqueId === hostId && countdown}</p>}
-        <h2 className="text-2xl md:text-3xl  mb-2">Choose your name and avatar</h2>
-        <div className="flex flex-col  items-center justify-center mb-8">
+        <h2 id="players" className="text-2xl md:text-3xl  mb-2">
+          Choose your name and avatar
+        </h2>
+        <div id="players" className="flex flex-col  items-center justify-center mb-8">
           <div className="flex justify-center items-center  text-3xl">
             <button className="prev mt-4" onClick={handlePrevAv}>
               <PrevAvatar />
@@ -293,7 +301,7 @@ export default function Home() {
               <NextAvatar />
             </button>
           </div>
-          <div className="flex flex-col relative items-center justify-center">
+          <div id="players" className="flex flex-col relative items-center justify-center">
             <div className="mt-4">
               <input
                 className="text-lg md:text-xl w-[200px] h-[40px] px-2"
@@ -303,7 +311,8 @@ export default function Home() {
                 placeholder="Your name"
               />
               <button
-                className={`${isSpectator && 'opacity-50'} h-[40px] w-[100px] md:w-[120px] roombutton bg-lightpurple text-[#130242]`}
+                className={`${isSpectator && 'opacity-50'} h-[40px] w-[100px] md:w-[120px] roombutton bg-lightpurple text-[#130242]
+                transition ease-in-out duration-200 hover:bg-grey`}
                 onClick={handleConfirmName}
                 disabled={isSpectator ? true : false}>
                 <p className="text-lg md:text-xl">I'm ready</p>
@@ -312,10 +321,10 @@ export default function Home() {
             {error !== '' && <p className="text-lightpurple absolute -bottom-8">{error}</p>}
           </div>
         </div>
-        <div className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
+        <div id="players" className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
           {Object.keys(readNames).length > 0 &&
             Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
-              <div className="relative" key={playerId}>
+              <div id="players" className="relative" key={playerId}>
                 <div className="absolute z-40 top-[18px] left-2">
                   {Avatar === undefined ? (
                     <Image height={55} width={55} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
@@ -351,11 +360,19 @@ export default function Home() {
           {placeHolders}
         </div>
         {uniqueId === hostId ? (
-          <button className="w-[200px] mt-16 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton" onClick={handlePlayGame}>
+          <button
+            id="players"
+            className="w-[200px] mt-16 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton 
+          transition ease-in-out duration-200 hover:bg-grey"
+            onClick={handlePlayGame}>
             <p className="mb-1">start game</p>
           </button>
         ) : (
-          <div className="mt-8">Wait for the host to start the match</div>
+          hostId !== '' && (
+            <div id="players" className="mt-8">
+              Wait for the host to start the match
+            </div>
+          )
         )}
       </div>
       {isSpectator && isVisible && (

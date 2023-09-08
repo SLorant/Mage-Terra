@@ -78,5 +78,4 @@ export interface MapSetterProps {
   Squares: SquareState[]
   uniqueId: string
   room: string
-  mapLoaded: MutableRefObject<boolean>
 }

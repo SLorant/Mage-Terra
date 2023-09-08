@@ -35,14 +35,13 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const mapLoaded = useRef(false)
   //const [newSquares, setNewSquares] = useState<SquareState[]>([])
   //setNewSquares(useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded:mapLoaded }))
-  const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
+  const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '' })
 
   //const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
   useEffect(() => {
     console.log(newSquares)
     const isStartingMap: boolean = Squares.filter((square) => square.lastDroppedItem !== null).length < 5
-    if (newSquares.length > 0 && newSquares.some((square) => square.lastDroppedItem !== null) && mapLoaded.current === true && isStartingMap)
-      setSquares(newSquares)
+    if (newSquares.length > 0 && newSquares.some((square) => square.lastDroppedItem !== null)) setSquares(newSquares)
   }, [uniqueId, newSquares])
 
   useMemo(() => {

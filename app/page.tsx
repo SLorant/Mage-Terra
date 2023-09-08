@@ -106,12 +106,12 @@ export default function Home() {
           Join the party and create the <br /> most powerful magical kingdom
         </p>
         <button
-          className="darkbg hover:scale-105 transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white "
+          className="darkbg hover:scale-[103%] transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 mb-6 text-2xl  text-white "
           onClick={handleQuickPlay}>
           play
         </button>
         <button
-          className="darkbg hover:scale-105 transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 text-2xl  text-white"
+          className="darkbg hover:scale-[103%] transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 text-2xl  text-white"
           onClick={handlePlayGame}>
           create private room
         </button>

@@ -43,6 +43,21 @@ input:focus {
 .largeshadow {
   filter: drop-shadow(0px 4px 30px rgba(46, 15, 115, 0.9));
 }
+#roomcontainer {
+  animation: fadein 1s;
+}
+#players {
+  animation: fadein 2s;
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .roomcontainer {
     height: 100% !important;
