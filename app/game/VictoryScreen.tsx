@@ -38,20 +38,18 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
   }
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
   return (
-    <div className="absolute mx-auto h-[700px] w-[500px] bg-lightpurple z-30">
+    <div id="fade-in" className="absolute mx-auto h-[700px] w-[500px] bg-lightpurple z-30">
       <div className="flex flex-col text-xl text-white w-full items-center text-center">
         {Object.entries(playerInfos).map(
           ([playerId, { name, avatar }]) =>
             getRankByPlayerId(playerId) === 1 && (
-              <div className="flex flex-col justify-center items-center ">
-                <h1 className="text-3xl mt-8 mb-4 text-darkblue">
+              <div className="flex flex-col justify-center items-center" key={playerId}>
+                <h1 className="text-3xl mt-8 text-darkblue">
                   <div>The winner is: {name}!</div>
                 </h1>
-                <div className="mb-10 relative z-20 mt-4 h-[130px] w-full">
-                  <div className="">
-                    <Image className="absolute -top-6 left-20" height={200} width={200} src={`/dominoes/star.svg`} alt="star" unoptimized></Image>
-                  </div>
-                  <Image className="absolute top-0 left-28 z-30" height={120} width={120} src={`/avatar-${avatar}.png`} alt="playeravatar" unoptimized></Image>
+                <div className=" relative z-20 h-[200px] w-[200px] ml-2">
+                  <Image className="" height={200} width={200} src={`/dominoes/star.svg`} alt="star" unoptimized></Image>
+                  <Image className="absolute left-[34px] top-7" height={120} width={120} src={`/avatar-${avatar}.png`} alt="playeravatar" unoptimized></Image>
                 </div>
               </div>
             ),
@@ -70,7 +68,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
               <div className="text-2xl mr-4 absolute right-2">{score} p</div>
             </div>
           ))}
-          {Object.entries(emptyRows).map(([], index) => (
+          {Object.entries(emptyRows).map((_, index) => (
             <div
               key={index}
               className={`${
@@ -79,7 +77,10 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
              text-darkblue w-full h-12 justify-start items-center flex `}></div>
           ))}
         </div>
-        <button className="darkbutton w-[275px] rounded-sm h-14 mb-6 mt-12 text-2xl  text-white " onClick={handleGoBack}>
+        <button
+          className="darkbutton w-[275px] rounded-sm h-14 mb-6 mt-12 text-2xl  text-white 
+        transition ease-in-out duration-300 hover:scale-[102%]"
+          onClick={handleGoBack}>
           back to home
         </button>
       </div>

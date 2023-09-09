@@ -7,7 +7,6 @@ import { ref, onValue, update, onDisconnect, set, runTransaction } from 'firebas
 import { useState, useEffect, useRef } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useMapSetter } from './useMapSetter'
 import { SquareState, PlayerInfo, DominoState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
 import { useStore, usePlayerStore } from '../useStore'
@@ -40,7 +39,7 @@ export default function Home() {
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
 
   useEffect(() => {
-    if (uniqueId !== '') {
+    if (uniqueId !== '' && isPlayer) {
       const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
       const roomRef = ref(projectDatabase, `/${room}`)
       const doneRef = ref(projectDatabase, `/${room}/doneWithAction/${uniqueId}`)
@@ -55,20 +54,19 @@ export default function Home() {
           const playerIds = Object.keys(data)
           if (playerIds.length === playerCount - 1) {
             victory.current = true
-            console.log(data)
+            console.log(playerCount - 1)
             set(roomRef, null)
           }
         }
       })
     }
   }, [uniqueId, playerInfos])
-
-  const [countdown, setCountdown] = useState(100)
+  const [countdown, setCountdown] = useState(30)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   useEffect(() => {
     let timer: any
 
-    if (round > 1 && countdown > 0 && victory.current === false) {
+    if (countdown > 0 && victory.current === false) {
       timer = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1)
       }, 1000)
@@ -87,15 +85,10 @@ export default function Home() {
   useEffect(() => {
     setIsDropped(false)
     const playersRef = ref(projectDatabase, `/${room}`)
-    if (round > 4) {
+    if (round > 14) {
       victory.current = true
       set(playersRef, null)
     }
-    const playerRef = ref(projectDatabase, `/${room}/doneWithAction`)
-    /*  if (uniqueId !== '' && uniqueId === hostId && victory.current === false) {
-      const updateObject = { [uniqueId]: false }
-      update(playerRef, updateObject)
-    } */
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const gameStarted: number = snapshot.child('gameStarted').val()
@@ -108,7 +101,7 @@ export default function Home() {
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
           const nameData: string = userSnapshot.child('Name').val()
           if (uniqueId !== '') {
-            if (playerId === uniqueId && nameData === null) {
+            if (playerId === uniqueId && nameData === null && !victory.current) {
               const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
               set(playerRef, null)
               router.push('/')
@@ -141,8 +134,6 @@ export default function Home() {
     })
   }, [uniqueId, round])
 
-  //const newSquares = useMapSetter(readSquares, uniqueId, room ?? '')
-
   useEffect(() => {
     console.log('unique id:' + uniqueId)
 
@@ -155,7 +146,6 @@ export default function Home() {
       firstRender.current = false
     }
   }, [])
-  useEffect(() => {}, [uniqueId, hostId])
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
     const roomRef = ref(projectDatabase, `/${room}`)
@@ -211,7 +201,7 @@ export default function Home() {
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
       {isPlayer && (
-        <div className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
+        <div id="fade-in" className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
           <div className="mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
             <DndProvider backend={HTML5Backend}>
               <Board

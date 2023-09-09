@@ -50,7 +50,6 @@ export default function Home() {
         dataRef,
         (snapshot) => {
           snapshot.forEach((snap) => {
-            console.log(snap.val())
             let data = snap.val()
             const { gameStarted, Host, quickPlay, ...playersData } = data
             const roomKey: string = snap.key ?? ''
@@ -76,7 +75,6 @@ export default function Home() {
           onlyOnce: true,
         },
       )
-      console.log(foundQuickRoom)
     } catch (error) {
       console.log('Error setting the data: ' + error)
     }

@@ -1,5 +1,5 @@
 'use client'
-import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove, setWithPriority } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -20,10 +20,11 @@ const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCount
   const [quickPlay, setQuickPlay] = useState<boolean>(false)
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}`)
+    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, ...playersData } = data
+        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, ...playersData } = data
         if (wentBack === false) {
           setHostId(Host || uniqueId)
           const dataRef = ref(projectDatabase, `/${room}/Host`)
@@ -53,7 +54,16 @@ const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCount
           } */
         }
         setCurrentPlayers(Object.keys(playersData).length)
-        gameStarted === true && router.push(`/game?roomId=${room}`)
+        if (uniqueId !== '') {
+          if (gameStarted === true && (Map === null || Map === undefined)) {
+            router.push(`/game?roomId=${room}`)
+          } else if (gameStarted === true && Map) {
+            const discRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
+            update(discRef, { [uniqueId]: true })
+            set(playerRef, null)
+            router.push('/')
+          }
+        }
       }
     }
 
@@ -157,8 +167,13 @@ export default function Home() {
       const playerDisconnectRef = onDisconnect(playerRef)
       playerDisconnectRef.remove()
       updatePlayerCount(currentPlayers)
-
-      if (currentPlayers !== 100 && currentPlayers < 4) {
+      const gameStartedRef = ref(projectDatabase, `/${room}/gameStarted`)
+      let gameStarted: boolean = false
+      onValue(gameStartedRef, (snapshot) => {
+        const data = snapshot.val()
+        if (data === true) gameStarted = true
+      })
+      if (currentPlayers !== 100 && currentPlayers < 4 && !gameStarted) {
         if (playerName === 'New player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
@@ -252,7 +267,9 @@ export default function Home() {
   }
 
   const avatar = `avatar-${currentAvatar}.png`
-
+  const minutes = Math.floor(countdown / 60)
+  const seconds = countdown % 60
+  const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative `}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
@@ -262,35 +279,42 @@ export default function Home() {
         id="roomcontainer"
         className={`${
           isVisible && 'opacity-40'
-        } darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px] md:overflow-hidden overflow-y-auto flex flex-col items-center justify-start md:justify-start z-50 relative`}>
+        } darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px] md:overflow-hidden overflow-y-auto flex flex-col items-center
+        ${quickPlay && uniqueId !== hostId ? 'md:justify-center' : 'md:justify-start'} justify-start  z-50 relative`}>
         <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>
           <BackButton />
         </button>
+        {quickPlay && <p className="absolute top-4 right-6 text-lightpurple">{uniqueId === hostId && formattedTime}</p>}
         {quickPlay ? (
           hostId === uniqueId && (
-            <div id="players" className="mb-8  mt-8">
+            <div id="fade-in" className="mb-4  mt-12">
               If you think enough players joined, start the game!
             </div>
           )
         ) : (
-          <div className="mb-8  mt-8" id="players">
+          <div className="mb-8 relative mt-8" id="fade-in">
             To invite <span className="md:inline hidden"> your </span>friends,
             <button
-              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative
-              transition ease-in-out duration-200 hover:bg-grey"
+              className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative"
               onClick={handleCopyLink}>
               <p className="hidden md:inline">copy this link</p>
               <p className="md:hidden inline">tap here</p>
-              <Lottie className=" absolute -top-4 left-0" autoPlay={false} loop={false} animationData={sparkle} lottieRef={lottieRef} />
+              <Lottie
+                className="w-[190px] md:h-[80px] md:w-[230px] h-[70px] absolute -top-4 -left-4"
+                autoPlay={false}
+                loop={false}
+                animationData={sparkle}
+                lottieRef={lottieRef}
+              />
             </button>
             <p className="hidden md:inline"> and send it to them!</p>
           </div>
         )}
-        {quickPlay && <p>{uniqueId === hostId && countdown}</p>}
-        <h2 id="players" className="text-2xl md:text-3xl  mb-2">
+
+        <h2 id="fade-in" className="text-2xl md:text-3xl  mb-2">
           Choose your name and avatar
         </h2>
-        <div id="players" className="flex flex-col  items-center justify-center mb-8">
+        <div id="fade-in" className="flex flex-col  items-center justify-center mb-8">
           <div className="flex justify-center items-center  text-3xl">
             <button className="prev mt-4" onClick={handlePrevAv}>
               <PrevAvatar />
@@ -301,7 +325,7 @@ export default function Home() {
               <NextAvatar />
             </button>
           </div>
-          <div id="players" className="flex flex-col relative items-center justify-center">
+          <div id="fade-in" className="flex flex-col relative items-center justify-center">
             <div className="mt-4">
               <input
                 className="text-lg md:text-xl w-[200px] h-[40px] px-2"
@@ -321,10 +345,10 @@ export default function Home() {
             {error !== '' && <p className="text-lightpurple absolute -bottom-8">{error}</p>}
           </div>
         </div>
-        <div id="players" className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
+        <div id="fade-in" className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
           {Object.keys(readNames).length > 0 &&
             Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
-              <div id="players" className="relative" key={playerId}>
+              <div id="fade-in" className="relative" key={playerId}>
                 <div className="absolute z-40 top-[18px] left-2">
                   {Avatar === undefined ? (
                     <Image height={55} width={55} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
@@ -361,7 +385,7 @@ export default function Home() {
         </div>
         {uniqueId === hostId ? (
           <button
-            id="players"
+            id="fade-in"
             className="w-[200px] mt-16 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton 
           transition ease-in-out duration-200 hover:bg-grey"
             onClick={handlePlayGame}>
@@ -369,7 +393,7 @@ export default function Home() {
           </button>
         ) : (
           hostId !== '' && (
-            <div id="players" className="mt-8">
+            <div id="fade-in" className="mt-8">
               Wait for the host to start the match
             </div>
           )

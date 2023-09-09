@@ -35,7 +35,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const mapLoaded = useRef(false)
   //const [newSquares, setNewSquares] = useState<SquareState[]>([])
   //setNewSquares(useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded:mapLoaded }))
-  const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '' })
+  const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', victory: victory })
 
   //const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
   useEffect(() => {
@@ -45,12 +45,14 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [uniqueId, newSquares])
 
   useMemo(() => {
-    setDomino(DominoSetter())
-    setScore(ScoreCounter(Squares))
+    if (droppedDominoes.length > 0) {
+      setDomino(DominoSetter())
+      setScore(ScoreCounter(Squares))
+    }
   }, [droppedDominoes])
 
   useEffect(() => {
-    if (uniqueId !== '' && victory.current === false) {
+    if (uniqueId !== '' && !victory.current) {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       up(dataRef, { Domino: Domino })
     }
@@ -202,7 +204,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   return (
     <div className="h-full w-full flex gap-2 relative">
-      <div className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
+      <div id="fade-in" className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
@@ -226,7 +228,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-[120px] -right-96">
+      <div id="fade-in" className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-[160px] -right-96">
         <div className="text-white ml-4 mt-4 text-xl flex">
           <button className="absolute top-20 left-20" onClick={handleLeftTurnClick}>
             <TurnLeft />

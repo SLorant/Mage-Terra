@@ -4,7 +4,7 @@ import { onValue, ref, set } from 'firebase/database'
 import { projectDatabase } from '@/firebase/config'
 import { useState, useEffect } from 'react'
 
-export const useMapSetter = ({ Squares, uniqueId, room }: MapSetterProps): SquareState[] => {
+export const useMapSetter = ({ Squares, uniqueId, room, victory }: MapSetterProps): SquareState[] => {
   const [currentMap, setCurrentMap] = useState<SquareState[]>([])
 
   const setMap = (mapCode: number): SquareState[] => {
@@ -96,7 +96,7 @@ export const useMapSetter = ({ Squares, uniqueId, room }: MapSetterProps): Squar
       const unsubscribe = onValue(roomRef, (snapshot) => {
         const mapData = snapshot.val()
         if (uniqueId === hostData) {
-          if (mapData === undefined || mapData === null) {
+          if (!victory.current && (mapData === undefined || mapData === null)) {
             const mapCode = Math.floor(Math.random() * 4) + 1
             set(roomRef, mapCode)
             setCurrentMap(setMap(mapCode))
