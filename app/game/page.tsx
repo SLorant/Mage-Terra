@@ -3,8 +3,8 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
-import { ref, onValue, update, onDisconnect, set, runTransaction } from 'firebase/database'
-import { useState, useEffect, useRef } from 'react'
+import { ref, onValue, update, onDisconnect, set } from 'firebase/database'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { ItemTypes } from '../ItemTypes'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SquareState, PlayerInfo, DominoState } from './Interfaces'
@@ -61,7 +61,7 @@ export default function Home() {
       })
     }
   }, [uniqueId, playerInfos])
-  const [countdown, setCountdown] = useState(30)
+  const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   useEffect(() => {
     let timer: any
@@ -91,8 +91,8 @@ export default function Home() {
     }
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
-      const gameStarted: number = snapshot.child('gameStarted').val()
-      if (victory.current === false && (gameStarted === undefined || gameStarted === null)) router.push('/')
+      const gameStarted: boolean = snapshot.child('gameStarted').exists()
+      if (!victory.current && !gameStarted) router.push('/')
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         setLoading(false)
@@ -101,7 +101,7 @@ export default function Home() {
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
           const nameData: string = userSnapshot.child('Name').val()
           if (uniqueId !== '') {
-            if (playerId === uniqueId && nameData === null && !victory.current) {
+            if (playerId === uniqueId && nameData === null && !victory.current && !gameStarted) {
               const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
               set(playerRef, null)
               router.push('/')
@@ -198,11 +198,26 @@ export default function Home() {
   const handleGoBack = () => {
     router.push('/')
   }
+  let container = document.getElementById('gameContainer')
+  const minScale = 0.1
+  const maxScale = 1
+  let scale = Math.min(window.innerWidth / (container?.offsetWidth ?? 0 + 8), window.innerHeight / (container?.offsetHeight ?? 0 + 8))
+  scale = Math.min(maxScale, Math.max(minScale, scale))
+  document.documentElement.style.setProperty('--trickyScale', scale.toString())
+  window.onresize = function () {
+    let container = document.getElementById('gameContainer')
+    const minScale = 0.1
+    const maxScale = 1
+    let scale = Math.min(window.innerWidth / (container?.offsetWidth ?? 0 + 8), window.innerHeight / (container?.offsetHeight ?? 0 + 8))
+    scale = Math.min(maxScale, Math.max(minScale, scale))
+    document.documentElement.style.setProperty('--trickyScale', scale.toString())
+  }
+
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
       {isPlayer && (
-        <div id="fade-in" className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
-          <div className="mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md relative">
+        <div id="gameContainer" className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
+          <div className="mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
             <DndProvider backend={HTML5Backend}>
               <Board
                 uniqueId={uniqueId}
@@ -217,7 +232,7 @@ export default function Home() {
           </div>
           <div className="flex flex-col justify-center items-center">
             <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
-            <div className="mt-6 relative">
+            <div id="fade-in" className="mt-8 relative">
               <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
                   <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
@@ -225,16 +240,22 @@ export default function Home() {
                 <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
               </svg>
             </div>
+            <div className="mt-8 text-2xl text-white">
+              <p>{countdown}</p>
+            </div>
           </div>
         </div>
       )}
       {!isPlayer && (
-        <div className="w-1/3 h-1/3 absolute z-50 bg-[#EFCEFB] flex flex-col justify-around items-center rounded-md">
-          <h2 className="text-3xl mt-8 text-black">{loading ? 'Loading...' : 'The game has already started'}</h2>
+        <div className="xl:w-1/3 h-1/3 w-full md:w-1/2 absolute z-50 darkbg rounded-sm flex flex-col justify-around items-center">
+          <h2 className="text-2xl xl:text-3xl mt-8  text-white ">{loading ? 'Loading...' : 'The game has already started'}</h2>
           <div className="flex">
             {!loading && (
-              <button className="px-4 rounded-sm py-2 mx-4 text-3xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleGoBack}>
-                Return to home page
+              <button
+                className="w-[275px] h-14 mt-8  text-2xl bg-lightpurple text-[#130242] 
+          transition ease-in-out duration-200 hover:bg-grey mb-8"
+                onClick={handleGoBack}>
+                return to main page
               </button>
             )}
           </div>
@@ -247,9 +268,6 @@ export default function Home() {
           <VictoryScreen uniqueId={uniqueId} playerInfos={playerInfos} />
         </div>
       )}
-      <div>
-        <p>Countdown: {countdown} seconds</p>
-      </div>
     </main>
   )
 }

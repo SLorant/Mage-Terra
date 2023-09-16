@@ -11,7 +11,6 @@ body {
   overflow-x: hidden;
   position: relative;
 }
-
 input[type='text'] {
   background: transparent;
   border: 2px solid white;
@@ -31,10 +30,11 @@ input:focus {
 .darkbutton {
   background: rgba(19, 2, 66, 0.85);
 }
-.roomcontainer {
-  height: 100%;
-}
+
 .gamecontainer {
+  height: 870px;
+}
+.roomcontainer {
   height: 100%;
 }
 .footer {
@@ -42,6 +42,10 @@ input:focus {
 }
 .largeshadow {
   filter: drop-shadow(0px 4px 30px rgba(46, 15, 115, 0.9));
+}
+:root {
+  --trickyScale: 1;
+  --trickyScale2: 1;
 }
 #roomcontainer {
   animation: fadein 1s;
@@ -58,6 +62,23 @@ input:focus {
   }
 }
 
+#gameContainer {
+  transform: scale(var(--trickyScale));
+}
+#domino {
+  transform: scale(calc(1 - var(--trickyScale) + 1));
+  width: calc(var(--trickyScale) * 160px);
+  height: calc(var(--trickyScale) * 80px);
+}
+.turneddomino {
+  width: calc(var(--trickyScale) * 80px) !important;
+  height: calc(var(--trickyScale) * 160px) !important;
+}
+.dominoimg {
+  width: calc(var(--trickyScale) * 80px) !important;
+  height: calc(var(--trickyScale) * 80px) !important;
+}
+
 @media (max-width: 768px) {
   .roomcontainer {
     height: 100% !important;
@@ -71,12 +92,16 @@ input:focus {
     display: none !important;
   }
 }
-
+@media (max-height: 870px) {
+  .footer {
+    display: none !important;
+  }
+}
 @media (min-height: 870px) {
   .roomcontainer {
-    height: 80%;
-    margin-top: auto;
+    height: 740px;
     margin-bottom: 120px;
+    margin-top: auto;
   }
   .gamecontainer {
     height: 870px;

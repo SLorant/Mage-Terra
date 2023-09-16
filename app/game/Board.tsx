@@ -203,7 +203,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [Squares])
 
   return (
-    <div className="h-full w-full flex gap-2 relative">
+    <div className="h-full w-full flex gap-4 relative flex-col">
       <div id="fade-in" className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
@@ -228,9 +228,9 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div id="fade-in" className="w-28 ml-10 w-[400px] h-[200px] flex justify-center items-center  absolute -bottom-[160px] -right-96">
-        <div className="text-white ml-4 mt-4 text-xl flex">
-          <button className="absolute top-20 left-20" onClick={handleLeftTurnClick}>
+      <div id="fade-in" className="ml-20 w-[400px] h-[220px]  flex justify-center items-center relative">
+        <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex">
+          <button className="absolute top-14 left-20" onClick={handleLeftTurnClick}>
             <TurnLeft />
           </button>
           <div>
@@ -247,7 +247,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             />
           </div>
 
-          <button className="absolute top-20 right-16" onClick={handleRightTurnClick}>
+          <button className="absolute top-14 right-16" onClick={handleRightTurnClick}>
             <TurnRight />
           </button>
         </div>

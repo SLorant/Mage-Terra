@@ -1,17 +1,13 @@
 import { useEffect, useState, memo, FC } from 'react'
 import { ScoreBoardProps } from './Interfaces'
 import { MiniSquare } from './MiniSquare'
-import { useMapSetter } from './useMapSetter'
 import { ItemTypes } from '../ItemTypes'
 import { SquareState } from './Interfaces'
-import { rowLength, mapLength } from './MapConfig'
+import { mapLength } from './MapConfig'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
 
 export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
   const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string; avatar: string }[]>([])
-  const searchParams = useSearchParams()
-  const room = searchParams.get('roomId')
 
   useEffect(() => {
     // Calculate the rank for each player

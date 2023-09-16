@@ -53,7 +53,11 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
   }
   return (
     <div className={` h-6 w-6 border-none  bg-lightpurple ring-none relative z-20`} data-testid="Square">
-      {hasStar && <LittleStar />}
+      {hasStar && (
+        <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full">
+          <LittleStar />
+        </div>
+      )}
       {lastDroppedItem && <div className={`h-[24px] w-[24px]  shadow-lg z-20 ${squareColor}`}></div>}
       {accept.includes('W') && <div className={`h-[24px] w-[24px]  shadow-lg z-20 bg-darkgrey`}></div>}
     </div>

@@ -1,5 +1,5 @@
 'use client'
-import { set, ref, onValue, update, onDisconnect, DataSnapshot, remove, setWithPriority } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect, DataSnapshot } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -11,7 +11,7 @@ import { BackButton, PrevAvatar, NextAvatar, HostCrown, Dots } from '@/utils/Vec
 import sparkle from '@/app/animations/sparkle.json'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 
-const useRoomData = (room: string, uniqueId: string, wentBack: boolean, setCountdown: any) => {
+const useRoomData = (room: string, uniqueId: string, wentBack: boolean) => {
   const [hostId, setHostId] = useState('')
   const router = useRouter()
   const [currentPlayers, setCurrentPlayers] = useState(100)
@@ -80,7 +80,6 @@ export default function Home() {
   const [playerName, setPlayerName] = useState('New player')
   //const [uniqueId, setUniqueId] = useState('')
   const [isSpectator, setIsSpectator] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
   const [currentAvatar, setCurrentAvatar] = useState(1)
   const [inputName, setInputName] = useState('')
   const [countdown, setCountdown] = useState(300)
@@ -94,7 +93,7 @@ export default function Home() {
   if (room === null) {
     return <div>Wrong room ID</div>
   }
-  const { hostId, readNames, setReadNames, currentPlayers, quickPlay } = useRoomData(room, uniqueId, wentBack, setCountdown)
+  const { hostId, readNames, setReadNames, currentPlayers, quickPlay } = useRoomData(room, uniqueId, wentBack)
 
   const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -155,9 +154,15 @@ export default function Home() {
       } else hostDisconnectRef.cancel() */
       const playRef = ref(projectDatabase, `/${room}/quickPlay`)
       const playDisconnectRef = onDisconnect(playRef)
+      const countRef = ref(projectDatabase, `/${room}/countDown`)
+      const countDisconnectRef = onDisconnect(countRef)
       if (currentPlayers === 1) {
         playDisconnectRef.remove()
-      } else playDisconnectRef.cancel()
+        countDisconnectRef.remove()
+      } else {
+        playDisconnectRef.cancel()
+        countDisconnectRef.cancel()
+      }
     }
   }, [hostId, currentPlayers, room, uniqueId])
 
@@ -173,7 +178,7 @@ export default function Home() {
         const data = snapshot.val()
         if (data === true) gameStarted = true
       })
-      if (currentPlayers !== 100 && currentPlayers < 4 && !gameStarted) {
+      if (currentPlayers !== 100 && currentPlayers < 1 && !gameStarted) {
         if (playerName === 'New player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
@@ -181,13 +186,10 @@ export default function Home() {
           set(avatarRef, currentAvatar)
         }
         setIsSpectator(false)
-        setIsVisible(false)
       } else if (Object.keys(readNames).includes(uniqueId)) {
         setIsSpectator(false)
-        setIsVisible(false)
       } else if (currentPlayers !== 100) {
         setIsSpectator(true)
-        setIsVisible(true)
       }
     }
     return
@@ -204,7 +206,6 @@ export default function Home() {
     )
   }, [readNames])
   const handleGoBack = () => {
-    //setIsVisible(false)
     setWentBack(true)
     if (uniqueId === hostId) {
       const hostRef = ref(projectDatabase, `/${room}/Host`)
@@ -224,7 +225,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (quickPlay) {
+    if (quickPlay && !wentBack) {
       let timer: any
       const dataRef = ref(projectDatabase, `/${room}/countDown`)
       if (uniqueId === hostId && countdown > 0) {
@@ -270,6 +271,7 @@ export default function Home() {
   const minutes = Math.floor(countdown / 60)
   const seconds = countdown % 60
   const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative `}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
@@ -277,9 +279,7 @@ export default function Home() {
 
       <div
         id="roomcontainer"
-        className={`${
-          isVisible && 'opacity-40'
-        } darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px] md:overflow-hidden overflow-y-auto flex flex-col items-center
+        className={`${isSpectator && 'hidden'} darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px]  flex flex-col items-center
         ${quickPlay && uniqueId !== hostId ? 'md:justify-center' : 'md:justify-start'} justify-start  z-50 relative`}>
         <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>
           <BackButton />
@@ -287,12 +287,12 @@ export default function Home() {
         {quickPlay && <p className="absolute top-4 right-6 text-lightpurple">{uniqueId === hostId && formattedTime}</p>}
         {quickPlay ? (
           hostId === uniqueId && (
-            <div id="fade-in" className="mb-4  mt-12">
+            <div id="fade-in" className="mb-4  mt-16 md:mt-12 md:text-xl text-base">
               If you think enough players joined, start the game!
             </div>
           )
         ) : (
-          <div className="mb-8 relative mt-8" id="fade-in">
+          <div className="mb-8 relative mt-12 md:mt-8">
             To invite <span className="md:inline hidden"> your </span>friends,
             <button
               className="w-[160px] h-[40px] md:w-[200px] rounded-sm md:h-[50px] mx-4 text-2xl bg-lightpurple text-[#130242] roombutton relative"
@@ -387,7 +387,7 @@ export default function Home() {
           <button
             id="fade-in"
             className="w-[200px] mt-16 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton 
-          transition ease-in-out duration-200 hover:bg-grey"
+          transition ease-in-out duration-200 hover:bg-grey mb-8"
             onClick={handlePlayGame}>
             <p className="mb-1">start game</p>
           </button>
@@ -399,19 +399,15 @@ export default function Home() {
           )
         )}
       </div>
-      {isSpectator && isVisible && (
-        <div className="w-1/3 h-1/3 absolute z-50 bg-[#EFCEFB] flex flex-col justify-around items-center rounded-md">
-          <h2 className="text-3xl mt-8 text-black">The room is full</h2>
-          <div className="flex">
-            <button className="px-4 rounded-sm py-2 mx-4 text-3xl bg-[#B8AFE0] text-[#2F1F55]" onClick={handleGoBack}>
-              Go Back
-            </button>
+      {isSpectator && (
+        <div className="xl:w-1/3 h-1/3 w-full md:w-1/2 absolute z-50 darkbg flex flex-col justify-around items-center ">
+          <h2 className="text-3xl mt-8 text-white">The room is full</h2>
+          <div className="flex gap-10">
             <button
-              className="px-4 rounded-sm py-2 mx-4 text-2xl bg-[#B8AFE0] text-[#2F1F55]"
-              onClick={() => {
-                setIsVisible(false)
-              }}>
-              Wait for someone to quit
+              className=" mt-8  text-xl md:text-2xl bg-lightpurple text-[#130242] 
+          transition ease-in-out duration-200 hover:bg-grey mb-8  p-3 px-6"
+              onClick={handleGoBack}>
+              return to main page
             </button>
           </div>
         </div>

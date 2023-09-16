@@ -51,9 +51,10 @@ export default function Home() {
         (snapshot) => {
           snapshot.forEach((snap) => {
             let data = snap.val()
-            const { gameStarted, Host, quickPlay, ...playersData } = data
+            const { countDown, gameStarted, Host, quickPlay, ...playersData } = data
             const roomKey: string = snap.key ?? ''
             const playerSize = Object.keys(playersData).length
+            console.log(playerSize)
             if (quickPlay === true && gameStarted !== true && playerSize < 6) {
               setQuickRoom(roomKey)
               foundQuickRoom = true

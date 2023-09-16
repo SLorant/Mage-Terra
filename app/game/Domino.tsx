@@ -1,8 +1,8 @@
-import { Dispatch, FC, SetStateAction, useEffect, memo, useRef, useState } from 'react'
+import { Dispatch, FC, SetStateAction, useEffect, memo, useRef } from 'react'
 import { useDrag, useDragLayer } from 'react-dnd'
 import { ItemTypes } from '../ItemTypes'
 import Image from 'next/image'
-
+import {} from 'react-dnd'
 export interface DominoProps {
   firstname: string
   secondname: string
@@ -76,16 +76,17 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     }
   }, [currentOffset])
   return (
-    <div className={`${isTurned ? 'h-[200px]' : 'w-[200px]'}   ${isDropped && 'opacity-50'}  flex ml-0 justify-center items-center`}>
+    <div className={`${isTurned ? 'h-[22vh]' : 'w-[22vh]'}   ${isDropped && 'opacity-50'}  flex ml-0 justify-center items-center`}>
       <div ref={dominoRef}>
         <div
           ref={drag}
+          id="domino"
           style={{ opacity, border: '1px dashed gray' }}
-          className={`${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} cursor-move flex  mt-6`}>
-          <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+          className={`${isTurned ? 'flex-col turneddomino' : ' mb-10'} cursor-move flex  mt-6`}>
+          <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
             <Image src={img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
           </div>
-          <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+          <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
             <Image src={secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
           </div>
         </div>
