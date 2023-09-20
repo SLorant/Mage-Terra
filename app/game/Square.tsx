@@ -65,8 +65,13 @@ export const Square: FC<SquareProps> = memo(function Square({
   useEffect(() => {
     setRandomRuin(Math.floor(Math.random() * ruins.length) + 1)
   }, [])
+
   return (
-    <div className={` h-20 w-20 ${borderClass} ${borderColor} ${animation} ${bgColor} relative shadow-lg z-20`} ref={drop} data-testid="Square">
+    <div
+      className={`h-[14.5vw]  md:h-20 md:w-20
+     ${borderClass} ${borderColor} ${animation} ${bgColor} relative shadow-lg z-20`}
+      ref={drop}
+      data-testid="Square">
       {hasStar && <Image src="/dominoes/star.svg" alt="star" width={50} height={50} className="absolute top-2.5 left-2.5 w-3/4 h-3/4 z-50" unoptimized />}
       {lastDroppedItem && (
         <div className={`h-auto w-auto  shadow-lg z-20 `}>

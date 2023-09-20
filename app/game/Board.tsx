@@ -1,5 +1,5 @@
 import update from 'immutability-helper'
-import { FC, useEffect, useMemo, useRef } from 'react'
+import { FC, useEffect, useMemo } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
@@ -31,16 +31,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const [over, setOver] = useState<boolean>(false)
   const [sqIndex, setSqIndex] = useState<number>(0)
   const [leftSqIndex, setLeftSqIndex] = useState<number>(-1)
-  //const [mapLoaded, setMapLoaded] = useState(false)
-  const mapLoaded = useRef(false)
-  //const [newSquares, setNewSquares] = useState<SquareState[]>([])
-  //setNewSquares(useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded:mapLoaded }))
+
   const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', victory: victory })
 
-  //const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', mapLoaded: mapLoaded })
   useEffect(() => {
-    console.log(newSquares)
-    const isStartingMap: boolean = Squares.filter((square) => square.lastDroppedItem !== null).length < 5
     if (newSquares.length > 0 && newSquares.some((square) => square.lastDroppedItem !== null)) setSquares(newSquares)
   }, [uniqueId, newSquares])
 
@@ -204,7 +198,10 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   return (
     <div className="h-full w-full flex gap-4 relative flex-col">
-      <div id="fade-in" className={`h-[${mapLength * 10}px] w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
+      <div
+        id="fade-in"
+        className={`h-[${window.innerWidth}px] h-[${window.innerWidth}px] 
+      md:h-[${mapLength * 10}px] md:w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
@@ -228,7 +225,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div id="fade-in" className="ml-20 w-[400px] h-[220px]  flex justify-center items-center relative">
+      <div id="fade-in" className="ml-0 md:ml-20 w-full md:w-[400px] h-[220px]  flex justify-center items-center relative">
         <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex">
           <button className="absolute top-14 left-20" onClick={handleLeftTurnClick}>
             <TurnLeft />

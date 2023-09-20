@@ -2,7 +2,7 @@
 import { set, ref, onValue, update, onDisconnect, DataSnapshot } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, JSX } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
 import { useStore, usePlayerStore } from '../useStore'
@@ -178,7 +178,7 @@ export default function Home() {
         const data = snapshot.val()
         if (data === true) gameStarted = true
       })
-      if (currentPlayers !== 100 && currentPlayers < 1 && !gameStarted) {
+      if (currentPlayers !== 100 && currentPlayers < 6 && !gameStarted) {
         if (playerName === 'New player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
@@ -195,7 +195,7 @@ export default function Home() {
     return
   }, [uniqueId, currentPlayers])
 
-  const [placeHolders, setPlaceHolders] = useState<any[]>([])
+  const [placeHolders, setPlaceHolders] = useState<JSX.Element[]>([])
   useEffect(() => {
     setPlaceHolders(
       Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
@@ -226,7 +226,7 @@ export default function Home() {
 
   useEffect(() => {
     if (quickPlay && !wentBack) {
-      let timer: any
+      let timer: NodeJS.Timer
       const dataRef = ref(projectDatabase, `/${room}/countDown`)
       if (uniqueId === hostId && countdown > 0) {
         timer = setInterval(() => {
@@ -275,8 +275,9 @@ export default function Home() {
   return (
     <main className={` flex h-screen flex-col items-center justify-center text-white font-sans relative `}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
-      <ParallaxImages />
-
+      <div className="md:block hidden">
+        <ParallaxImages />
+      </div>
       <div
         id="roomcontainer"
         className={`${isSpectator && 'hidden'} darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px]  flex flex-col items-center

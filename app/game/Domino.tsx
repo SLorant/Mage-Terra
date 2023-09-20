@@ -33,7 +33,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
       item: { firstname, secondname, img, secondimg },
       canDrag: !isDropped,
       collect: (monitor) => ({
-        opacity: monitor.isDragging() ? 0.9 : 1,
+        opacity: monitor.isDragging() ? 0.5 : 1,
         isDragging: monitor.isDragging() ? true : false,
         canDrag: monitor.canDrag() ? true : false,
       }),

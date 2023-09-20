@@ -4,24 +4,37 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import Board from './Board'
 import { projectDatabase } from '@/firebase/config'
 import { ref, onValue, update, onDisconnect, set } from 'firebase/database'
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { ItemTypes } from '../ItemTypes'
+import { useState, useEffect, useRef, CSSProperties } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SquareState, PlayerInfo, DominoState } from './Interfaces'
 import ScoreBoard from './ScoreBoard'
 import { useStore, usePlayerStore } from '../useStore'
 import VictoryScreen from './VictoryScreen'
-import Trading from './Trading'
 import { DominoSetter } from './DominoSetter'
+import { Scaler } from '@/utils/Scaler'
+import { TouchBackend } from 'react-dnd-touch-backend'
+import { usePreview } from 'react-dnd-preview'
+import Image from 'next/image'
+
+const MyPreview = () => {
+  const preview = usePreview()
+  if (!preview.display) {
+    return null
+  }
+  const { item, style } = preview as { itemType: string; item: DominoState; style: CSSProperties }
+  return (
+    <div className="z-50 flex" style={style}>
+      <div className={`h-[14.5vw] w-[14.5vw] md:h-auto md:w-auto ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+        <Image src={item.img} alt="kep" width={20} height={20} className={`w-full h-full`} draggable="false" unoptimized />
+      </div>
+      <div className={`h-[14.5vw] w-[14.5vw] md:h-auto md:w-auto ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+        <Image src={item.secondimg} alt="kep" width={20} height={20} className={`w-full h-full`} draggable="false" unoptimized />
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
-  const initialSquares: SquareState[] = Array.from({ length: 64 }).map(() => ({
-    accepts: [ItemTypes.DOMINO],
-    lastDroppedItem: null,
-    hasStar: false,
-  }))
-
-  const [readSquares, setReadSquares] = useState<SquareState[]>(initialSquares)
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
 
   const { playerCount } = usePlayerStore()
@@ -54,7 +67,6 @@ export default function Home() {
           const playerIds = Object.keys(data)
           if (playerIds.length === playerCount - 1) {
             victory.current = true
-            console.log(playerCount - 1)
             set(roomRef, null)
           }
         }
@@ -64,9 +76,9 @@ export default function Home() {
   const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   useEffect(() => {
-    let timer: any
+    let timer: NodeJS.Timer
 
-    if (countdown > 0 && victory.current === false) {
+    if (round > 1 && countdown > 0 && victory.current === false) {
       timer = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1)
       }, 1000)
@@ -109,7 +121,6 @@ export default function Home() {
           }
 
           if (squaresData !== null) {
-            setReadSquares(squaresData)
             setReadBoards((prevReadBoards) => ({
               ...prevReadBoards,
               [playerId]: [squaresData, nameData],
@@ -135,11 +146,7 @@ export default function Home() {
   }, [uniqueId, round])
 
   useEffect(() => {
-    console.log('unique id:' + uniqueId)
-
-    console.log('setting map')
     if (firstRender) {
-      /* setReadSquares(newSquares) */
       if (uniqueId === '') {
         initializeUniqueId()
       }
@@ -154,7 +161,6 @@ export default function Home() {
       update(playersRef, updateObject)
     }
     if (uniqueId !== '' && uniqueId === hostId) {
-      const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
       const unsubscribePlayers = onValue(playersRef, (snapshot) => {
         const data = snapshot.val()
         if (data) {
@@ -198,27 +204,18 @@ export default function Home() {
   const handleGoBack = () => {
     router.push('/')
   }
-  let container = document.getElementById('gameContainer')
-  const minScale = 0.1
-  const maxScale = 1
-  let scale = Math.min(window.innerWidth / (container?.offsetWidth ?? 0 + 8), window.innerHeight / (container?.offsetHeight ?? 0 + 8))
-  scale = Math.min(maxScale, Math.max(minScale, scale))
-  document.documentElement.style.setProperty('--trickyScale', scale.toString())
-  window.onresize = function () {
-    let container = document.getElementById('gameContainer')
-    const minScale = 0.1
-    const maxScale = 1
-    let scale = Math.min(window.innerWidth / (container?.offsetWidth ?? 0 + 8), window.innerHeight / (container?.offsetHeight ?? 0 + 8))
-    scale = Math.min(maxScale, Math.max(minScale, scale))
-    document.documentElement.style.setProperty('--trickyScale', scale.toString())
-  }
+  Scaler()
 
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
       {isPlayer && (
-        <div id="gameContainer" className="overflow-y-auto gamecontainer flex items-start justify-center gap-10 darkbg w-[1100px] relative">
-          <div className="mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
-            <DndProvider backend={HTML5Backend}>
+        <div
+          id="gameContainer"
+          className="overflow-y-auto md:w-full lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-10 darkbg relative
+          lg:flex-row flex-col items-center">
+          <div className=" mt-20 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
+            <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
+              {window.innerWidth < 640 && <MyPreview />}
               <Board
                 uniqueId={uniqueId}
                 room={room}
@@ -230,9 +227,9 @@ export default function Home() {
               />
             </DndProvider>
           </div>
-          <div className="flex flex-col justify-center items-center">
+          <div className="flex flex-col justify-center items-center ">
             <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
-            <div id="fade-in" className="mt-8 relative">
+            <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8  md:static absolute top-0 left-0">
               <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
                   <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
@@ -240,7 +237,7 @@ export default function Home() {
                 <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
               </svg>
             </div>
-            <div className="mt-8 text-2xl text-white">
+            <div className="lg:static absolute top-4 right-10 mt-8 text-2xl text-white">
               <p>{countdown}</p>
             </div>
           </div>

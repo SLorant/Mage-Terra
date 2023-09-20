@@ -77,6 +77,7 @@ export const useMapSetter = ({ Squares, uniqueId, room, victory }: MapSetterProp
           if (Squares[index]) {
             result[index] = { accepts: { $set: ['W'] } }
           }
+          console.log(result)
           return result
         }, {}),
       })

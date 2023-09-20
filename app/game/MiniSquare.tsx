@@ -1,9 +1,6 @@
 import { FC } from 'react'
 import { memo } from 'react'
-import Image from 'next/image'
-import { rowLength } from './MapConfig'
 import { LittleStar } from '@/utils/Vectors'
-type DroppedDominoes = [number, number]
 export interface SquareProps {
   accept: string[]
   lastDroppedItem?: any
@@ -13,13 +10,6 @@ export interface SquareProps {
 }
 
 export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDroppedItem, hasStar, index /* droppedDominoes */ }) {
-  let borderClass = 'border-2'
-  /* for (let i = 0; i < droppedDominoes.length; i++) {
-    if (index === droppedDominoes[i][0] && index + 1 === droppedDominoes[i][1]) borderClass = 'border-l-2 border-b-2 border-t-2'
-    if (index === droppedDominoes[i][1] && index - 1 === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-t-2'
-    if (index === droppedDominoes[i][0] && index + rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-l-2 border-t-2'
-    if (index === droppedDominoes[i][1] && index - rowLength === droppedDominoes[i][0]) borderClass = 'border-r-2 border-b-2 border-l-2'
-  } */
   let squareColor = 'bg-transparent'
 
   if (lastDroppedItem) {
@@ -52,14 +42,14 @@ export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDr
     }
   }
   return (
-    <div className={` h-6 w-6 border-none  bg-lightpurple ring-none relative z-20`} data-testid="Square">
+    <div className={` h-7 w-7 md:h-6 md:w-6 border-none  bg-lightpurple ring-none relative z-20`} data-testid="Square">
       {hasStar && (
         <div className="absolute top-0 left-0 flex justify-center items-center w-full h-full">
           <LittleStar />
         </div>
       )}
-      {lastDroppedItem && <div className={`h-[24px] w-[24px]  shadow-lg z-20 ${squareColor}`}></div>}
-      {accept.includes('W') && <div className={`h-[24px] w-[24px]  shadow-lg z-20 bg-darkgrey`}></div>}
+      {lastDroppedItem && <div className={`h-[28px] w-[28px] md:h-[24px] md:w-[24px]  shadow-lg z-20 ${squareColor}`}></div>}
+      {accept.includes('W') && <div className={`h-[28px] w-[28px] md:h-[24px] md:w-[24px]   shadow-lg z-20 bg-darkgrey`}></div>}
     </div>
   )
 })

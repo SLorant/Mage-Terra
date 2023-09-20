@@ -10,7 +10,7 @@ const Trading = ({ room, uniqueId, Domino, round, hostId, setIsRoundOver }: Trad
   const [countdown, setCountdown] = useState(10)
 
   useEffect(() => {
-    let timer: any
+    let timer: NodeJS.Timer
 
     if (round > 1 && countdown > 0) {
       timer = setInterval(() => {
