@@ -3,15 +3,15 @@ import { FC, useEffect, useMemo } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
-import { ItemTypes } from '../ItemTypes'
+import { ItemTypes } from '../../../_types/ItemTypes'
 import { ScoreCounter } from './ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, update as up } from 'firebase/database'
 import { useMapSetter } from './useMapSetter'
-import { BoardProps, SquareState } from './Interfaces'
+import { BoardProps, SquareState } from '../../../_components/Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
-import { TurnLeft, TurnRight } from '@/utils/Vectors'
+import { TurnLeft, TurnRight } from '@/app/_components/Vectors'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino, victory }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({

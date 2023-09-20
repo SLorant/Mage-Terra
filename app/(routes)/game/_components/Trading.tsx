@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { onValue, ref, update, set } from 'firebase/database'
-import { DominoState, TradingProps } from './Interfaces'
+import { DominoState, TradingProps } from '../../../_components/Interfaces'
 import { projectDatabase } from '@/firebase/config'
 
 const Trading = ({ room, uniqueId, Domino, round, hostId, setIsRoundOver }: TradingProps) => {

@@ -2,8 +2,8 @@ import React from 'react'
 import { useRef, useEffect } from 'react'
 import Image from 'next/image'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
-import dominoes from './animations/dominos.json'
-import mage2 from './animations/mage2.json'
+import dominoes from '../_assets/animations/dominos.json'
+import mage2 from '../_assets/animations/mage2.json'
 import { useMediaQuery } from 'react-responsive'
 const ParallaxImages = () => {
   type ParallaxValues = {

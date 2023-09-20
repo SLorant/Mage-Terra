@@ -1,5 +1,5 @@
 import update from 'immutability-helper'
-import { MapSetterProps, SquareState } from './Interfaces'
+import { MapSetterProps, SquareState } from '../../../_components/Interfaces'
 import { onValue, ref, set } from 'firebase/database'
 import { projectDatabase } from '@/firebase/config'
 import { useState, useEffect } from 'react'

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { VictoryScreenProps } from './Interfaces'
+import { VictoryScreenProps } from '../../../_components/Interfaces'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 

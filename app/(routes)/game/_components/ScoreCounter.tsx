@@ -1,4 +1,4 @@
-import { SquareState } from './Interfaces'
+import { SquareState } from '../../../_components/Interfaces'
 import { rowLength } from './MapConfig'
 export const ScoreCounter = (squares: SquareState[]): number => {
   const maxSequenceLengths: { [type: string]: { length: number; starCount: number } } = {}

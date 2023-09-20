@@ -1,4 +1,4 @@
-import { DominoState } from './Interfaces'
+import { DominoState } from '../../../_components/Interfaces'
 
 export const DominoSetter = (): DominoState => {
   const nameArray: string[] = ['Dungeon', 'Lagoon', 'Mt', 'Village', 'Field']

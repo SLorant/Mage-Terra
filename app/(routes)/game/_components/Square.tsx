@@ -3,7 +3,7 @@ import { memo, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import Image from 'next/image'
 import { rowLength } from './MapConfig'
-import { SquareProps } from './Interfaces'
+import { SquareProps } from '../../../_components/Interfaces'
 
 export const Square: FC<SquareProps> = memo(function Square({
   accept,

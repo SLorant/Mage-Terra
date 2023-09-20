@@ -6,8 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
 import { Amaranth } from 'next/font/google'
 import Image from 'next/image'
-import { useStore } from './useStore'
-import ParallaxImages from './ParallaxImages'
+import { useStore } from './_components/useStore'
+import ParallaxImages from './_components/ParallaxImages'
 
 const amaranth = Amaranth({
   weight: '400',

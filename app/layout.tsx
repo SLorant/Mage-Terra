@@ -1,4 +1,4 @@
-import './globals.css'
+import './_assets/style/globals.css'
 import { Amaranth } from 'next/font/google'
 const amaranth = Amaranth({
   weight: '400',

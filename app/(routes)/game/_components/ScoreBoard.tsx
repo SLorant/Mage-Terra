@@ -1,8 +1,8 @@
 import { useEffect, useState, memo, FC } from 'react'
-import { ScoreBoardProps } from './Interfaces'
+import { ScoreBoardProps } from '../../../_components/Interfaces'
 import { MiniSquare } from './MiniSquare'
-import { ItemTypes } from '../ItemTypes'
-import { SquareState } from './Interfaces'
+import { ItemTypes } from '../../../_types/ItemTypes'
+import { SquareState } from '../../../_components/Interfaces'
 import { mapLength } from './MapConfig'
 import Image from 'next/image'
 

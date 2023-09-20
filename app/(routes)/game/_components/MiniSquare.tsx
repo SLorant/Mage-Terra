@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { memo } from 'react'
-import { LittleStar } from '@/utils/Vectors'
+import { LittleStar } from '@/app/_components/Vectors'
 export interface SquareProps {
   accept: string[]
   lastDroppedItem?: any
