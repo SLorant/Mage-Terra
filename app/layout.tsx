@@ -13,8 +13,10 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={amaranth.className}>{children}</body>
+    <html lang="en" className="light" style={{ colorScheme: 'light' }}>
+      <body suppressHydrationWarning={true} className={amaranth.className}>
+        {children}
+      </body>
     </html>
   )
 }

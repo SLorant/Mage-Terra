@@ -80,3 +80,32 @@ export interface MapSetterProps {
   room: string
   victory: MutableRefObject<boolean>
 }
+export interface PlayerGridProps {
+  readNames: {
+    [key: string]: {
+      Name: string
+      Avatar: number
+    }
+  }
+  playerName: string
+  uniqueId: string
+  hostId: string
+}
+export interface AvatarChooserProps {
+  room: string
+  uniqueId: string
+  playerName: string
+  setIsSpectator: Dispatch<SetStateAction<boolean>>
+  isSpectator: boolean
+  error: string
+  setError: Dispatch<SetStateAction<string>>
+  setPlayerName: Dispatch<SetStateAction<string>>
+  currentPlayers: number
+  readNames: {
+    [key: string]: {
+      Name: string
+      Avatar: number
+    }
+  }
+  wentBack: boolean
+}

@@ -1,99 +1,31 @@
 'use client'
-import { set, ref, onValue, update, onDisconnect, DataSnapshot } from 'firebase/database'
+import { set, ref, onValue, update, onDisconnect } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState, JSX } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
-import { useStore, usePlayerStore } from '../../_components/useStore'
+import { useStore } from '../../_components/useStore'
 import ParallaxImages from '../../_components/ParallaxImages'
-import { BackButton, PrevAvatar, NextAvatar, HostCrown, Dots } from '@/app/_components/Vectors'
+import { BackButton } from '@/app/_components/Vectors'
 import sparkle from '@/app/_assets/animations/sparkle.json'
 import Lottie, { LottieRefCurrentProps } from 'lottie-react'
-
-const useRoomData = (room: string, uniqueId: string, wentBack: boolean) => {
-  const [hostId, setHostId] = useState('')
-  const router = useRouter()
-  const [currentPlayers, setCurrentPlayers] = useState(100)
-  const [readNames, setReadNames] = useState<{ [key: string]: { Name: string; Avatar: number } }>({})
-  const firstRender = useRef(true)
-  const [quickPlay, setQuickPlay] = useState<boolean>(false)
-  useEffect(() => {
-    const roomRef = ref(projectDatabase, `/${room}`)
-    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-    const handleRoomData = (snapshot: DataSnapshot) => {
-      const data = snapshot.val()
-      if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, ...playersData } = data
-        if (wentBack === false) {
-          setHostId(Host || uniqueId)
-          const dataRef = ref(projectDatabase, `/${room}/Host`)
-          set(dataRef, Host || uniqueId)
-        } else {
-          const dataRef = ref(projectDatabase, `/${room}/Host`)
-          set(dataRef, null)
-        }
-        if (firstRender.current) {
-          setReadNames(playersData)
-          firstRender.current = false
-        }
-        if (quickPlay) setQuickPlay(true)
-        if (Host !== '') {
-          const sortedNamesArray = Object.entries(playersData).sort((a, b) => {
-            if (a[0] === Host) return -1 // Move host player to the beginning
-            if (b[0] === Host) return 1
-            return 0
-          })
-          const sortedReadNames = sortedNamesArray.reduce((obj: any, [key, value]) => {
-            obj[key] = value
-            return obj
-          }, {})
-          setReadNames(sortedReadNames)
-          /*  if (hostId !== uniqueId) {
-            setCountdown(180)
-          } */
-        }
-        setCurrentPlayers(Object.keys(playersData).length)
-        if (uniqueId !== '') {
-          if (gameStarted === true && (Map === null || Map === undefined)) {
-            router.push(`/game?roomId=${room}`)
-          } else if (gameStarted === true && Map) {
-            const discRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
-            update(discRef, { [uniqueId]: true })
-            set(playerRef, null)
-            router.push('/')
-          }
-        }
-      }
-    }
-
-    return onValue(roomRef, handleRoomData)
-  }, [room, uniqueId])
-
-  return { hostId, readNames, setReadNames, currentPlayers, quickPlay }
-}
+import { useRoomData } from './_components/useRoomData'
+import PlayerGrid from './_components/PlayerGrid'
+import AvatarChooser from './_components/AvatarChooser'
 
 export default function Home() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
-  const [playerName, setPlayerName] = useState('New player')
-  //const [uniqueId, setUniqueId] = useState('')
-  const [isSpectator, setIsSpectator] = useState(false)
-  const [currentAvatar, setCurrentAvatar] = useState(1)
-  const [inputName, setInputName] = useState('')
-  const [countdown, setCountdown] = useState(300)
   const lottieRef = useRef<LottieRefCurrentProps>(null)
-  //const [uniqueId, updateUniqueId] = useStore((state) => [state.uniqueId, state.updateUniqueId])
   const { uniqueId, initializeUniqueId } = useStore()
-  const [playerCount, updatePlayerCount] = usePlayerStore((state) => [state.playerCount, state.updatePlayerCount])
+  const [playerName, setPlayerName] = useState('New player')
+  const [isSpectator, setIsSpectator] = useState(false)
+  const [countdown, setCountdown] = useState(300)
   const [error, setError] = useState<string>('')
   const [wentBack, setWentBack] = useState(false)
-
-  if (room === null) {
-    return <div>Wrong room ID</div>
-  }
-  const { hostId, readNames, setReadNames, currentPlayers, quickPlay } = useRoomData(room, uniqueId, wentBack)
+  const { hostId, readNames, setReadNames, currentPlayers, quickPlay } = useRoomData(room ?? '', uniqueId, wentBack)
 
   const handlePlayGame = async () => {
     const dataRef = ref(projectDatabase, `/${room}`)
@@ -107,33 +39,17 @@ export default function Home() {
     }
   }
 
-  const handleConfirmName = () => {
-    if (inputName.length === 0) setError('Your name must contain characters')
-    else if (inputName.length > 10) setError('Your name can be max 10 characters')
-    else {
-      const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
-      set(dataRef, inputName)
-      const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
-      set(avatarRef, currentAvatar)
-      setPlayerName(inputName)
-      setInputName('')
-      setError('')
-    }
-  }
   async function handleCopyLink() {
     lottieRef.current?.playSegments([0, 25])
     await navigator.clipboard.writeText(location.href)
   }
   useEffect(() => {
-    if (uniqueId === '') {
-      initializeUniqueId()
-    }
-    const randomAvatar = Math.floor(Math.random() * 12)
-    if (randomAvatar > 0) setCurrentAvatar(randomAvatar)
+    if (!uniqueId) initializeUniqueId()
   }, [])
 
   useEffect(() => {
-    if (hostId !== '') {
+    if (hostId) {
+      //Make the host always the first player in the grid
       const sortedNamesArray = Object.entries(readNames).sort((a, b) => {
         if (a[0] === hostId) return -1 // Move host player to the beginning
         if (b[0] === hostId) return 1
@@ -149,13 +65,11 @@ export default function Home() {
       const hostRef = ref(projectDatabase, `/${room}/Host`)
       const hostDisconnectRef = onDisconnect(hostRef)
       hostDisconnectRef.remove()
-
-      /*  if (wentBack === false) {
-      } else hostDisconnectRef.cancel() */
       const playRef = ref(projectDatabase, `/${room}/quickPlay`)
       const playDisconnectRef = onDisconnect(playRef)
       const countRef = ref(projectDatabase, `/${room}/countDown`)
       const countDisconnectRef = onDisconnect(countRef)
+      //When the last player quits too, the room gets deleted
       if (currentPlayers === 1) {
         playDisconnectRef.remove()
         countDisconnectRef.remove()
@@ -166,45 +80,6 @@ export default function Home() {
     }
   }, [hostId, currentPlayers, room, uniqueId])
 
-  useEffect(() => {
-    if (uniqueId !== '' && wentBack === false) {
-      const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-      const playerDisconnectRef = onDisconnect(playerRef)
-      playerDisconnectRef.remove()
-      updatePlayerCount(currentPlayers)
-      const gameStartedRef = ref(projectDatabase, `/${room}/gameStarted`)
-      let gameStarted: boolean = false
-      onValue(gameStartedRef, (snapshot) => {
-        const data = snapshot.val()
-        if (data === true) gameStarted = true
-      })
-      if (currentPlayers !== 100 && currentPlayers < 6 && !gameStarted) {
-        if (playerName === 'New player') {
-          const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
-          set(dataRef, 'New player')
-          const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
-          set(avatarRef, currentAvatar)
-        }
-        setIsSpectator(false)
-      } else if (Object.keys(readNames).includes(uniqueId)) {
-        setIsSpectator(false)
-      } else if (currentPlayers !== 100) {
-        setIsSpectator(true)
-      }
-    }
-    return
-  }, [uniqueId, currentPlayers])
-
-  const [placeHolders, setPlaceHolders] = useState<JSX.Element[]>([])
-  useEffect(() => {
-    setPlaceHolders(
-      Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
-        <div
-          key={`placeholder-${index}`}
-          className="md:flex hidden opacity-50 flex w-[300px] mt-8 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple"></div>
-      )),
-    )
-  }, [readNames])
   const handleGoBack = () => {
     setWentBack(true)
     if (uniqueId === hostId) {
@@ -212,6 +87,7 @@ export default function Home() {
       set(hostRef, null)
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       set(dataRef, null)
+      //This is needed because the routing doesn't disconnect the user, so the room must be deleted manually
       if (currentPlayers === 1) {
         const playRef = ref(projectDatabase, `/${room}/quickPlay`)
         set(playRef, null)
@@ -234,40 +110,27 @@ export default function Home() {
         }, 1000)
         set(dataRef, countdown)
       }
-
-      onValue(dataRef, (snapshot) => {
+      const unsubscribeCount = onValue(dataRef, (snapshot) => {
         const data: number = snapshot.val()
-        if (uniqueId !== '' && hostId !== '' && uniqueId !== hostId) {
+        if (uniqueId && hostId && uniqueId !== hostId) {
           setCountdown(data)
         }
-        if (countdown === 1) {
-          handleGoBack()
-        }
-        if (data && data === 1) {
+        if (countdown === 1 || (data && data === 1)) {
           handleGoBack()
         }
       })
       return () => {
         clearInterval(timer)
+        unsubscribeCount()
       }
     } else return
   }, [countdown, uniqueId, hostId])
+
   useEffect(() => {
-    setCountdown(300)
+    setCountdown(301)
   }, [hostId])
 
-  const handleNextAv = () => {
-    if (currentAvatar > 11) {
-      setCurrentAvatar(1)
-    } else setCurrentAvatar(currentAvatar + 1)
-  }
-  const handlePrevAv = () => {
-    if (currentAvatar < 2) {
-      setCurrentAvatar(12)
-    } else setCurrentAvatar(currentAvatar - 1)
-  }
-
-  const avatar = `avatar-${currentAvatar}.png`
+  //Format the time
   const minutes = Math.floor(countdown / 60)
   const seconds = countdown % 60
   const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
@@ -312,78 +175,23 @@ export default function Home() {
           </div>
         )}
 
-        <h2 id="fade-in" className="text-2xl md:text-3xl  mb-2">
+        <h2 id="fade-in" className={`${hostId !== uniqueId && 'mt-16 md:mt-0'} text-2xl md:text-3xl  mb-2`}>
           Choose your name and avatar
         </h2>
-        <div id="fade-in" className="flex flex-col  items-center justify-center mb-8">
-          <div className="flex justify-center items-center  text-3xl">
-            <button className="prev mt-4" onClick={handlePrevAv}>
-              <PrevAvatar />
-            </button>
-            <Image src={avatar} alt="mainavatar" width={100} height={100} className="w-36 h-40 mainavatar" unoptimized />
-
-            <button className="next mt-4" onClick={handleNextAv}>
-              <NextAvatar />
-            </button>
-          </div>
-          <div id="fade-in" className="flex flex-col relative items-center justify-center">
-            <div className="mt-4">
-              <input
-                className="text-lg md:text-xl w-[200px] h-[40px] px-2"
-                type="text"
-                value={inputName}
-                onChange={(e) => setInputName(e.target.value)}
-                placeholder="Your name"
-              />
-              <button
-                className={`${isSpectator && 'opacity-50'} h-[40px] w-[100px] md:w-[120px] roombutton bg-lightpurple text-[#130242]
-                transition ease-in-out duration-200 hover:bg-grey`}
-                onClick={handleConfirmName}
-                disabled={isSpectator ? true : false}>
-                <p className="text-lg md:text-xl">I'm ready</p>
-              </button>
-            </div>
-            {error !== '' && <p className="text-lightpurple absolute -bottom-8">{error}</p>}
-          </div>
-        </div>
-        <div id="fade-in" className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
-          {Object.keys(readNames).length > 0 &&
-            Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
-              <div id="fade-in" className="relative" key={playerId}>
-                <div className="absolute z-40 top-[18px] left-2">
-                  {Avatar === undefined ? (
-                    <Image height={55} width={55} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
-                  ) : (
-                    <Image height={55} width={55} src={`/avatars/avatars-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
-                  )}
-                </div>
-                <div
-                  className={`flex w-[300px] justify-between relative mt-8 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple
-            ${Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
-                  <p className="ml-16 mb-1">
-                    {Name === playerName && playerId === uniqueId && Name === 'New player'
-                      ? 'You'
-                      : Name === playerName && playerId === uniqueId
-                      ? Name + ' (you)'
-                      : Name}
-                  </p>
-                  <span className="flex items-center justify-center mr-4 gap-4">
-                    {playerId === hostId && (
-                      <span className="">
-                        <HostCrown />
-                      </span>
-                    )}
-                    {Name === 'New player' && (
-                      <span className="">
-                        <Dots />
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-            ))}
-          {placeHolders}
-        </div>
+        <AvatarChooser
+          room={room ?? ''}
+          uniqueId={uniqueId}
+          isSpectator={isSpectator}
+          setIsSpectator={setIsSpectator}
+          error={error}
+          setError={setError}
+          playerName={playerName}
+          setPlayerName={setPlayerName}
+          currentPlayers={currentPlayers}
+          readNames={readNames}
+          wentBack={wentBack}
+        />
+        <PlayerGrid readNames={readNames} playerName={playerName} uniqueId={uniqueId} hostId={hostId} />
         {uniqueId === hostId ? (
           <button
             id="fade-in"
@@ -393,7 +201,7 @@ export default function Home() {
             <p className="mb-1">start game</p>
           </button>
         ) : (
-          hostId !== '' && (
+          hostId && (
             <div id="fade-in" className="mt-8">
               Wait for the host to start the match
             </div>

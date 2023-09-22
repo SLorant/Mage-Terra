@@ -1,45 +1,26 @@
 'use client'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import Board from './_components/Board'
+import Board from './_components/boardcomponents/Board'
 import { projectDatabase } from '@/firebase/config'
 import { ref, onValue, update, onDisconnect, set } from 'firebase/database'
-import { useState, useEffect, useRef, CSSProperties } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SquareState, PlayerInfo, DominoState } from '../../_components/Interfaces'
 import ScoreBoard from './_components/ScoreBoard'
 import { useStore, usePlayerStore } from '../../_components/useStore'
 import VictoryScreen from './_components/VictoryScreen'
-import { DominoSetter } from './_components/DominoSetter'
+import { DominoSetter } from './_components/boardcomponents/DominoSetter'
 import { Scaler } from '@/app/_components/Scaler'
 import { TouchBackend } from 'react-dnd-touch-backend'
-import { usePreview } from 'react-dnd-preview'
-import Image from 'next/image'
-
-const MyPreview = () => {
-  const preview = usePreview()
-  if (!preview.display) {
-    return null
-  }
-  const { item, style } = preview as { itemType: string; item: DominoState; style: CSSProperties }
-  return (
-    <div className="z-50 flex" style={style}>
-      <div className={`h-[14.5vw] w-[14.5vw] md:h-auto md:w-auto ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-        <Image src={item.img} alt="kep" width={20} height={20} className={`w-full h-full`} draggable="false" unoptimized />
-      </div>
-      <div className={`h-[14.5vw] w-[14.5vw] md:h-auto md:w-auto ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-        <Image src={item.secondimg} alt="kep" width={20} height={20} className={`w-full h-full`} draggable="false" unoptimized />
-      </div>
-    </div>
-  )
-}
+import { DominoPreview } from './_components/DominoPreview'
 
 export default function Home() {
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
-
   const { playerCount } = usePlayerStore()
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
-
+  const [isPlayer, setIsPlayer] = useState(false)
+  const [loading, setLoading] = useState(true)
   const { uniqueId, initializeUniqueId } = useStore()
   const searchParams = useSearchParams()
   const room = searchParams.get('roomId')
@@ -48,54 +29,54 @@ export default function Home() {
   const [hostId, setHostId] = useState('')
   const victory = useRef(false)
   const router = useRouter()
-  const firstRender = useRef(true)
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
-
-  useEffect(() => {
-    if (uniqueId !== '' && isPlayer) {
-      const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
-      const roomRef = ref(projectDatabase, `/${room}`)
-      const doneRef = ref(projectDatabase, `/${room}/doneWithAction/${uniqueId}`)
-      const playerDisconnectRef = onDisconnect(playerRef)
-      const doneDisconnectRef = onDisconnect(doneRef)
-      doneDisconnectRef.set(null)
-      playerDisconnectRef.update({ [uniqueId]: true })
-      if (victory.current) playerDisconnectRef.cancel()
-      onValue(playerRef, (snapshot) => {
-        const data = snapshot.val()
-        if (data) {
-          const playerIds = Object.keys(data)
-          if (playerIds.length === playerCount - 1) {
-            victory.current = true
-            set(roomRef, null)
-          }
-        }
-      })
-    }
-  }, [uniqueId, playerInfos])
   const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
+
+  const handleDisconnection = () => {
+    const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
+    const roomRef = ref(projectDatabase, `/${room}`)
+    const doneRef = ref(projectDatabase, `/${room}/doneWithAction/${uniqueId}`)
+    const playerDisconnectRef = onDisconnect(playerRef)
+    const doneDisconnectRef = onDisconnect(doneRef)
+    doneDisconnectRef.set(null)
+    playerDisconnectRef.update({ [uniqueId]: true })
+    if (victory.current) playerDisconnectRef.cancel()
+    const unsubscribeDisconnected = onValue(playerRef, (snapshot) => {
+      const data = snapshot.val()
+      if (data) {
+        const playerIds = Object.keys(data)
+        if (playerIds.length === playerCount - 1) {
+          victory.current = true
+          set(roomRef, null)
+        }
+      }
+    })
+    return () => unsubscribeDisconnected()
+  }
+  useEffect(() => {
+    if (uniqueId && isPlayer) {
+      handleDisconnection()
+    }
+    return
+  }, [uniqueId, playerInfos])
+
   useEffect(() => {
     let timer: NodeJS.Timer
-
     if (round > 1 && countdown > 0 && victory.current === false) {
       timer = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1)
       }, 1000)
     }
-
-    if (countdown === 0) {
-      setIsRoundOver(true)
-    }
-
+    if (countdown === 0) setIsRoundOver(true)
     return () => {
       clearInterval(timer)
     }
   }, [countdown, round])
-  const [isPlayer, setIsPlayer] = useState(false)
-  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     setIsDropped(false)
+    if (!uniqueId) initializeUniqueId()
     const playersRef = ref(projectDatabase, `/${room}`)
     if (round > 14) {
       victory.current = true
@@ -104,7 +85,7 @@ export default function Home() {
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const gameStarted: boolean = snapshot.child('gameStarted').exists()
-      if (!victory.current && !gameStarted) router.push('/')
+      if (!victory.current && !gameStarted) router.push('/') // Game doesn't exist
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         setLoading(false)
@@ -112,15 +93,9 @@ export default function Home() {
           const playerId: string = userSnapshot.key ?? ''
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
           const nameData: string = userSnapshot.child('Name').val()
-          if (uniqueId !== '') {
-            if (playerId === uniqueId && nameData === null && !victory.current && !gameStarted) {
-              const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
-              set(playerRef, null)
-              router.push('/')
-            } else if (playerId === uniqueId && nameData !== null) setIsPlayer(true)
-          }
-
-          if (squaresData !== null) {
+          //If the player has a name in the db, the player is valid
+          if (uniqueId && playerId === uniqueId && nameData) setIsPlayer(true)
+          if (squaresData) {
             setReadBoards((prevReadBoards) => ({
               ...prevReadBoards,
               [playerId]: [squaresData, nameData],
@@ -129,38 +104,28 @@ export default function Home() {
           const scoreData: number = userSnapshot.child('Score').val()
           const avatarData: string = userSnapshot.child('Avatar').val()
           const dominoData: DominoState = userSnapshot.child('Domino').val()
-          if (playerId === uniqueId && dominoData !== null && dominoData !== undefined) {
+          if (playerId === uniqueId && dominoData) {
             setDomino(dominoData)
           }
-          if (nameData !== null) addPlayerInfo(playerId, nameData, scoreData, avatarData)
+          if (nameData) addPlayerInfo(playerId, nameData, scoreData, avatarData)
         })
       }
       if (dataHost && dataHost.Host) {
         setHostId(dataHost.Host)
-      } else if (uniqueId !== '' && victory.current === false) {
+      } else if (uniqueId && !victory.current) {
         setHostId(uniqueId)
-        /* const dataRef = ref(projectDatabase, `/${room}/Host`)
-        set(dataRef, uniqueId) */
       }
     })
   }, [uniqueId, round])
 
   useEffect(() => {
-    if (firstRender) {
-      if (uniqueId === '') {
-        initializeUniqueId()
-      }
-      firstRender.current = false
-    }
-  }, [])
-  useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithAction`)
     const roomRef = ref(projectDatabase, `/${room}`)
-    if (uniqueId !== '' && victory.current === false) {
+    if (uniqueId && !victory.current) {
       const updateObject = { [uniqueId]: isDropped }
       update(playersRef, updateObject)
     }
-    if (uniqueId !== '' && uniqueId === hostId) {
+    if (uniqueId && uniqueId === hostId) {
       const unsubscribePlayers = onValue(playersRef, (snapshot) => {
         const data = snapshot.val()
         if (data) {
@@ -215,7 +180,7 @@ export default function Home() {
           lg:flex-row flex-col items-center">
           <div className=" mt-20 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
             <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
-              {window.innerWidth < 640 && <MyPreview />}
+              {window.innerWidth < 640 && <DominoPreview />}
               <Board
                 uniqueId={uniqueId}
                 room={room}

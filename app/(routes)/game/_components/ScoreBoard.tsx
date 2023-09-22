@@ -1,13 +1,14 @@
 import { useEffect, useState, memo, FC } from 'react'
-import { ScoreBoardProps } from '../../../_components/Interfaces'
 import { MiniSquare } from './MiniSquare'
 import { ItemTypes } from '../../../_types/ItemTypes'
-import { SquareState } from '../../../_components/Interfaces'
-import { mapLength } from './MapConfig'
+import { SquareState, ScoreBoardProps } from '../../../_components/Interfaces'
+import { mapLength } from './boardcomponents/MapConfig'
 import Image from 'next/image'
 
 export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
   const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string; avatar: string }[]>([])
+  const [currentBoard, setCurrentBoard] = useState(0)
+  const [scoreBoardOpened, setScoreBoardOpened] = useState<boolean>(false)
 
   useEffect(() => {
     // Calculate the rank for each player
@@ -32,9 +33,8 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
   const getRankByPlayerId = (playerId: string): number => {
     const playerData = rankedPlayers.find((player) => player.playerId === playerId)
     if (playerData) return playerData.rank
-    else return 2
+    else return 0 // If the player wasn't found, there is a problem in the conversion, return 0 (throw exception?)
   }
-  const [currentBoard, setCurrentBoard] = useState(0)
   const handleNextBoard = () => {
     if (Object.keys(readBoards).length - 1 === currentBoard) setCurrentBoard(0)
     else setCurrentBoard(currentBoard + 1)
@@ -43,7 +43,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     if (currentBoard === 0) setCurrentBoard(Object.keys(readBoards).length - 1)
     else setCurrentBoard(currentBoard - 1)
   }
-  const [scoreBoardOpened, setScoreBoardOpened] = useState<boolean>(false)
   const openScoreBoard = () => {
     setScoreBoardOpened(!scoreBoardOpened)
     /* const element: HTMLElement = document.getElementById('slide-in')
@@ -58,18 +57,29 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     hasStar: false,
   }))
 
-  const firstPlayerSquares = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][0] : initialSquares
-  const boardName: string = Object.values(readBoards)[currentBoard] ? Object.values(readBoards)[currentBoard][1] : ''
-
+  const firstPlayerSquares = Object.values(readBoards)[currentBoard]?.[0] ?? initialSquares
+  const boardName: string = Object.values(readBoards)[currentBoard]?.[1] ?? ''
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
+
+  const isEven = (number: number) => number % 2 === 0
+
+  const getBgColor = (index: number) => {
+    let bgColor = ''
+    const evenRow = isEven(emptyRows.length) !== isEven(index)
+    if (evenRow) {
+      bgColor = 'bg-lightpurple md:bg-grey'
+    } else {
+      bgColor = 'bg-grey md:bg-lightpurple'
+    }
+    return bgColor
+  }
 
   return (
     <div
       id="slide-in"
       className={`${
-        scoreBoardOpened
-          ? 'w-screen h-screen  transform-gpu duration-200 transition ease-in-out absolute bottom-0 left-0 z-50 flex flex-col justify-end items-end'
-          : ''
+        scoreBoardOpened &&
+        'w-screen h-screen  transform-gpu duration-200 transition ease-in-out absolute bottom-0 left-0 z-50 flex flex-col justify-end items-end'
       }`}>
       <button
         id="scoreArrow"
@@ -102,15 +112,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
           {Object.entries(emptyRows).map((_, index) => (
             <div
               key={index}
-              className={`${
-                emptyRows.length % 2 === 0
-                  ? index % 2 === 0
-                    ? 'bg-grey md:bg-lightpurple'
-                    : 'bg-lightpurple md:bg-grey'
-                  : (index + 1) % 2 === 0
-                  ? 'bg-grey md:bg-lightpurple'
-                  : 'bg-lightpurple md:bg-grey'
-              }
+              className={`${getBgColor(index)}
              text-darkblue w-full h-12 justify-start items-center flex `}></div>
           ))}
         </div>

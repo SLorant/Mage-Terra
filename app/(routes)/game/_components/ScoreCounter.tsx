@@ -1,5 +1,6 @@
 import { SquareState } from '../../../_components/Interfaces'
-import { rowLength } from './MapConfig'
+import { rowLength } from './boardcomponents/MapConfig'
+
 export const ScoreCounter = (squares: SquareState[]): number => {
   const maxSequenceLengths: { [type: string]: { length: number; starCount: number } } = {}
   const visited: boolean[] = Array(squares.length).fill(false)

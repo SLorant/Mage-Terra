@@ -34,7 +34,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
   const getRankByPlayerId = (playerId: string): number => {
     const playerData = rankedPlayers.find((player) => player.playerId === playerId)
     if (playerData) return playerData.rank
-    else return 2
+    else return 0
   }
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
   return (

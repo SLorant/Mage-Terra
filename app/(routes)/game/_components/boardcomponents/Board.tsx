@@ -3,12 +3,12 @@ import { FC, useEffect, useMemo } from 'react'
 import { memo, useCallback, useState } from 'react'
 import { DominoComponent } from './Domino'
 import { Square } from './Square'
-import { ItemTypes } from '../../../_types/ItemTypes'
-import { ScoreCounter } from './ScoreCounter'
+import { ItemTypes } from '../../../../_types/ItemTypes'
+import { ScoreCounter } from '../ScoreCounter'
 import { projectDatabase } from '@/firebase/config'
 import { ref, update as up } from 'firebase/database'
 import { useMapSetter } from './useMapSetter'
-import { BoardProps, SquareState } from '../../../_components/Interfaces'
+import { BoardProps, SquareState } from '../../../../_components/Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
 import { TurnLeft, TurnRight } from '@/app/_components/Vectors'
@@ -35,7 +35,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   const newSquares = useMapSetter({ Squares: Squares, uniqueId: uniqueId, room: room ?? '', victory: victory })
 
   useEffect(() => {
-    if (newSquares.length > 0 && newSquares.some((square) => square.lastDroppedItem !== null)) setSquares(newSquares)
+    if (newSquares.length > 0 && newSquares.some((square) => !square.lastDroppedItem)) setSquares(newSquares)
   }, [uniqueId, newSquares])
 
   useMemo(() => {
@@ -46,41 +46,45 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [droppedDominoes])
 
   useEffect(() => {
-    if (uniqueId !== '' && !victory.current) {
+    if (uniqueId && !victory.current) {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       up(dataRef, { Domino: Domino })
     }
   }, [Domino])
 
   const isDominoPlacedCorrectly = (index: number) => {
-    if (isTurned) {
-      const adjacentSquare = direction == 'top' ? Squares[index + rowLength] : Squares[index]
-      return (
-        adjacentSquare &&
-        !adjacentSquare.lastDroppedItem &&
-        sqIndex === index &&
-        sqIndex < mapLength - rowLength &&
-        leftSqIndex === index + rowLength &&
-        adjacentSquare.accepts.includes('D')
-      )
-    } else {
-      const adjacentSquare = direction == 'left' ? Squares[index + 1] : Squares[index]
-      return (
-        adjacentSquare &&
-        !adjacentSquare.lastDroppedItem &&
-        sqIndex === index &&
-        sqIndex % rowLength !== rowLength - 1 &&
-        leftSqIndex === index + 1 &&
-        adjacentSquare.accepts.includes('D')
-      )
+    let adjacentIndex = index
+    switch (direction) {
+      case 'right':
+        adjacentIndex = index
+        index = index - 1
+        break
+      case 'left':
+        adjacentIndex = index + 1
+        break
+      case 'top':
+        adjacentIndex = index + rowLength
+        break
+      case 'down':
+        index = index - rowLength
+        break
     }
+    const adjacentSquare = Squares[adjacentIndex]
+    //Since this function runs for all of the squares, check if this is the hovered square
+    const isCorrectIndex = sqIndex === index
+    //Check if the adjacent square is not out of bounds
+    if (isCorrectIndex && adjacentSquare && !adjacentSquare.lastDroppedItem && !Squares[index]?.lastDroppedItem) {
+      const isLastColumn = sqIndex % rowLength === rowLength - 1 //Preventing overflow to the other row
+      const notWasteLand = adjacentSquare.accepts.includes('D') && Squares[index]?.accepts.includes('D')
+      return notWasteLand && (isTurned || !isLastColumn)
+    } else return false
   }
   const handleIsOverChange = useCallback(
     (index: number, isOver: boolean) => {
       if (isOver) {
         setSqIndex(index)
         setOver(true)
-        if (Squares[index] && Squares[index].lastDroppedItem == null) {
+        if (Squares[index] && !Squares[index].lastDroppedItem) {
           setLeftSqIndex(isTurned ? index + rowLength : index + 1)
         } else setLeftSqIndex(-1)
       }
@@ -89,8 +93,8 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   )
 
   function isValidNeighbour(index: number, targetIndex: number, firstname: string): boolean {
-    if (Squares[index - targetIndex] !== undefined) {
-      if (Squares[index - targetIndex].lastDroppedItem == null) return false
+    if (Squares[index - targetIndex]) {
+      if (!Squares[index - targetIndex].lastDroppedItem) return false
       else return Squares[index - targetIndex].lastDroppedItem.firstname.includes(firstname)
     } else return false
   }
@@ -180,7 +184,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
     setTurnCount((turnCount + 1) % 4)
   }
   useEffect(() => {
-    if (uniqueId !== '') {
+    if (uniqueId) {
       const dataRef = ref(projectDatabase, `/${room}/${uniqueId}`)
       const squaresData = Squares.map((square) => ({
         accepts: square.accepts,
@@ -198,17 +202,14 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   return (
     <div className="h-full w-full flex gap-4 relative flex-col">
-      <div
-        id="fade-in"
-        className={`h-[${window.innerWidth}px] h-[${window.innerWidth}px] 
-      md:h-[${mapLength * 10}px] md:w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
+      <div id="fade-in" className={`md:h-[${mapLength * 10}px] md:w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
             accept={accepts}
             lastDroppedItem={lastDroppedItem}
             hasStar={hasStar}
             onDrop={(item) => handleDrop(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index, item)}
-            isActive={isActive && over && isDominoPlacedCorrectly(direction === 'right' ? index - 1 : direction === 'down' ? index - rowLength : index)}
+            isActive={isActive && over && isDominoPlacedCorrectly(index)}
             setIsActive={setIsActive}
             onIsOverChange={(index, isOver) => handleIsOverChange(index, isOver)}
             index={index}

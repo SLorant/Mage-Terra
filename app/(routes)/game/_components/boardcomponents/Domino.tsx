@@ -1,6 +1,6 @@
 import { Dispatch, FC, SetStateAction, useEffect, memo, useRef } from 'react'
 import { useDrag, useDragLayer } from 'react-dnd'
-import { ItemTypes } from '../../../_types/ItemTypes'
+import { ItemTypes } from '../../../../_types/ItemTypes'
 import Image from 'next/image'
 import {} from 'react-dnd'
 export interface DominoProps {
