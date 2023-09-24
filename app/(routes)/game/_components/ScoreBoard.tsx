@@ -84,7 +84,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       <button
         id="scoreArrow"
         className={`${scoreBoardOpened ? '-translate-y-[600px] transform-gpu duration-200 transition ease-in-out static z-50' : ''}
-      absolute w-full bottom-0 h-[48px] left-0 flex items-center justify-center bg-lightpurple md:hidden`}
+      absolute w-full bottom-10 h-[48px] left-0 flex items-center justify-center bg-lightpurple md:hidden`}
         onClick={openScoreBoard}>
         <svg width="47" height="21" viewBox="0 0 47 21" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M47 19.9298L23.651 -1.02062e-06L0.236751 20.043L23.651 15.1738L47 19.9298Z" fill="white" />

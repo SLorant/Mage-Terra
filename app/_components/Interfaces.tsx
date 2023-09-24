@@ -109,3 +109,11 @@ export interface AvatarChooserProps {
   }
   wentBack: boolean
 }
+export interface DominoPickerProps {
+  uniqueId: string
+  hostId: string
+  countDown: number
+  setDomino: Dispatch<SetStateAction<DominoState>>
+  room: string
+  readBoards: { [playerId: string]: [SquareState[], string] }
+}

@@ -16,7 +16,7 @@ export const useRoomData = (room: string, uniqueId: string, wentBack: boolean) =
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, ...playersData } = data
+        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, Dominoes, pickerPlayer, ...playersData } = data
         if (!wentBack) {
           setHostId(Host || uniqueId)
           const dataRef = ref(projectDatabase, `/${room}/Host`)
@@ -45,14 +45,14 @@ export const useRoomData = (room: string, uniqueId: string, wentBack: boolean) =
         }
         if (currentPlayers !== Object.keys(playersData).length) setCurrentPlayers(Object.keys(playersData).length)
         if (uniqueId) {
-          if (gameStarted === true && (Map === null || Map === undefined)) {
+          if (gameStarted === true) {
             router.push(`/game?roomId=${room}`)
-          } else if (gameStarted === true && Map) {
+          } /*  else if (gameStarted === true && Map) {
             const discRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
             update(discRef, { [uniqueId]: true })
             set(playerRef, null)
             router.push('/')
-          }
+          } */
         }
       }
     }

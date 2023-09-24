@@ -14,6 +14,7 @@ import { DominoSetter } from './_components/boardcomponents/DominoSetter'
 import { Scaler } from '@/app/_components/Scaler'
 import { TouchBackend } from 'react-dnd-touch-backend'
 import { DominoPreview } from './_components/DominoPreview'
+import DominoPicker from './_components/DominoPicker'
 
 export default function Home() {
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
@@ -78,14 +79,14 @@ export default function Home() {
     setIsDropped(false)
     if (!uniqueId) initializeUniqueId()
     const playersRef = ref(projectDatabase, `/${room}`)
-    if (round > 14) {
+    if (round > 19) {
       victory.current = true
       set(playersRef, null)
     }
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
       const gameStarted: boolean = snapshot.child('gameStarted').exists()
-      if (!victory.current && !gameStarted) router.push('/') // Game doesn't exist
+      //if (!victory.current && !gameStarted) router.push('/') // Game doesn't exist
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         setLoading(false)
@@ -104,9 +105,9 @@ export default function Home() {
           const scoreData: number = userSnapshot.child('Score').val()
           const avatarData: string = userSnapshot.child('Avatar').val()
           const dominoData: DominoState = userSnapshot.child('Domino').val()
-          if (playerId === uniqueId && dominoData) {
+          /*  if (playerId === uniqueId && dominoData) {
             setDomino(dominoData)
-          }
+          } */
           if (nameData) addPlayerInfo(playerId, nameData, scoreData, avatarData)
         })
       }
@@ -134,7 +135,7 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
-            setCountdown(30)
+            setCountdown(50)
             setIsRoundOver(false)
           }
         }
@@ -146,7 +147,7 @@ export default function Home() {
       if (data && data.round && uniqueId !== hostId) {
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(30)
+          setCountdown(50)
           setIsRoundOver(false)
         }
       }
@@ -192,6 +193,9 @@ export default function Home() {
               />
             </DndProvider>
           </div>
+          {round > 2 && countdown > 30 && (
+            <DominoPicker uniqueId={uniqueId} hostId={hostId} room={room ?? ''} countDown={countdown} setDomino={setDomino} readBoards={readBoards} />
+          )}
           <div className="flex flex-col justify-center items-center ">
             <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
             <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8  md:static absolute top-0 left-0">
