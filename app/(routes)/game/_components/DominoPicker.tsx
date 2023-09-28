@@ -6,12 +6,22 @@ import { onValue, ref, set, update } from 'firebase/database'
 import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
 
-const DominoPicker = ({ uniqueId, hostId, room, countDown, setDomino, readBoards }: DominoPickerProps) => {
+const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
   const { playerCount } = usePlayerStore()
   const [dominoes, setDominoes] = useState<DominoState[]>([])
   const [playerInfos2, setPlayerInfos2] = useState<{ [key: string]: [name: string, score: number] }>({})
   const [playerDominoes, setPlayerDominoes] = useState<{ [key: string]: [name: string, domino: DominoState] }>({})
+  const [pickingCountDown, setPickingCountDown] = useState(15)
 
+  useEffect(() => {
+    const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
+    const dominoesRef = ref(projectDatabase, `/${room}/Dominoes`)
+    // or last picker's round ends
+    if (Object.keys(playerDominoes).length === playerCount) {
+      set(playersRef, null)
+      set(dominoesRef, null)
+    }
+  }, [playerDominoes])
   useEffect(() => {
     const dominoesRef = ref(projectDatabase, `/${room}/Dominoes`)
     if (hostId === uniqueId) {
@@ -69,13 +79,32 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, setDomino, readBoards
       }
     }
   }
-
+  useEffect(() => {
+    if (canPick) {
+      let timer: NodeJS.Timer
+      if (pickingCountDown) {
+        timer = setInterval(() => {
+          setPickingCountDown((prevCountdown) => prevCountdown - 1)
+        }, 1000)
+      }
+      if (pickingCountDown === 0) {
+        const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
+        if (uniqueId) {
+          const updateObject = { [uniqueId]: [30, originalDomino] }
+          update(playersRef, updateObject)
+        }
+      }
+      return () => {
+        clearInterval(timer)
+      }
+    }
+  }, [canPick, pickingCountDown])
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}/pickerPlayer`)
     const doneRef = ref(projectDatabase, `/${room}/doneWithDomino`)
     onValue(doneRef, (snapshot) => {
       const data = snapshot.val()
-      console.log(currentPicker)
+      // console.log(currentPicker)
       if (uniqueId === hostId && Object.values(playerInfos2).length > 1) {
         set(roomRef, Object.keys(playerInfos2)[currentPicker])
       }
@@ -113,17 +142,22 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, setDomino, readBoards
   }, [playerInfos2])
   return (
     <div className="absolute top-10 left-10 w-[1000px] bg-lightpurple h-[500px] z-50 flex gap-10">
+      {pickingCountDown}
       <div className="flex gap-10 flex-col">
-        {dominoes.map((Domino, index) => (
-          <div className={`${dominoIndex === index && 'opacity-20'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
-            <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-              <Image src={Domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+        {dominoes.map((Domino, index) =>
+          index === 30 ? (
+            <div>None</div>
+          ) : (
+            <div className={`${dominoIndex === index && 'opacity-20'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
+              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                <Image src={Domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+              </div>
+              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                <Image src={Domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+              </div>
             </div>
-            <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-              <Image src={Domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
-            </div>
-          </div>
-        ))}
+          ),
+        )}
       </div>
       <div>
         {Object.entries(playerInfos2).map(([playerId, [name, score]]) => (

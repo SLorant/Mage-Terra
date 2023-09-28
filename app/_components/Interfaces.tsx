@@ -113,6 +113,7 @@ export interface DominoPickerProps {
   uniqueId: string
   hostId: string
   countDown: number
+  originalDomino: DominoState
   setDomino: Dispatch<SetStateAction<DominoState>>
   room: string
   readBoards: { [playerId: string]: [SquareState[], string] }

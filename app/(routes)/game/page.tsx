@@ -194,7 +194,15 @@ export default function Home() {
             </DndProvider>
           </div>
           {round > 2 && countdown > 30 && (
-            <DominoPicker uniqueId={uniqueId} hostId={hostId} room={room ?? ''} countDown={countdown} setDomino={setDomino} readBoards={readBoards} />
+            <DominoPicker
+              originalDomino={Domino}
+              uniqueId={uniqueId}
+              hostId={hostId}
+              room={room ?? ''}
+              countDown={countdown}
+              setDomino={setDomino}
+              readBoards={readBoards}
+            />
           )}
           <div className="flex flex-col justify-center items-center ">
             <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
