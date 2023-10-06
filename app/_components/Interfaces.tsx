@@ -117,4 +117,5 @@ export interface DominoPickerProps {
   setDomino: Dispatch<SetStateAction<DominoState>>
   room: string
   readBoards: { [playerId: string]: [SquareState[], string] }
+  setDonePicking: Dispatch<SetStateAction<boolean>>
 }

@@ -6,7 +6,7 @@ import { onValue, ref, set, update } from 'firebase/database'
 import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
 
-const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
+const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
   const { playerCount } = usePlayerStore()
   const [dominoes, setDominoes] = useState<DominoState[]>([])
   const [playerInfos2, setPlayerInfos2] = useState<{ [key: string]: [name: string, score: number] }>({})
@@ -16,14 +16,22 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
   useEffect(() => {
     const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
     const dominoesRef = ref(projectDatabase, `/${room}/Dominoes`)
+    // Delete the dominoes and player domino data.
     // or last picker's round ends
+    const pickerRef = ref(projectDatabase, `/${room}/pickerPlayer`)
     if (Object.keys(playerDominoes).length === playerCount) {
-      set(playersRef, null)
-      set(dominoesRef, null)
+      if (uniqueId === hostId) {
+        set(playersRef, null)
+        set(dominoesRef, null)
+        set(pickerRef, null)
+      }
+      setCurrentPicker(0)
+      setDonePicking(true)
     }
   }, [playerDominoes])
   useEffect(() => {
     const dominoesRef = ref(projectDatabase, `/${room}/Dominoes`)
+    // Make dominoes to pick
     if (hostId === uniqueId) {
       for (let i = 0; i < playerCount; i++) {
         const Domino = DominoSetter()
@@ -34,7 +42,7 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
     return onValue(dominoesRef, (snapshot) => {
       const data: DominoState[] = snapshot.val()
       if (data) {
-        setDominoes(data)
+        if (Array.isArray(data)) setDominoes(data)
       } else setDominoes([])
     })
   }, [uniqueId, room, hostId])
@@ -42,7 +50,7 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
     readBoards &&
       Object.entries(readBoards).forEach((board) => {
         let greens: number = 0
-        console.log(board)
+        // console.log(board)
         board[1][0].forEach((square) => {
           if (square.lastDroppedItem?.firstname === 'Mt') {
             greens++
@@ -69,6 +77,8 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
   const [picker, setPicker] = useState<string>('')
   const [currentPicker, setCurrentPicker] = useState<number>(0)
   const chooseDomino = (Domino: DominoState, index: number) => {
+    console.log(dominoIndex)
+    console.log(canPick)
     if (dominoIndex === 30 && canPick) {
       setDominoIndex(index)
       setDomino(Domino)
@@ -104,12 +114,17 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
     const doneRef = ref(projectDatabase, `/${room}/doneWithDomino`)
     onValue(doneRef, (snapshot) => {
       const data = snapshot.val()
+      const playersDone = snapshot.size
       // console.log(currentPicker)
-      if (uniqueId === hostId && Object.values(playerInfos2).length > 1) {
-        set(roomRef, Object.keys(playerInfos2)[currentPicker])
+      if (uniqueId === hostId && Object.values(playerInfos2).length > 1 && currentPicker < playerCount) {
+        console.log(currentPicker)
+        console.log(Object.keys(playerInfos2)[currentPicker])
+        if (Object.keys(playerDominoes).length !== playerCount) {
+          set(roomRef, Object.keys(playerInfos2)[currentPicker])
+        }
       }
-      if (data && currentPicker < playerCount - 1) {
-        setCurrentPicker(currentPicker + 1)
+      if (data) {
+        setCurrentPicker(playersDone)
       }
       if (data) {
         snapshot.forEach((userSnapshot) => {
@@ -134,12 +149,14 @@ const DominoPicker = ({ uniqueId, hostId, room, countDown, originalDomino, setDo
     })
     return onValue(roomRef, (snapshot) => {
       const data: string = snapshot.val()
-      setPicker(data)
+      if (data) setPicker(data)
       if (data && data === uniqueId) {
         setCanPick(true)
       } else setCanPick(false)
     })
   }, [playerInfos2])
+
+  console.log(dominoes)
   return (
     <div className="absolute top-10 left-10 w-[1000px] bg-lightpurple h-[500px] z-50 flex gap-10">
       {pickingCountDown}

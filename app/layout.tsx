@@ -1,10 +1,4 @@
 import './_assets/style/globals.css'
-import { Amaranth } from 'next/font/google'
-const amaranth = Amaranth({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-amaranth',
-})
 
 export const metadata = {
   title: 'Create Next App',
@@ -14,9 +8,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="light" style={{ colorScheme: 'light' }}>
-      <body suppressHydrationWarning={true} className={amaranth.className}>
-        {children}
-      </body>
+      <head>
+        <link href="https://fonts.googleapis.com/css?family=Amaranth&display=swap" rel="stylesheet"></link>
+      </head>
+      <body suppressHydrationWarning={true}>{children}</body>
     </html>
   )
 }

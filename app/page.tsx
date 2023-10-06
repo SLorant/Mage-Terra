@@ -4,16 +4,9 @@ import { useRouter } from 'next/navigation'
 import { ref, set, onValue } from 'firebase/database'
 import { v4 as uuidv4 } from 'uuid'
 import { projectDatabase } from '@/firebase/config'
-import { Amaranth } from 'next/font/google'
 import Image from 'next/image'
 import { useStore } from './_components/useStore'
 import ParallaxImages from './_components/ParallaxImages'
-
-const amaranth = Amaranth({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-amaranth',
-})
 
 export default function Home() {
   const router = useRouter()
@@ -93,7 +86,7 @@ export default function Home() {
     }
   }
   return (
-    <main className={`flex h-full mt-6 sm:mt-2 flex-col items-center justify-center text-white ${amaranth.variable} font-sans`}>
+    <main className={`flex h-full mt-6 sm:mt-2 flex-col items-center justify-center text-white  font-sans`}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
       <div className="mb-10 sm:mb-4  z-30  ">
         <Image className="w-[90vw] md:w-[50vh] md:h-[22vh]" height={500} width={500} src="/logo.png" alt="logo"></Image>

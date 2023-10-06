@@ -33,6 +33,7 @@ export default function Home() {
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
   const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
+  const [donePicking, setDonePicking] = useState<boolean>(false)
 
   const handleDisconnection = () => {
     const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
@@ -135,8 +136,9 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
-            setCountdown(50)
+            setCountdown(30 + playerCount * 15)
             setIsRoundOver(false)
+            setDonePicking(false)
           }
         }
       })
@@ -147,8 +149,9 @@ export default function Home() {
       if (data && data.round && uniqueId !== hostId) {
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(50)
+          setCountdown(30 + playerCount * 15)
           setIsRoundOver(false)
+          setDonePicking(false)
         }
       }
     })
@@ -193,7 +196,7 @@ export default function Home() {
               />
             </DndProvider>
           </div>
-          {round > 2 && countdown > 30 && (
+          {round > 2 && countdown > 30 && !donePicking && (
             <DominoPicker
               originalDomino={Domino}
               uniqueId={uniqueId}
@@ -202,6 +205,7 @@ export default function Home() {
               countDown={countdown}
               setDomino={setDomino}
               readBoards={readBoards}
+              setDonePicking={setDonePicking}
             />
           )}
           <div className="flex flex-col justify-center items-center ">
