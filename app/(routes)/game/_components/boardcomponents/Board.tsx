@@ -226,12 +226,12 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div id="fade-in" className="ml-0 md:ml-20 w-full md:w-[400px] h-[220px]  flex justify-center items-center relative">
-        <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex">
-          <button className="absolute top-14 left-20" onClick={handleLeftTurnClick}>
+      <div id="fade-in" className="ml-0 md:mt-16 md:ml-10 w-full md:w-[400px] h-[200px] flex justify-center items-center relative">
+        <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex relative">
+          <button className="absolute top-14 left-72" onClick={handleLeftTurnClick}>
             <TurnLeft />
           </button>
-          <div>
+          <div className="ml-[440px]">
             <DominoComponent
               firstname={Domino.firstname ?? 'Dungeon'}
               secondname={Domino.secondname ?? 'Mt'}
@@ -245,7 +245,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             />
           </div>
 
-          <button className="absolute top-14 right-16" onClick={handleRightTurnClick}>
+          <button className="absolute top-14 -right-36" onClick={handleRightTurnClick}>
             <TurnRight />
           </button>
         </div>

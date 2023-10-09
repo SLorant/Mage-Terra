@@ -15,6 +15,7 @@ import { Scaler } from '@/app/_components/Scaler'
 import { TouchBackend } from 'react-dnd-touch-backend'
 import { DominoPreview } from './_components/DominoPreview'
 import DominoPicker from './_components/DominoPicker'
+import Image from 'next/image'
 
 export default function Home() {
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
@@ -64,13 +65,17 @@ export default function Home() {
   }, [uniqueId, playerInfos])
 
   useEffect(() => {
+    console.log(countdown)
+    console.log(round)
     let timer: NodeJS.Timer
     if (round > 1 && countdown > 0 && victory.current === false) {
       timer = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1)
       }, 1000)
     }
-    if (countdown === 0) setIsRoundOver(true)
+    if (countdown === 0) {
+      setIsRoundOver(true)
+    }
     return () => {
       clearInterval(timer)
     }
@@ -177,49 +182,57 @@ export default function Home() {
 
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
+      <Image className="h-screen absolute top-0 left-0" src={'/hexagon.svg'} height={500} width={2000} alt="hexagon"></Image>
       {isPlayer && (
-        <div
-          id="gameContainer"
-          className="overflow-y-auto md:w-full lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-10 darkbg relative
+        <div id="gameContainer" className="relative">
+          <div
+            className="overflow-y-auto lg:overflow-hidden md:w-full lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
           lg:flex-row flex-col items-center">
-          <div className=" mt-20 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-20 gap-0 shadow-md">
-            <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
-              {window.innerWidth < 640 && <DominoPreview />}
-              <Board
-                uniqueId={uniqueId}
-                room={room}
-                isDropped={isDropped}
-                setIsDropped={setIsDropped}
-                Domino={Domino}
-                setDomino={setDomino}
-                victory={victory}
-              />
-            </DndProvider>
-          </div>
-          {round > 2 && countdown > 30 && !donePicking && (
-            <DominoPicker
-              originalDomino={Domino}
-              uniqueId={uniqueId}
-              hostId={hostId}
-              room={room ?? ''}
-              countDown={countdown}
-              setDomino={setDomino}
-              readBoards={readBoards}
-              setDonePicking={setDonePicking}
-            />
-          )}
-          <div className="flex flex-col justify-center items-center ">
-            <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
-            <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8  md:static absolute top-0 left-0">
-              <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
-                  <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
+            <div className="absolute top-0 left-0 w-full h-[650px] bg-[#130242]">
+              <div className="absolute -bottom-14 z-50 right-44 mt-8 text-2xl text-white">
+                <svg width="117" height="55" viewBox="0 0 117 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M58.5 55L0.909314 0.250001L116.091 0.250011L58.5 55Z" fill="#E1DAFF" />
                 </svg>
-                <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
-              </svg>
+                <p className="absolute text-3xl top-0 left-10 text-darkblue z-50">{countdown}</p>
+              </div>
             </div>
-            <div className="lg:static absolute top-4 right-10 mt-8 text-2xl text-white">
-              <p>{countdown}</p>
+
+            <div className=" mt-20 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-4 gap-0 shadow-md">
+              <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
+                {window.innerWidth < 640 && <DominoPreview />}
+                <Board
+                  uniqueId={uniqueId}
+                  room={room}
+                  isDropped={isDropped}
+                  setIsDropped={setIsDropped}
+                  Domino={Domino}
+                  setDomino={setDomino}
+                  victory={victory}
+                />
+              </DndProvider>
+            </div>
+            {round > 2 && countdown > 30 && !donePicking && (
+              <DominoPicker
+                originalDomino={Domino}
+                uniqueId={uniqueId}
+                hostId={hostId}
+                room={room ?? ''}
+                countDown={countdown}
+                setDomino={setDomino}
+                readBoards={readBoards}
+                setDonePicking={setDonePicking}
+              />
+            )}
+            <div className="flex flex-col justify-center items-center ">
+              <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
+              <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8 z-30 md:static absolute top-0 left-0">
+                <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
+                    <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
+                  </svg>
+                  <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

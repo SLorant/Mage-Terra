@@ -6,7 +6,7 @@ import { onValue, ref, set, update } from 'firebase/database'
 import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
 
-const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
+const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
   const { playerCount } = usePlayerStore()
   const [dominoes, setDominoes] = useState<DominoState[]>([])
   const [playerInfos2, setPlayerInfos2] = useState<{ [key: string]: [name: string, score: number] }>({})
@@ -19,7 +19,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, originalDomino, 
     // Delete the dominoes and player domino data.
     // or last picker's round ends
     const pickerRef = ref(projectDatabase, `/${room}/pickerPlayer`)
-    if (Object.keys(playerDominoes).length === playerCount) {
+    if (Object.keys(playerDominoes).length === playerCount || countDown == 31) {
       if (uniqueId === hostId) {
         set(playersRef, null)
         set(dominoesRef, null)
