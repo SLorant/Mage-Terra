@@ -16,6 +16,7 @@ import { TouchBackend } from 'react-dnd-touch-backend'
 import { DominoPreview } from './_components/DominoPreview'
 import DominoPicker from './_components/DominoPicker'
 import Image from 'next/image'
+import RoundBar from './_components/RoundBar'
 
 export default function Home() {
   const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
@@ -35,6 +36,7 @@ export default function Home() {
   const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   const [donePicking, setDonePicking] = useState<boolean>(false)
+  const [arcaneType, setArcaneType] = useState('')
 
   const handleDisconnection = () => {
     const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
@@ -221,18 +223,12 @@ export default function Home() {
                 setDomino={setDomino}
                 readBoards={readBoards}
                 setDonePicking={setDonePicking}
+                arcaneType={arcaneType}
               />
             )}
             <div className="flex flex-col justify-center items-center ">
               <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
-              <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8 z-30 md:static absolute top-0 left-0">
-                <svg width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <svg width={round * 22} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 22} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
-                    <path d={`M${round * 22} 20H0V0H${round * 22}V20Z`} fill="#B8AFE0" />
-                  </svg>
-                  <path d="M332.406 26.1667H2.59375V1.83342H332.406V26.1667Z" stroke="#E1DAFF" strokeWidth="6" strokeMiterlimit="10" />
-                </svg>
-              </div>
+              <RoundBar round={round} setArcaneType={setArcaneType} uniqueId={uniqueId} hostId={hostId} room={room ?? ''} />
             </div>
           </div>
         </div>

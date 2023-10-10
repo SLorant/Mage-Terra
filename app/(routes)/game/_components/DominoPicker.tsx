@@ -6,7 +6,7 @@ import { onValue, ref, set, update } from 'firebase/database'
 import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
 
-const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, originalDomino, setDomino, readBoards }: DominoPickerProps) => {
+const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, originalDomino, setDomino, readBoards, arcaneType }: DominoPickerProps) => {
   const { playerCount } = usePlayerStore()
   const [dominoes, setDominoes] = useState<DominoState[]>([])
   const [playerInfos2, setPlayerInfos2] = useState<{ [key: string]: [name: string, score: number] }>({})
@@ -49,21 +49,21 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   useEffect(() => {
     readBoards &&
       Object.entries(readBoards).forEach((board) => {
-        let greens: number = 0
+        let arcane: number = 0
         // console.log(board)
         board[1][0].forEach((square) => {
-          if (square.lastDroppedItem?.firstname === 'Mt') {
-            greens++
+          if (square.lastDroppedItem?.firstname === arcaneType) {
+            arcane++
           }
         })
         /*  setPlayerInfos2((prevInfos) => ({
           ...prevInfos,
-          [board[0]]: [board[1][1] ,greens],
+          [board[0]]: [board[1][1] ,arcanes],
         })) */
         setPlayerInfos2((prevPlayerInfos) => {
           const updatedPlayerInfos: { [key: string]: [string, number] } = {
             ...prevPlayerInfos,
-            [board[0]]: [board[1][1], greens],
+            [board[0]]: [board[1][1], arcane],
           }
           const sortedPlayerInfosArray: [string, [string, number]][] = Object.entries(updatedPlayerInfos).sort(([_, a], [__, b]) => b[1] - a[1])
           const sortedPlayerInfos = Object.fromEntries(sortedPlayerInfosArray)
@@ -161,6 +161,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
     <div className="absolute top-10 left-10 w-[1000px] bg-lightpurple h-[500px] z-50 flex gap-10">
       {pickingCountDown}
       <div className="flex gap-10 flex-col">
+        current arcane: {arcaneType}
         {dominoes.map((Domino, index) =>
           index === 30 ? (
             <div>None</div>

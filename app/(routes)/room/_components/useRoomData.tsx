@@ -16,7 +16,8 @@ export const useRoomData = (room: string, uniqueId: string, wentBack: boolean) =
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
-        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, Dominoes, pickerPlayer, ...playersData } = data
+        const { gameStarted, Host, doneWithAction, quickPlay, countDown, Map, round, DisconnectedPlayers, Dominoes, pickerPlayer, arcanes, ...playersData } =
+          data
         if (!wentBack) {
           setHostId(Host || uniqueId)
           const dataRef = ref(projectDatabase, `/${room}/Host`)

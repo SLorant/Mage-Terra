@@ -6,7 +6,6 @@ export const Scaler = () => {
     const minScale = 0.1
     const maxScale = 1
     let scale = Math.min(window.innerWidth / (container?.offsetWidth ?? 0 + 8), window.innerHeight / (container?.offsetHeight ?? 0 + 8))
-    console.log(scale)
     scale = Math.min(maxScale, Math.max(minScale, scale))
     document.documentElement.style.setProperty('--trickyScale', scale.toString())
     window.onresize = function () {

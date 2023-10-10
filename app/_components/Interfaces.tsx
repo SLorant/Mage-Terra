@@ -118,4 +118,12 @@ export interface DominoPickerProps {
   room: string
   readBoards: { [playerId: string]: [SquareState[], string] }
   setDonePicking: Dispatch<SetStateAction<boolean>>
+  arcaneType: string
+}
+export interface RoundBarProps {
+  round: number
+  setArcaneType: Dispatch<SetStateAction<string>>
+  room: string
+  uniqueId: string
+  hostId: string
 }
