@@ -201,7 +201,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [Squares])
 
   return (
-    <div className="h-full w-full flex gap-4 relative flex-col">
+    <div className="h-full mt-6 w-full flex gap-4 relative flex-col">
       <div id="fade-in" className={`md:h-[${mapLength * 10}px] md:w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square

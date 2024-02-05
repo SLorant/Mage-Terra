@@ -67,9 +67,9 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     let bgColor = ''
     const evenRow = isEven(emptyRows.length) !== isEven(index)
     if (evenRow) {
-      bgColor = 'bg-lightpurple md:bg-grey'
+      bgColor = 'bg-lightpurple lg:bg-grey'
     } else {
-      bgColor = 'bg-grey md:bg-lightpurple'
+      bgColor = 'bg-grey lg:bg-lightpurple'
     }
     return bgColor
   }
@@ -79,12 +79,12 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       id="slide-in"
       className={`${
         scoreBoardOpened &&
-        'w-screen h-screen  transform-gpu duration-200 transition ease-in-out absolute bottom-0 left-0 z-50 flex flex-col justify-end items-end'
+        'w-screen h-screen transform-gpu duration-200 transition ease-in-out absolute bottom-0 left-0 z-50 flex flex-col justify-end items-end'
       }`}>
       <button
         id="scoreArrow"
         className={`${scoreBoardOpened ? '-translate-y-[600px] transform-gpu duration-200 transition ease-in-out static z-50' : ''}
-      absolute w-full bottom-10 h-[48px] left-0 flex items-center justify-center bg-lightpurple md:hidden`}
+      absolute w-full bottom-10 h-[48px] left-0 flex items-center justify-center bg-lightpurple lg:hidden z-50`}
         onClick={openScoreBoard}>
         <svg width="47" height="21" viewBox="0 0 47 21" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M47 19.9298L23.651 -1.02062e-06L0.236751 20.043L23.651 15.1738L47 19.9298Z" fill="white" />
@@ -92,15 +92,15 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       </button>
       <aside
         id="fade-in"
-        className={`${scoreBoardOpened ? 'w-full ' : 'hidden md:flex'}
-      mt-24 lg:mt-12 w-[335px] bg-grey flex flex-col h-[600px] md:h-[500px] justify-start items-center gap-2 relative`}>
+        className={`${scoreBoardOpened ? 'w-full ' : 'hidden lg:flex'}
+      mt-24 lg:mt-9 w-[335px] bg-grey flex flex-col h-[600px] lg:h-[500px] justify-start items-center gap-2 relative`}>
         <div className="flex flex-col text-xl text-white w-full items-center text-center">
           {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
             <div
               key={playerId}
               className={`${
-                getRankByPlayerId(playerId) % 2 === 0 ? 'bg-lightpurple md:bg-grey' : 'bg-grey md:bg-lightpurple'
-              } text-darkblue w-full h-12 md:h-10 justify-start items-center flex relative`}>
+                getRankByPlayerId(playerId) % 2 === 0 ? 'bg-lightpurple lg:bg-grey' : 'bg-grey lg:bg-lightpurple'
+              } text-darkblue w-full h-12 lg:h-10 justify-start items-center flex relative`}>
               <div className="ml-4">{getRankByPlayerId(playerId)}</div>
               <div className="ml-4">
                 <Image height={30} width={30} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
@@ -116,12 +116,12 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
              text-darkblue w-full h-12 justify-start items-center flex `}></div>
           ))}
         </div>
-        <div className="absolute bottom-12 md:bottom-8 gap-4 flex h-[200px] md:h-[165px] w-[240px] ">
+        <div className="absolute bottom-12 lg:bottom-8 gap-4 flex h-[200px] lg:h-[165px] w-[240px] ">
           <button className="z-20 text-3xl text-white mb-2" onClick={handlePrevBoard}>
             &#10094;
           </button>
           <div className="flex flex-col items-center justify-center">
-            <div className="h-[196px] w-[196px] md:h-[165px] md:w-[165px] grid grid-cols-7 grid-rows-7">
+            <div className="h-[196px] w-[196px] lg:h-[165px] lg:w-[165px] grid grid-cols-7 grid-rows-7">
               {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
                 <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
               ))}

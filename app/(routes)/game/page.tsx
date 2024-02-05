@@ -67,8 +67,6 @@ export default function Home() {
   }, [uniqueId, playerInfos])
 
   useEffect(() => {
-    console.log(countdown)
-    console.log(round)
     let timer: NodeJS.Timer
     if (round > 1 && countdown > 0 && victory.current === false) {
       timer = setInterval(() => {
@@ -143,7 +141,7 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
-            setCountdown(30 + playerCount * 15)
+            setCountdown(33 + playerCount * 15)
             setIsRoundOver(false)
             setDonePicking(false)
           }
@@ -156,7 +154,7 @@ export default function Home() {
       if (data && data.round && uniqueId !== hostId) {
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(30 + playerCount * 15)
+          setCountdown(33 + playerCount * 15)
           setIsRoundOver(false)
           setDonePicking(false)
         }
@@ -181,16 +179,15 @@ export default function Home() {
     router.push('/')
   }
   Scaler()
-
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
-      <Image className="h-screen absolute top-0 left-0" src={'/hexagon.svg'} height={500} width={2000} alt="hexagon"></Image>
+      <Image className="h-screen hidden lg:block lg:absolute top-0 left-0" src={'/hexagon.svg'} height={500} width={2000} alt="hexagon"></Image>
       {isPlayer && (
         <div id="gameContainer" className="relative">
           <div
-            className="overflow-y-auto lg:overflow-hidden md:w-full lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
+            className=" overflow-y-auto lg:overflow-hidden  lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
           lg:flex-row flex-col items-center">
-            <div className="absolute top-0 left-0 w-full h-[650px] bg-[#130242]">
+            <div className="absolute top-0 lg:top-6 left-0 w-full h-full lg:h-[650px] bg-[#130242]">
               <div className="absolute -bottom-14 z-50 right-44 mt-8 text-2xl text-white">
                 <svg width="117" height="55" viewBox="0 0 117 55" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M58.5 55L0.909314 0.250001L116.091 0.250011L58.5 55Z" fill="#E1DAFF" />
@@ -199,7 +196,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className=" mt-20 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-4 gap-0 shadow-md">
+            <div className=" mt-28 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-4 gap-0 shadow-md">
               <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
                 {window.innerWidth < 640 && <DominoPreview />}
                 <Board
@@ -226,7 +223,7 @@ export default function Home() {
                 arcaneType={arcaneType}
               />
             )}
-            <div className="flex flex-col justify-center items-center ">
+            <div className="flex lg:w-auto w-full mt-6 flex-col justify-center items-center bg-[#130242]">
               <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
               <RoundBar round={round} setArcaneType={setArcaneType} uniqueId={uniqueId} hostId={hostId} room={room ?? ''} />
             </div>

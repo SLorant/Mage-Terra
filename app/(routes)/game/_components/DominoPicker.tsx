@@ -12,21 +12,27 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   const [playerInfos2, setPlayerInfos2] = useState<{ [key: string]: [name: string, score: number] }>({})
   const [playerDominoes, setPlayerDominoes] = useState<{ [key: string]: [name: string, domino: DominoState] }>({})
   const [pickingCountDown, setPickingCountDown] = useState(15)
-
-  useEffect(() => {
+  function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+  async function endPicking() {
+    await sleep(2000)
     const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
     const dominoesRef = ref(projectDatabase, `/${room}/Dominoes`)
     // Delete the dominoes and player domino data.
     // or last picker's round ends
     const pickerRef = ref(projectDatabase, `/${room}/pickerPlayer`)
-    if (Object.keys(playerDominoes).length === playerCount || countDown == 31) {
-      if (uniqueId === hostId) {
-        set(playersRef, null)
-        set(dominoesRef, null)
-        set(pickerRef, null)
-      }
-      setCurrentPicker(0)
-      setDonePicking(true)
+    if (uniqueId === hostId) {
+      set(playersRef, null)
+      set(dominoesRef, null)
+      set(pickerRef, null)
+    }
+    setCurrentPicker(0)
+    setDonePicking(true)
+  }
+  useEffect(() => {
+    if (Object.keys(playerDominoes).length === playerCount || countDown == 34) {
+      endPicking()
     }
   }, [playerDominoes])
   useEffect(() => {
@@ -76,6 +82,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   const [canPick, setCanPick] = useState<boolean>(false)
   const [picker, setPicker] = useState<string>('')
   const [currentPicker, setCurrentPicker] = useState<number>(0)
+
   const chooseDomino = (Domino: DominoState, index: number) => {
     console.log(dominoIndex)
     console.log(canPick)
@@ -98,6 +105,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
         }, 1000)
       }
       if (pickingCountDown === 0) {
+        console.log(dominoes)
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
         if (uniqueId) {
           const updateObject = { [uniqueId]: [30, originalDomino] }
@@ -108,6 +116,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
         clearInterval(timer)
       }
     }
+    return
   }, [canPick, pickingCountDown])
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}/pickerPlayer`)
@@ -156,49 +165,57 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
     })
   }, [playerInfos2])
 
-  console.log(dominoes)
   return (
-    <div className="absolute top-10 left-10 w-[1000px] bg-lightpurple h-[500px] z-50 flex gap-10">
+    <div className="absolute top-10 left-10 w-[1000px] bg-lightpurple h-[500px] z-50 flex flex-col gap-10 rounded-md justify-center items-center">
       {pickingCountDown}
-      <div className="flex gap-10 flex-col">
-        current arcane: {arcaneType}
-        {dominoes.map((Domino, index) =>
-          index === 30 ? (
-            <div>None</div>
-          ) : (
-            <div className={`${dominoIndex === index && 'opacity-20'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
-              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-                <Image src={Domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
-              </div>
-              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-                <Image src={Domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
-              </div>
-            </div>
-          ),
-        )}
-      </div>
       <div>
-        {Object.entries(playerInfos2).map(([playerId, [name, score]]) => (
+        {Object.entries(playerInfos2).map(([playerId, [name]]) => (
           <div key={playerId}>
-            {playerId === picker && <div>{name} is picking a domino!</div>}
-            {name}:{score}
+            {playerId === picker && <h1 className="text-2xl">{playerId === uniqueId ? 'Choose a domino!' : name + 'is picking a domino'}</h1>}
           </div>
         ))}
       </div>
-      <div>
-        {Object.entries(playerDominoes).map(([playerId, [name, domino]]) => (
-          <div key={playerId}>
-            {name} picked this domino:
-            <div className="flex">
-              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-                <Image src={domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+      <div className="grid grid-cols-3">
+        <div className="grid grid-cols-2 gap-10">
+          {dominoes.map((Domino, index) =>
+            index === 30 ? (
+              <div>None</div>
+            ) : (
+              <div className={`${dominoIndex === index && 'opacity-20'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
+                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                  <Image src={Domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+                </div>
+                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                  <Image src={Domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+                </div>
               </div>
-              <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
-                <Image src={domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+            ),
+          )}
+        </div>
+        <div>
+          {Object.entries(playerInfos2).map(([playerId, [name, score]]) => (
+            <div className="w-80" key={playerId}>
+              {name}:{score}
+              current arcane: {arcaneType}
+            </div>
+          ))}
+        </div>
+
+        <div>
+          {Object.entries(playerDominoes).map(([playerId, [name, domino]]) => (
+            <div key={playerId}>
+              {name} picked this domino:
+              <div className="flex">
+                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                  <Image src={domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+                </div>
+                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominoimg`} data-testid="Domino">
+                  <Image src={domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )

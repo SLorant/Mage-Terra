@@ -46,7 +46,7 @@ const RoundBar = ({ round, setArcaneType, room, uniqueId, hostId }: RoundBarProp
     if (round == 18) setArcaneType(arcanes[4])
   }, [round])
   return (
-    <div id="fade-in" className="md:mt-8 lg:mb-0 md:mb-8 z-30 md:static absolute top-0 left-0">
+    <div id="fade-in" className="lg:mt-8 lg:mb-0  z-30 lg:static absolute top-0 left-0">
       <div className="relative">
         <svg className="" width="335" height="28" viewBox="0 0 335 28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <svg width={round * 16.75} height={round > 1 ? '28' : '0'} viewBox={`0 0 ${round * 16.75} 20`} fill="#B8AFE0" xmlns="http://www.w3.org/2000/svg">
