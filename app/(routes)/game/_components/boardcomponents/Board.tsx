@@ -12,6 +12,7 @@ import { BoardProps, SquareState } from '../../../../_components/Interfaces'
 import { rowLength, mapLength } from './MapConfig'
 import { DominoSetter } from './DominoSetter'
 import { TurnLeft, TurnRight } from '@/app/_components/Vectors'
+import { DominoPreview } from '../DominoPreview'
 
 export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino, victory }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
@@ -130,14 +131,15 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
       const fillIndex: number = isTurned ? index + rowLength : index + 1
       setIsActive(false)
-
+      console.log(index)
+      console.log(Squares[index])
       setLeftSqIndex(-1)
       //dominoIndexes.set(index, item)
       if (
         (isTurned ? index < 56 : index % rowLength !== rowLength - 1) &&
         Squares[index] &&
         !Squares[index].lastDroppedItem &&
-        !Squares[isTurned ? index + rowLength : index + 1].lastDroppedItem &&
+        !Squares[isTurned ? index + rowLength : index + 1]?.lastDroppedItem &&
         areNeighboursValid(index, firstname, secondname) &&
         Squares[fillIndex].accepts.includes('D') &&
         Squares[index].accepts.includes('D')
@@ -201,7 +203,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
   }, [Squares])
 
   return (
-    <div className="h-full mt-6 w-full flex gap-4 relative flex-col">
+    <div className="h-full mt-10 md:mt-6 w-full flex gap-4 relative flex-col">
       <div id="fade-in" className={`md:h-[${mapLength * 10}px] md:w-[${mapLength * 10}px] grid grid-cols-7 grid-rows-7`}>
         {Squares.map(({ accepts, lastDroppedItem, hasStar }, index) => (
           <Square
@@ -226,12 +228,13 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
         ))}
       </div>
 
-      <div id="fade-in" className="ml-0 md:mt-16 md:ml-10 w-full md:w-[400px] h-[200px] flex justify-center items-center relative">
+      <div id="fade-in" className="ml-0 md:mt-16 md:ml-10 w-full md:w-[400px] md:h-[200px] h-[200px] flex justify-center items-center relative">
         <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex relative">
-          <button className="absolute top-14 left-72" onClick={handleLeftTurnClick}>
+          <button className="absolute top-10 lg:top-14 left-16 md:left-72" onClick={handleLeftTurnClick}>
             <TurnLeft />
           </button>
-          <div className="ml-[440px]">
+          <div className="lg:ml-[460px] lg:mb-0 mb-24">
+            {window.innerWidth < 640 && <DominoPreview isTurned={isTurned} />}
             <DominoComponent
               firstname={Domino.firstname ?? 'Dungeon'}
               secondname={Domino.secondname ?? 'Mt'}
@@ -245,7 +248,7 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
             />
           </div>
 
-          <button className="absolute top-14 -right-36" onClick={handleRightTurnClick}>
+          <button className="absolute top-10 lg:top-14  right-16 md:-right-36" onClick={handleRightTurnClick}>
             <TurnRight />
           </button>
         </div>

@@ -14,10 +14,14 @@ export interface PlayerInfo {
   score: number
   avatar: string
 }
+export interface playerInfo2 {
+  [key: string]: [name: string, score: number]
+}
 export interface ScoreBoardProps {
   uniqueId: string
-  playerInfos: { [key: string]: PlayerInfo }
-  readBoards: { [playerId: string]: [SquareState[], string] }
+  playerInfos: { [key: string]: PlayerInfo } | playerInfo2
+  needBoard: boolean
+  readBoards?: { [playerId: string]: [SquareState[], string] }
 }
 
 export interface SquareState {
@@ -126,4 +130,7 @@ export interface RoundBarProps {
   room: string
   uniqueId: string
   hostId: string
+}
+export interface DominoPreviewProps {
+  isTurned: boolean
 }

@@ -55,13 +55,15 @@ a {
   --trickyScale: 1;
   --trickyScale2: 1;
 }
-#roomcontainer {
+#fade-in-fast {
   animation: fadein 1s;
 }
 #fade-in {
   animation: fadein 2s;
 }
-
+.fade-out {
+  animation: fadeout 1s;
+}
 @keyframes fadein {
   from {
     opacity: 0;
@@ -70,6 +72,16 @@ a {
     opacity: 1;
   }
 }
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes slidein {
   from {
     transform: translateY(200px);
@@ -94,6 +106,11 @@ a {
 .dominoimg {
   width: calc(var(--trickyScale) * 80px);
   height: calc(var(--trickyScale) * 80px);
+}
+
+.dominosmall {
+  width: calc(var(--trickyScale) * 60px);
+  height: calc(var(--trickyScale) * 60px);
 }
 
 @media (max-width: 768px) {

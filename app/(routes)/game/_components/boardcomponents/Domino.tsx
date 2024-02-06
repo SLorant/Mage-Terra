@@ -76,8 +76,8 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     }
   }, [currentOffset])
   return (
-    <div className={`${isTurned ? 'h-[22vh] ' : 'w-[22vh]'}   ${isDropped && 'opacity-50'}  flex ml-0 justify-center items-center`}>
-      <div ref={dominoRef}>
+    <div className={`${isTurned ? 'h-[14.5vh] md:h-[22vh] ' : 'w-[22vh]'}   ${isDropped && 'opacity-50'}  flex ml-0 justify-center items-center`}>
+      <div ref={dominoRef} className={`${isTurned ? 'h-[14.5vh] md:h-[22vh] md:mb-20' : 'w-[14.5vh] md:w-[22vh]'} `}>
         <div
           ref={drag}
           id="domino"

@@ -33,10 +33,11 @@ export default function Home() {
   const victory = useRef(false)
   const router = useRouter()
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
-  const [countdown, setCountdown] = useState(40)
+  const [countdown, setCountdown] = useState(4000)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   const [donePicking, setDonePicking] = useState<boolean>(false)
   const [arcaneType, setArcaneType] = useState('')
+  const needBoard = true
 
   const handleDisconnection = () => {
     const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
@@ -141,7 +142,7 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
-            setCountdown(33 + playerCount * 15)
+            setCountdown(3300 + playerCount * 15)
             setIsRoundOver(false)
             setDonePicking(false)
           }
@@ -154,7 +155,7 @@ export default function Home() {
       if (data && data.round && uniqueId !== hostId) {
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(33 + playerCount * 15)
+          setCountdown(3300 + playerCount * 15)
           setIsRoundOver(false)
           setDonePicking(false)
         }
@@ -187,18 +188,19 @@ export default function Home() {
           <div
             className=" overflow-y-auto lg:overflow-hidden  lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
           lg:flex-row flex-col items-center">
-            <div className="absolute top-0 lg:top-6 left-0 w-full h-full lg:h-[650px] bg-[#130242]">
-              <div className="absolute -bottom-14 z-50 right-44 mt-8 text-2xl text-white">
-                <svg width="117" height="55" viewBox="0 0 117 55" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M58.5 55L0.909314 0.250001L116.091 0.250011L58.5 55Z" fill="#E1DAFF" />
-                </svg>
-                <p className="absolute text-3xl top-0 left-10 text-darkblue z-50">{countdown}</p>
+            <div className="absolute flex flex-col justify-start items-center top-0 lg:top-6 left-0 w-full h-full lg:h-[650px] bg-[#130242]">
+              <div className="md:absolute md:-bottom-14 z-50 mt-[35px] md:right-44 md:mt-8 text-2xl text-white">
+                <div className="relative">
+                  <svg width="117" height="55" viewBox="0 0 117 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M58.5 55L0.909314 0.250001L116.091 0.250011L58.5 55Z" fill="#E1DAFF" />
+                  </svg>
+                  <p className="absolute text-3xl -top-2 left-7 md:top-0 md:left-10 text-darkblue z-50">{countdown}</p>
+                </div>
               </div>
             </div>
 
             <div className=" mt-28 md:mt-[600px] lg:mt-12  flex items-center justify-center  bg-purple-700 h-[560px] mb-4 gap-0 shadow-md">
               <DndProvider backend={window.innerWidth < 640 ? TouchBackend : HTML5Backend}>
-                {window.innerWidth < 640 && <DominoPreview />}
                 <Board
                   uniqueId={uniqueId}
                   room={room}
@@ -224,7 +226,7 @@ export default function Home() {
               />
             )}
             <div className="flex lg:w-auto w-full mt-6 flex-col justify-center items-center bg-[#130242]">
-              <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} />
+              <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} needBoard={needBoard} />
               <RoundBar round={round} setArcaneType={setArcaneType} uniqueId={uniqueId} hostId={hostId} room={room ?? ''} />
             </div>
           </div>

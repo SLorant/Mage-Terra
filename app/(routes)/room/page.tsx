@@ -142,7 +142,7 @@ export default function Home() {
         <ParallaxImages />
       </div>
       <div
-        id="roomcontainer"
+        id="fade-in-fast"
         className={`${isSpectator && 'hidden'} darkbg text-xl rounded-sm roomcontainer  w-full lg:w-[800px]  flex flex-col items-center
         ${quickPlay && uniqueId !== hostId ? 'md:justify-center' : 'md:justify-start'} justify-start  z-50 relative`}>
         <button className="z-30 absolute top-4 left-6" onClick={handleGoBack}>

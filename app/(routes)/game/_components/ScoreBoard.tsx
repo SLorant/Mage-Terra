@@ -5,7 +5,7 @@ import { SquareState, ScoreBoardProps } from '../../../_components/Interfaces'
 import { mapLength } from './boardcomponents/MapConfig'
 import Image from 'next/image'
 
-export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, readBoards }) {
+export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ uniqueId, playerInfos, needBoard, readBoards }) {
   const [rankedPlayers, setRankedPlayers] = useState<{ playerId: string; rank: number; name: string; avatar: string }[]>([])
   const [currentBoard, setCurrentBoard] = useState(0)
   const [scoreBoardOpened, setScoreBoardOpened] = useState<boolean>(false)
@@ -36,12 +36,16 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     else return 0 // If the player wasn't found, there is a problem in the conversion, return 0 (throw exception?)
   }
   const handleNextBoard = () => {
-    if (Object.keys(readBoards).length - 1 === currentBoard) setCurrentBoard(0)
-    else setCurrentBoard(currentBoard + 1)
+    if (readBoards) {
+      if (Object.keys(readBoards).length - 1 === currentBoard) setCurrentBoard(0)
+      else setCurrentBoard(currentBoard + 1)
+    }
   }
   const handlePrevBoard = () => {
-    if (currentBoard === 0) setCurrentBoard(Object.keys(readBoards).length - 1)
-    else setCurrentBoard(currentBoard - 1)
+    if (readBoards) {
+      if (currentBoard === 0) setCurrentBoard(Object.keys(readBoards).length - 1)
+      else setCurrentBoard(currentBoard - 1)
+    }
   }
   const openScoreBoard = () => {
     setScoreBoardOpened(!scoreBoardOpened)
@@ -56,9 +60,12 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     lastDroppedItem: null,
     hasStar: false,
   }))
-
-  const firstPlayerSquares = Object.values(readBoards)[currentBoard]?.[0] ?? initialSquares
-  const boardName: string = Object.values(readBoards)[currentBoard]?.[1] ?? ''
+  let firstPlayerSquares
+  let boardName: string = ''
+  if (readBoards) {
+    firstPlayerSquares = Object.values(readBoards)[currentBoard]?.[0] ?? initialSquares
+    boardName = Object.values(readBoards)[currentBoard]?.[1] ?? ''
+  }
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
 
   const isEven = (number: number) => number % 2 === 0
@@ -73,14 +80,14 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     }
     return bgColor
   }
-
+  console.log(playerInfos)
   return (
     <div
       id="slide-in"
       className={`${
         scoreBoardOpened &&
         'w-screen h-screen transform-gpu duration-200 transition ease-in-out absolute bottom-0 left-0 z-50 flex flex-col justify-end items-end'
-      }`}>
+      } `}>
       <button
         id="scoreArrow"
         className={`${scoreBoardOpened ? '-translate-y-[600px] transform-gpu duration-200 transition ease-in-out static z-50' : ''}
@@ -92,7 +99,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       </button>
       <aside
         id="fade-in"
-        className={`${scoreBoardOpened ? 'w-full ' : 'hidden lg:flex'}
+        className={`${scoreBoardOpened ? 'w-full transform-gpu duration-200 transition ease-in-out' : 'hidden lg:flex'}
       mt-24 lg:mt-9 w-[335px] bg-grey flex flex-col h-[600px] lg:h-[500px] justify-start items-center gap-2 relative`}>
         <div className="flex flex-col text-xl text-white w-full items-center text-center">
           {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
@@ -116,22 +123,24 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
              text-darkblue w-full h-12 justify-start items-center flex `}></div>
           ))}
         </div>
-        <div className="absolute bottom-12 lg:bottom-8 gap-4 flex h-[200px] lg:h-[165px] w-[240px] ">
-          <button className="z-20 text-3xl text-white mb-2" onClick={handlePrevBoard}>
-            &#10094;
-          </button>
-          <div className="flex flex-col items-center justify-center">
-            <div className="h-[196px] w-[196px] lg:h-[165px] lg:w-[165px] grid grid-cols-7 grid-rows-7">
-              {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-                <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
-              ))}
+        {needBoard && firstPlayerSquares && (
+          <div className="absolute bottom-12 lg:bottom-8 gap-4 flex h-[200px] lg:h-[165px] w-[240px] ">
+            <button className="z-20 text-3xl text-white mb-2" onClick={handlePrevBoard}>
+              &#10094;
+            </button>
+            <div className="flex flex-col items-center justify-center">
+              <div className="h-[196px] w-[196px] lg:h-[165px] lg:w-[165px] grid grid-cols-7 grid-rows-7">
+                {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
+                  <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
+                ))}
+              </div>
+              <p className="text-darkblue mt-2">{boardName}'s map</p>
             </div>
-            <p className="text-darkblue mt-2">{boardName}'s map</p>
+            <button className="z-20 text-3xl text-white mb-2" onClick={handleNextBoard}>
+              &#10095;
+            </button>
           </div>
-          <button className="z-20 text-3xl text-white mb-2" onClick={handleNextBoard}>
-            &#10095;
-          </button>
-        </div>
+        )}
       </aside>
     </div>
   )
