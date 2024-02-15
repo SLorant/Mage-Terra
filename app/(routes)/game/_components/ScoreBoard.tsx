@@ -80,7 +80,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     }
     return bgColor
   }
-  console.log(playerInfos)
   return (
     <div
       id="slide-in"

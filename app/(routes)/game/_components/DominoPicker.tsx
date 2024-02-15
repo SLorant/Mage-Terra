@@ -51,13 +51,29 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
       }
     }
 
-    return onValue(dominoesRef, (snapshot) => {
-      const data: DominoState[] = snapshot.val()
-      if (data) {
-        if (Array.isArray(data)) setDominoes(data)
-      } else setDominoes([])
+    onValue(dominoesRef, (snapshot) => {
+      const data: DominoState[] | DominoState = snapshot.val()
+      let dataArray: DominoState[]
+
+      if (Array.isArray(data)) {
+        dataArray = data
+      } else if (data) {
+        const keys = Object.keys(data)
+        const values = Object.values(data)
+
+        dataArray = new Array(keys.length).fill(undefined)
+
+        for (let i = 0; i < keys.length; i++) {
+          const index = parseInt(keys[i])
+          dataArray[index] = values[i]
+        }
+      } else {
+        dataArray = []
+      }
+      setDominoes(dataArray)
     })
   }, [uniqueId, room, hostId])
+
   useEffect(() => {
     readBoards &&
       Object.entries(readBoards).forEach((board) => {
@@ -90,8 +106,6 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   const [currentPicker, setCurrentPicker] = useState<number>(0)
 
   const chooseDomino = (Domino: DominoState, index: number) => {
-    console.log(dominoIndex)
-    console.log(canPick)
     if (dominoIndex === 30 && canPick) {
       setDominoIndex(index)
       setDomino(Domino)
@@ -111,14 +125,11 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
         }, 1000)
       }
       if (pickingCountDown === 0) {
-        console.log(dominoes)
         const tempdominoes = dominoes.filter(Boolean)
         setDominoIndex(0)
         setDomino(tempdominoes[0])
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
         if (uniqueId) {
-          console.log(dominoes)
-          console.log(tempdominoes)
           const updateObject = { [uniqueId]: [0, tempdominoes[0]] }
           update(playersRef, updateObject)
         }
@@ -189,7 +200,11 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
       <div className={`${playerCount < 4 ? 'mt-12' : 'mt-6'} flex flex-col justify-start items-center`}>
         {Object.entries(playerInfos2).map(([playerId, [name]]) => (
           <div key={playerId}>
-            {playerId === picker && <h1 className="text-3xl">{playerId === uniqueId ? 'Choose a domino!' : name + ' is picking a domino'}</h1>}
+            {playerId === picker && (
+              <h1 id="fade-in-fast" className="text-3xl">
+                {playerId === uniqueId ? 'Choose a domino!' : name + ' is picking a domino'}
+              </h1>
+            )}
           </div>
         ))}
         <p className="mt-2">{pickingCountDown} seconds left</p>
@@ -203,7 +218,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
               index === 30 ? (
                 <div>None</div>
               ) : (
-                <div id="fade-in-fast" className={`${dominoIndex === index && 'opacity-20'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
+                <div id="fade-in-fast" className={`${dominoIndex === index && 'hidden'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
                   <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                     <Image src={Domino.img} alt="kep" width={40} height={40} className={`w-full h-full`} draggable="false" unoptimized />
                   </div>

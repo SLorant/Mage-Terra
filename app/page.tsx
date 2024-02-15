@@ -7,6 +7,7 @@ import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
 import { useStore } from './_components/useStore'
 import ParallaxImages from './_components/ParallaxImages'
+import Link from 'next/link'
 
 export default function Home() {
   const router = useRouter()
@@ -108,9 +109,12 @@ export default function Home() {
         </button>
 
         <p className="text-xl mt-10 mb-2 opacity-60 sm:opacity-40">New to the game?</p>
-        <button className="darkbg mb-20  w-[80vw] sm:w-[500px] h-14 rounded-sm  text-2xl  text-white" disabled>
-          play the tutorial
-        </button>
+        <Link
+          href={'rules'}
+          className="flex justify-center items-center darkbg mb-20  w-[80vw] sm:w-[500px] h-14 rounded-sm  text-2xl  text-white
+        hover:scale-[103%] transition duration-500 ease-in-out">
+          <p>Check the rules</p>
+        </Link>
       </div>
       <div
         className="w-3/4 sm:ml-20 absolute bottom-6 sm:bottom-2
