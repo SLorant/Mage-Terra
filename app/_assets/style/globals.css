@@ -148,6 +148,9 @@ a {
   .footer {
     display: none !important;
   }
+  .avatarchooser {
+    margin-bottom: 32px;
+  }
 }
 @media (min-height: 870px) {
   .roomcontainer {
@@ -171,6 +174,14 @@ a {
   .right {
     right: -100px !important;
   }
+  .roominfo {
+    margin-top: 80px !important;
+    font-size: 1.5rem; /* 24px */
+    line-height: 2rem; /* 32px */
+  }
+  .start {
+    margin-top: 80px !important;
+  }
 }
 @media screen and (min-height: 870px) and (min-width: 1280px) {
   .left {
@@ -179,14 +190,19 @@ a {
   .right {
     right: 80px !important;
   }
+  .roominfo {
+    margin-top: 40px !important;
+  }
+  .start {
+    margin-top: 40px !important;
+  }
 }
 @media (max-height: 700px) {
   .avatartable {
-    overflow-x: scroll;
-    height: 150px;
+    max-height: 200px !important;
   }
   .mainavatar {
-    width: 100px;
+    width: 110px;
     height: 120px;
   }
   input {

@@ -39,3 +39,6 @@ next-env.d.ts
 .prettierrc.json
 app/unusedcode.txt
 .env.development
+functions
+.firebaserc
+firebase.json

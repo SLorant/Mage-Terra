@@ -83,7 +83,7 @@ const AvatarChooser = ({
 
   const currentAvatar = `avatar-${avatar}.png`
   return (
-    <div id="fade-in" className="flex flex-col  items-center justify-center mb-8">
+    <div id="fade-in" className="flex flex-col  items-center justify-center avatarchooser">
       <div className="flex justify-center items-center  text-3xl">
         <button className="prev mt-4" onClick={handlePrevAv}>
           <PrevAvatar />

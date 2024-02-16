@@ -17,7 +17,12 @@ const PlayerGrid = ({ readNames, playerName, uniqueId, hostId }: PlayerGridProps
   }, [readNames])
 
   return (
-    <div id="fade-in" className="grid h-auto w-[auto] gap-x-6 grid-cols-1 md:grid-cols-2 md:grid-rows-3 avatartable">
+    <div
+      id="fade-in"
+      className={` ${
+        readNames && Object.keys(readNames).length > 2 ? 'h-[200px] overflow-scroll md:h-auto ' : 'h-[150px] md:h-auto overflow-hidden'
+      } md:overflow-hidden grid  w-[auto] gap-x-6
+     grid-cols-1 md:h-auto md:grid-cols-2 md:grid-rows-3 avatartable`}>
       {Object.keys(readNames).length > 0 &&
         Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
           <div id="fade-in" className="relative" key={playerId}>

@@ -68,9 +68,9 @@ export default function Home() {
   }, [uniqueId, playerInfos])
 
   useEffect(() => {
-    let timer: NodeJS.Timer
+    let timer: number
     if (round > 1 && countdown > 0 && victory.current === false) {
-      timer = setInterval(() => {
+      timer = window.setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1)
       }, 1000)
     }

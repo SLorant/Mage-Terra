@@ -102,10 +102,10 @@ export default function Home() {
 
   useEffect(() => {
     if (quickPlay && !wentBack) {
-      let timer: NodeJS.Timer
+      let timer: number
       const dataRef = ref(projectDatabase, `/${room}/countDown`)
       if (uniqueId === hostId && countdown > 0) {
-        timer = setInterval(() => {
+        timer = window.setInterval(() => {
           setCountdown((prevCountdown) => prevCountdown - 1)
         }, 1000)
         set(dataRef, countdown)
@@ -151,7 +151,7 @@ export default function Home() {
         {quickPlay && <p className="absolute top-4 right-6 text-lightpurple">{uniqueId === hostId && formattedTime}</p>}
         {quickPlay ? (
           hostId === uniqueId && (
-            <div id="fade-in" className="mb-4  mt-16 md:mt-12 md:text-xl text-base">
+            <div id="fade-in" className="mb-4  mt-16 md:mt-12 md:text-xl text-sm">
               If you think enough players joined, start the game!
             </div>
           )
@@ -175,7 +175,7 @@ export default function Home() {
           </div>
         )}
 
-        <h2 id="fade-in" className={`${hostId !== uniqueId && 'mt-16 md:mt-0'} text-2xl md:text-3xl  mb-2`}>
+        <h2 id="fade-in" className={`${hostId !== uniqueId && quickPlay && 'mt-12 md:mt-0'} text-2xl md:text-3xl  mb-2`}>
           Choose your name and avatar
         </h2>
         <AvatarChooser
@@ -195,14 +195,14 @@ export default function Home() {
         {uniqueId === hostId ? (
           <button
             id="fade-in"
-            className="w-[200px] mt-16 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton 
-          transition ease-in-out duration-200 hover:bg-grey mb-8"
+            className="w-40 md:w-[200px] mt-10 md:mt-8  h-[50px] text-2xl bg-lightpurple text-[#130242] roombutton 
+          transition ease-in-out duration-200 hover:bg-grey mb-8 start"
             onClick={handlePlayGame}>
             <p className="mb-1">start game</p>
           </button>
         ) : (
           hostId && (
-            <div id="fade-in" className="mt-8">
+            <div id="fade-in" className="mt-8 roominfo">
               Wait for the host to start the match
             </div>
           )

@@ -118,9 +118,10 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   }
   useEffect(() => {
     if (canPick) {
-      let timer: NodeJS.Timer
+      let timer: number
+
       if (pickingCountDown) {
-        timer = setInterval(() => {
+        timer = window.setInterval(() => {
           setPickingCountDown((prevCountdown) => prevCountdown - 1)
         }, 1000)
       }
