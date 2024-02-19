@@ -128,10 +128,10 @@ const Trading = ({ room, uniqueId, Domino, round, hostId, setIsRoundOver }: Trad
             </div>
             <p className="text-white text-xl">{name}</p>
             <div style={{ border: '1px dashed gray' }} className={`w-[120px] h-[60px]  flex  mt-6`}>
-              <div className={`w-[60px] h-[60px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+              <div className={`w-[60px] h-[60px] ring-2 bg-grey ring-gray-200 shadow-lg z-20`} data-testid="Domino">
                 <Image src={domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
               </div>
-              <div className={`w-[60px] h-[60px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+              <div className={`w-[60px] h-[60px] ring-2 bg-grey ring-gray-200 shadow-lg z-20`} data-testid="Domino">
                 <Image src={domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
               </div>
             </div>
@@ -139,10 +139,10 @@ const Trading = ({ room, uniqueId, Domino, round, hostId, setIsRoundOver }: Trad
         ))}
       </div>
       <div style={{ border: '1px dashed gray' }} className={`w-[160px] h-[80px] mb-10'} cursor-move flex  mt-6`}>
-        <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+        <div className={`w-[80px] h-[80px] ring-2 bg-grey ring-gray-200 shadow-lg z-20`} data-testid="Domino">
           <Image src={Domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
         </div>
-        <div className={`w-[80px] h-[80px] ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20`} data-testid="Domino">
+        <div className={`w-[80px] h-[80px] ring-2 bg-grey ring-gray-200 shadow-lg z-20`} data-testid="Domino">
           <Image src={Domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
         </div>
       </div>

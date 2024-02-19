@@ -1,4 +1,4 @@
-import { DominoPickerProps, DominoState, SquareState, playerInfo2 } from '@/app/_components/Interfaces'
+import { DominoPickerProps, DominoState, SquareState, playerInfo2, PlayerInfo } from '@/app/_components/Interfaces'
 import React, { useEffect, useState } from 'react'
 import { usePlayerStore } from '@/app/_components/useStore'
 import { projectDatabase } from '@/firebase/config'
@@ -7,7 +7,18 @@ import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
 import ScoreBoard from './ScoreBoard'
 
-const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, originalDomino, setDomino, readBoards, arcaneType }: DominoPickerProps) => {
+const DominoPicker = ({
+  uniqueId,
+  hostId,
+  room,
+  setDonePicking,
+  countDown,
+  setDomino,
+  readBoards,
+  arcaneType,
+  playerArcanes,
+  setPlayerArcanes,
+}: DominoPickerProps) => {
   type ArcaneList = {
     [key: string]: string
   }
@@ -15,7 +26,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
   const arcaneList: ArcaneList = { Dungeon: '#9000BD', Lagoon: '#FF40B1', Mt: '#35CB8F', Village: '#184BC2', Field: '#E29D6B' }
   const { playerCount } = usePlayerStore()
   const [dominoes, setDominoes] = useState<DominoState[]>([])
-  const [playerInfos2, setPlayerInfos2] = useState<playerInfo2>({})
+
   const [playerDominoes, setPlayerDominoes] = useState<{ [key: string]: [name: string, domino: DominoState] }>({})
   const [pickingCountDown, setPickingCountDown] = useState(1500)
   function sleep(ms: number) {
@@ -84,17 +95,22 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
             arcane++
           }
         })
-        /*  setPlayerInfos2((prevInfos) => ({
+        /*  setPlayerArcanes((prevInfos) => ({
           ...prevInfos,
           [board[0]]: [board[1][1] ,arcanes],
         })) */
-        setPlayerInfos2((prevPlayerInfos) => {
-          const updatedPlayerInfos: { [key: string]: [string, number] } = {
+        setPlayerArcanes((prevPlayerInfos) => {
+          const updatedPlayerInfos: { [key: string]: PlayerInfo } = {
             ...prevPlayerInfos,
-            [board[0]]: [board[1][1], arcane],
+            [board[0]]: {
+              name: board[1][1],
+              score: arcane, // Assuming `arcane` is defined elsewhere
+              avatar: board[1][2],
+            },
           }
-          const sortedPlayerInfosArray: [string, [string, number]][] = Object.entries(updatedPlayerInfos).sort(([_, a], [__, b]) => b[1] - a[1])
-          const sortedPlayerInfos = Object.fromEntries(sortedPlayerInfosArray)
+          const sortedPlayerInfosArray: [string, PlayerInfo][] = Object.entries(updatedPlayerInfos).sort(([_, a], [__, b]) => b.score - a.score)
+          const sortedPlayerInfos: { [key: string]: PlayerInfo } = Object.fromEntries(sortedPlayerInfosArray)
+
           return sortedPlayerInfos
         })
       })
@@ -148,11 +164,11 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
       const data = snapshot.val()
       const playersDone = snapshot.size
       // console.log(currentPicker)
-      if (uniqueId === hostId && Object.values(playerInfos2).length > 1 && currentPicker < playerCount) {
+      if (uniqueId === hostId && Object.values(playerArcanes).length > 1 && currentPicker < playerCount) {
         // console.log(currentPicker)
-        // console.log(Object.keys(playerInfos2)[currentPicker])
+        // console.log(Object.keys(playerArcanes)[currentPicker])
         if (Object.keys(playerDominoes).length !== playerCount) {
-          set(roomRef, Object.keys(playerInfos2)[currentPicker])
+          set(roomRef, Object.keys(playerArcanes)[currentPicker])
         }
       }
       if (data) {
@@ -164,8 +180,8 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
           const num: number = userSnapshot.child('0').val()
           const domino: DominoState = userSnapshot.child('1').val()
           let name = ''
-          Object.entries(playerInfos2).forEach((player) => {
-            if (playerId === player[0]) name = player[1][0]
+          Object.entries(playerArcanes).forEach((player) => {
+            if (playerId === player[0]) name = player[1].name
           })
           setPlayerDominoes((prevDominoes) => ({
             ...prevDominoes,
@@ -176,7 +192,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
             set(dominoRef, null)
           }
         })
-        //set(roomRef, Object.keys(playerInfos2)[currentPicker + 1])
+        //set(roomRef, Object.keys(playerArcanes)[currentPicker + 1])
       }
     })
     return onValue(roomRef, (snapshot) => {
@@ -186,20 +202,19 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
         setCanPick(true)
       } else setCanPick(false)
     })
-  }, [playerInfos2])
+  }, [playerArcanes])
 
   const getColor = (type: string): string => {
     return arcaneList[type] || '#000000' // Default to black if type not found
   }
   const color = getColor(arcaneType)
-
   return (
     <div
       className="absolute top-0 left-0 h-full w-full lg:top-14 lg:left-16 lg:w-[567px] bg-lightpurple lg:h-[564px] z-50 flex flex-col gap-4 justify-start
      items-center"
       id="fade-in-fast">
       <div className={`${playerCount < 4 ? 'mt-12' : 'mt-6'} flex flex-col justify-start items-center`}>
-        {Object.entries(playerInfos2).map(([playerId, [name]]) => (
+        {Object.entries(playerArcanes).map(([playerId, { name }]) => (
           <div key={playerId}>
             {playerId === picker && (
               <h1 id="fade-in-fast" className="text-3xl">
@@ -212,7 +227,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
       </div>
 
       <div className="flex flex-col justify-center items-center gap-4">
-        <div className="flex flex-col justify-center items-center bg-grey w-[567px] h-[155px] py-4">
+        <div className="flex flex-col justify-center items-center bg-grey w-[100vw] md:w-[567px] h-[155px] py-4">
           <p className="mb-4 text-2xl">Pickable dominos</p>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-10 mb-4 ">
             {dominoes.map((Domino, index) =>
@@ -220,10 +235,10 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
                 <div>None</div>
               ) : (
                 <div id="fade-in-fast" className={`${dominoIndex === index && 'hidden'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
-                  <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
+                  <div className={` ring-2 bg-grey ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                     <Image src={Domino.img} alt="kep" width={40} height={40} className={`w-full h-full`} draggable="false" unoptimized />
                   </div>
-                  <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
+                  <div className={` ring-2 bg-grey ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                     <Image src={Domino.secondimg} alt="kep" width={40} height={40} className={`w-full h-full`} draggable="false" unoptimized />
                   </div>
                 </div>
@@ -237,10 +252,10 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
             <div className="flex flex-col justify-center items-center " key={playerId} id="fade-in-fast">
               <p className="text-xl mb-2">{name}:</p>
               <div className="flex">
-                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
+                <div className={` ring-2 bg-grey ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                   <Image src={domino.img} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
                 </div>
-                <div className={` ring-2 bg-yellow-500 ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
+                <div className={` ring-2 bg-grey ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                   <Image src={domino.secondimg} alt="kep" width={80} height={80} className={`w-full h-full`} draggable="false" unoptimized />
                 </div>
               </div>
@@ -248,9 +263,12 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
           ))}
         </div>
       </div>
-      <div id="fade-in-fast" className="absolute top-1 -right-[399px] w-[335px] bg-lightpurple h-[285px] z-50 flex flex-col gap-10 justify-start items-center">
-        <div className="flex flex-col text-xl w-full items-center text-center">
-          {Object.entries(playerInfos2).map(([playerId, [name, score]], index) => (
+      <div
+        id="fade-in-fast"
+        className={`${'top-60 -right-[399px] hidden md:flex z-50'} absolute  w-[335px] h-[45px] flex
+       flex-col gap-10 justify-start items-center`}>
+        {/*  { <div className="flex flex-col text-xl w-full items-center text-center">
+          {Object.entries(playerArcanes).map(([playerId, { name, score, avatar }], index) => (
             <div
               key={playerId}
               className={`${
@@ -258,18 +276,16 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
               } text-darkblue w-full h-12 lg:h-10 justify-start items-center flex relative`}>
               <div className="ml-4">{index + 1}</div>
               <div className="ml-4">
-                <Image height={30} width={30} src={`/avatars/avatars-${1}.png`} alt="playeravatar" unoptimized></Image>
+                <Image height={30} width={30} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
               </div>
               <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
               <div className="mr-4 absolute right-2">{score} arc</div>
             </div>
 
-            /*  <div className="w-80" key={playerId}>
-              {name}:{score} arcanes
-            </div> */
+        
           ))}
-        </div>
-        <div className="absolute w-full h-12 gap-1 bottom-0 left-0 flex justify-center items-center bg-grey">
+        </div>} */}
+        <div className={`${playerCount < 6 ? 'flex' : 'hidden'} absolute w-full h-12 gap-1 bottom-0 left-0 flex justify-center items-center bg-grey`}>
           Current arcane:
           <svg width="24" height="30" viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 8L5.5 16L11 8L5.5 4.04797e-07L0 8Z" fill={color} />
@@ -277,7 +293,7 @@ const DominoPicker = ({ uniqueId, hostId, room, setDonePicking, countDown, origi
           ({arcaneType})
         </div>
       </div>
-      {/*  <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos2} /> */}
+      {/*  <ScoreBoard uniqueId={uniqueId} playerInfos={playerArcanes} /> */}
     </div>
   )
 }

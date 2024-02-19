@@ -19,9 +19,10 @@ import Image from 'next/image'
 import RoundBar from './_components/RoundBar'
 
 export default function Home() {
-  const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string] }>({})
+  const [readBoards, setReadBoards] = useState<{ [playerId: string]: [SquareState[], string, string] }>({})
   const { playerCount } = usePlayerStore()
   const [playerInfos, setPlayerInfos] = useState<{ [key: string]: PlayerInfo }>({})
+  const [playerArcanes, setPlayerArcanes] = useState<{ [key: string]: PlayerInfo }>({})
   const [isPlayer, setIsPlayer] = useState(false)
   const [loading, setLoading] = useState(true)
   const { uniqueId, initializeUniqueId } = useStore()
@@ -35,8 +36,10 @@ export default function Home() {
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
   const [countdown, setCountdown] = useState(4000)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
-  const [donePicking, setDonePicking] = useState<boolean>(false)
+  const [donePicking, setDonePicking] = useState<boolean>(true)
   const [arcaneType, setArcaneType] = useState('')
+  const [sbOpened, setSbOpened] = useState<boolean>(false)
+  //const [isPickingStage, setIsPickingStage] = useState<boolean>(false)
   const needBoard = true
 
   const handleDisconnection = () => {
@@ -101,16 +104,16 @@ export default function Home() {
           const playerId: string = userSnapshot.key ?? ''
           const squaresData: SquareState[] = userSnapshot.child('Squares').val()
           const nameData: string = userSnapshot.child('Name').val()
+          const avatarData: string = userSnapshot.child('Avatar').val()
           //If the player has a name in the db, the player is valid
           if (uniqueId && playerId === uniqueId && nameData) setIsPlayer(true)
           if (squaresData) {
             setReadBoards((prevReadBoards) => ({
               ...prevReadBoards,
-              [playerId]: [squaresData, nameData],
+              [playerId]: [squaresData, nameData, avatarData],
             }))
           }
           const scoreData: number = userSnapshot.child('Score').val()
-          const avatarData: string = userSnapshot.child('Avatar').val()
           const dominoData: DominoState = userSnapshot.child('Domino').val()
           /*  if (playerId === uniqueId && dominoData) {
             setDomino(dominoData)
@@ -164,6 +167,11 @@ export default function Home() {
     return () => unsubscribeRoom()
   }, [isDropped, isRoundOver])
 
+  useEffect(() => {
+    if (round > 2 && countdown > 30 && !donePicking) {
+    }
+  }, [round, countdown, donePicking])
+
   const addPlayerInfo = (otherId: string, nameData: string, scoreData: number, avatarData: string) => {
     scoreData = scoreData ?? 0
     setPlayerInfos((prevPlayerInfos) => {
@@ -186,7 +194,7 @@ export default function Home() {
       {isPlayer && (
         <div id="gameContainer" className="relative">
           <div
-            className=" overflow-y-auto lg:overflow-hidden  lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
+            className=" overflow-y-hidden lg:overflow-hidden  lg:w-[1100px] gamecontainer flex lg:items-start justify-center gap-16 relative
           lg:flex-row flex-col items-center">
             <div className="absolute flex flex-col justify-start items-center top-0 lg:top-6 left-0 w-full h-full lg:h-[650px] bg-[#130242]">
               <div className="md:absolute md:-bottom-14 z-50 mt-[35px] md:right-44 md:mt-8 text-2xl text-white">
@@ -223,10 +231,34 @@ export default function Home() {
                 readBoards={readBoards}
                 setDonePicking={setDonePicking}
                 arcaneType={arcaneType}
+                playerArcanes={playerArcanes}
+                setPlayerArcanes={setPlayerArcanes}
               />
             )}
-            <div className="flex lg:w-auto w-full mt-6 flex-col justify-center items-center bg-[#130242]">
-              <ScoreBoard uniqueId={uniqueId} playerInfos={playerInfos} readBoards={readBoards} needBoard={needBoard} />
+            <div
+              className={`flex lg:w-auto w-full mt-6 flex-col
+             justify-center items-center bg-[#130242]`}>
+              {round > 2 && countdown > 30 && !donePicking ? (
+                <ScoreBoard
+                  uniqueId={uniqueId}
+                  playerInfos={playerArcanes}
+                  readBoards={readBoards}
+                  needBoard={needBoard}
+                  sbOpened={sbOpened}
+                  setSbOpened={setSbOpened}
+                  scoreText={'arc'}
+                />
+              ) : (
+                <ScoreBoard
+                  uniqueId={uniqueId}
+                  playerInfos={playerInfos}
+                  readBoards={readBoards}
+                  needBoard={needBoard}
+                  sbOpened={sbOpened}
+                  setSbOpened={setSbOpened}
+                  scoreText="p"
+                />
+              )}
               <RoundBar round={round} setArcaneType={setArcaneType} uniqueId={uniqueId} hostId={hostId} room={room ?? ''} />
             </div>
           </div>

@@ -15,13 +15,16 @@ export interface PlayerInfo {
   avatar: string
 }
 export interface playerInfo2 {
-  [key: string]: [name: string, score: number]
+  [key: string]: [name: string, score: number, avatar: string]
 }
 export interface ScoreBoardProps {
   uniqueId: string
-  playerInfos: { [key: string]: PlayerInfo } | playerInfo2
+  playerInfos: { [key: string]: PlayerInfo }
   needBoard: boolean
-  readBoards?: { [playerId: string]: [SquareState[], string] }
+  readBoards?: { [playerId: string]: [SquareState[], string, string] }
+  sbOpened: boolean
+  setSbOpened: Dispatch<SetStateAction<boolean>>
+  scoreText: string
 }
 
 export interface SquareState {
@@ -120,9 +123,11 @@ export interface DominoPickerProps {
   originalDomino: DominoState
   setDomino: Dispatch<SetStateAction<DominoState>>
   room: string
-  readBoards: { [playerId: string]: [SquareState[], string] }
+  readBoards: { [playerId: string]: [SquareState[], string, string] }
   setDonePicking: Dispatch<SetStateAction<boolean>>
   arcaneType: string
+  playerArcanes: { [key: string]: PlayerInfo }
+  setPlayerArcanes: Dispatch<SetStateAction<{ [key: string]: PlayerInfo }>>
 }
 export interface RoundBarProps {
   round: number
