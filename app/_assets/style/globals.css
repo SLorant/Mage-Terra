@@ -58,6 +58,9 @@ a {
 #fade-in-fast {
   animation: fadein 1s;
 }
+#fade-in-faster {
+  animation: fadein 0.5s;
+}
 #fade-in {
   animation: fadein 2s;
 }

@@ -8,6 +8,7 @@ export interface BoardProps {
   Domino: DominoState
   setDomino: Dispatch<SetStateAction<DominoState>>
   victory: MutableRefObject<boolean>
+  isDominoPicked: boolean
 }
 export interface PlayerInfo {
   name: string
@@ -69,6 +70,20 @@ export interface SquareProps {
   direction: string
   isLeftSquareActive: boolean
 }
+
+export interface DominoProps {
+  firstname: string
+  secondname: string
+  isDropped: boolean
+  img: string
+  secondimg: string
+  isTurned: boolean
+  setIsActive: Dispatch<SetStateAction<boolean>>
+  setDirection: Dispatch<SetStateAction<string>>
+  setLeftSqIndex: Dispatch<SetStateAction<number>>
+  isDominoPicked: boolean
+}
+
 export interface VictoryScreenProps {
   playerInfos: { [key: string]: PlayerInfo }
   uniqueId: string
@@ -128,6 +143,7 @@ export interface DominoPickerProps {
   arcaneType: string
   playerArcanes: { [key: string]: PlayerInfo }
   setPlayerArcanes: Dispatch<SetStateAction<{ [key: string]: PlayerInfo }>>
+  setIsDominoPicked: Dispatch<SetStateAction<boolean>>
 }
 export interface RoundBarProps {
   round: number

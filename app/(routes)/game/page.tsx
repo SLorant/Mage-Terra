@@ -13,7 +13,6 @@ import VictoryScreen from './_components/VictoryScreen'
 import { DominoSetter } from './_components/boardcomponents/DominoSetter'
 import { Scaler } from '@/app/_components/Scaler'
 import { TouchBackend } from 'react-dnd-touch-backend'
-import { DominoPreview } from './_components/DominoPreview'
 import DominoPicker from './_components/DominoPicker'
 import Image from 'next/image'
 import RoundBar from './_components/RoundBar'
@@ -39,6 +38,7 @@ export default function Home() {
   const [donePicking, setDonePicking] = useState<boolean>(true)
   const [arcaneType, setArcaneType] = useState('')
   const [sbOpened, setSbOpened] = useState<boolean>(false)
+  const [isDominoPicked, setIsDominoPicked] = useState<boolean>(false)
   //const [isPickingStage, setIsPickingStage] = useState<boolean>(false)
   const needBoard = true
 
@@ -87,9 +87,10 @@ export default function Home() {
 
   useEffect(() => {
     setIsDropped(false)
+    setIsDominoPicked(false)
     if (!uniqueId) initializeUniqueId()
     const playersRef = ref(projectDatabase, `/${room}`)
-    if (round > 19) {
+    if (round > 14) {
       victory.current = true
       set(playersRef, null)
     }
@@ -217,10 +218,11 @@ export default function Home() {
                   Domino={Domino}
                   setDomino={setDomino}
                   victory={victory}
+                  isDominoPicked={isDominoPicked}
                 />
               </DndProvider>
             </div>
-            {round > 2 && countdown > 30 && !donePicking && (
+            {round > 1 && countdown > 30 && !donePicking && (
               <DominoPicker
                 originalDomino={Domino}
                 uniqueId={uniqueId}
@@ -233,6 +235,7 @@ export default function Home() {
                 arcaneType={arcaneType}
                 playerArcanes={playerArcanes}
                 setPlayerArcanes={setPlayerArcanes}
+                setIsDominoPicked={setIsDominoPicked}
               />
             )}
             <div

@@ -1,19 +1,9 @@
-import { Dispatch, FC, SetStateAction, useEffect, memo, useRef } from 'react'
+import { FC, useEffect, memo, useRef } from 'react'
 import { useDrag, useDragLayer } from 'react-dnd'
 import { ItemTypes } from '../../../../_types/ItemTypes'
 import Image from 'next/image'
 import {} from 'react-dnd'
-export interface DominoProps {
-  firstname: string
-  secondname: string
-  isDropped: boolean
-  img: string
-  secondimg: string
-  isTurned: boolean
-  setIsActive: Dispatch<SetStateAction<boolean>>
-  setDirection: Dispatch<SetStateAction<string>>
-  setLeftSqIndex: Dispatch<SetStateAction<number>>
-}
+import { DominoProps } from '@/app/_components/Interfaces'
 
 export const DominoComponent: FC<DominoProps> = memo(function Domino({
   firstname,
@@ -25,6 +15,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   isTurned,
   setDirection,
   setLeftSqIndex,
+  isDominoPicked,
 }) {
   const dominoRef = useRef<HTMLDivElement>(null)
   const [{ opacity, isDragging, canDrag }, drag] = useDrag(
@@ -76,7 +67,10 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     }
   }, [currentOffset])
   return (
-    <div className={`${isTurned ? 'h-[14.5vh] md:h-[22vh] ' : 'w-[22vh]'}   ${isDropped && 'opacity-50'}  flex ml-0 justify-center items-center`}>
+    <div
+      className={`${isTurned ? 'h-[14.5vh] md:h-[22vh] ' : 'w-[22vh]'}   ${
+        (isDropped || !isDominoPicked) && 'opacity-50'
+      }  flex ml-0 justify-center items-center`}>
       <div ref={dominoRef} className={`${isTurned ? 'h-[14.5vh] md:h-[22vh] md:mb-20' : 'w-[14.5vh] md:w-[22vh]'} `}>
         <div
           ref={drag}
@@ -94,5 +88,3 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
     </div>
   )
 })
-/* ${isTurned ? 'flex-col w-[80px] h-[160px]' : 'w-[160px] h-[80px] mb-10'} */
-/* ${isTurned ? 'h-[200px]' : 'w-[200px]'} */

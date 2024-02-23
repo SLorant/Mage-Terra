@@ -49,11 +49,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
   }
   const openScoreBoard = () => {
     setSbOpened(!sbOpened)
-    /* const element: HTMLElement = document.getElementById('slide-in')
-
-    element.classList.remove('slide-in') // reset animation
-    void element.offsetWidth // trigger reflow
-    element.classList.add('slide-in') // start animation */
   }
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
     accepts: [ItemTypes.DOMINO],
@@ -64,7 +59,8 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
   let boardName: string = ''
   if (readBoards) {
     firstPlayerSquares = Object.values(readBoards)[currentBoard]?.[0] ?? initialSquares
-    boardName = Object.values(readBoards)[currentBoard]?.[1] ?? ''
+    if (Object.keys(readBoards)[currentBoard] && Object.keys(readBoards)[currentBoard] === uniqueId) boardName = 'Your'
+    else boardName = Object.values(readBoards)[currentBoard]?.[1] + "'s" ?? ''
   }
 
   const emptyRows = new Array(6 - Object.keys(playerInfos).length).fill(null)
@@ -81,7 +77,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
     }
     return bgColor
   }
-  console.log(playerInfos)
   return (
     <div
       id="slide-in"
@@ -91,8 +86,9 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       } `}>
       <button
         id="scoreArrow"
-        className={`${sbOpened ? '-translate-y-[600px] transform-gpu duration-200 transition ease-in-out static z-50' : ''}
-      absolute w-full mobilebottom h-[48px] left-0 flex items-center justify-center bg-lightpurple lg:hidden z-50`}
+        className={`${sbOpened ? '-translate-y-[548px] static z-50' : ''}
+      absolute w-full transform-gpu duration-300 transition ease-out
+       mobilebottom h-[48px] left-0 flex items-center justify-center bg-lightpurple lg:hidden z-50`}
         onClick={openScoreBoard}>
         <svg width="47" height="21" viewBox="0 0 47 21" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M47 19.9298L23.651 -1.02062e-06L0.236751 20.043L23.651 15.1738L47 19.9298Z" fill="white" />
@@ -127,8 +123,8 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
           ))}
         </div>
         {needBoard && firstPlayerSquares && (
-          <div className="absolute bottom-12 lg:bottom-8 gap-4 z-50 bg-black flex h-[200px] lg:h-[165px] w-[240px] ">
-            <button className="z-20 text-3xl text-white mb-2" onClick={handlePrevBoard}>
+          <div className="absolute  w-full justify-center  bottom-12 lg:bottom-8 gap-4 z-50 flex h-[200px] lg:h-[165px] ">
+            <button className="z-20 text-3xl text-white mb-6" onClick={handlePrevBoard}>
               &#10094;
             </button>
             <div className="flex flex-col items-center justify-center">
@@ -137,9 +133,9 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
                   <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
                 ))}
               </div>
-              <p className="text-darkblue mt-2">{boardName}'s map</p>
+              <p className="text-darkblue mt-2">{boardName} map</p>
             </div>
-            <button className="z-20 text-3xl text-white mb-2" onClick={handleNextBoard}>
+            <button className="z-20 text-3xl text-white mb-6" onClick={handleNextBoard}>
               &#10095;
             </button>
           </div>

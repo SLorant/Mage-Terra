@@ -10,11 +10,10 @@ import { ref, update as up } from 'firebase/database'
 import { useMapSetter } from './useMapSetter'
 import { BoardProps, SquareState } from '../../../../_components/Interfaces'
 import { rowLength, mapLength } from './MapConfig'
-import { DominoSetter } from './DominoSetter'
 import { TurnLeft, TurnRight } from '@/app/_components/Vectors'
 import { DominoPreview } from '../DominoPreview'
 
-export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino, victory }) {
+export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDropped, setIsDropped, Domino, setDomino, victory, isDominoPicked }) {
   const initialSquares: SquareState[] = Array.from({ length: mapLength }).map(() => ({
     accepts: [ItemTypes.DOMINO],
     lastDroppedItem: null,
@@ -41,7 +40,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
   useMemo(() => {
     if (droppedDominoes.length > 0) {
-      setDomino(DominoSetter())
       setScore(ScoreCounter(Squares))
     }
   }, [droppedDominoes])
@@ -229,11 +227,11 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
       </div>
 
       <div id="fade-in" className="ml-0 md:mt-16 md:ml-10 w-full md:w-[400px] md:h-[200px] h-[200px] flex justify-center items-center relative">
-        <div className="h-full w-full justify-center items-center text-white ml-4 text-xl flex relative">
-          <button className="absolute top-10 lg:top-14 left-16 md:left-72" onClick={handleLeftTurnClick}>
+        <div className="h-full w-full justify-center items-center text-white lg:ml-4 text-xl flex relative">
+          <button className="absolute top-10 lg:top-14 left-20 md:left-72" onClick={handleLeftTurnClick}>
             <TurnLeft />
           </button>
-          <div className="lg:ml-[460px] lg:mb-0 mb-24">
+          <div className="lg:ml-[460px] lg:mb-0 mb-28">
             {window.innerWidth < 640 && <DominoPreview isTurned={isTurned} />}
             <DominoComponent
               firstname={Domino.firstname ?? 'Dungeon'}
@@ -245,10 +243,11 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
               setIsActive={setIsActive}
               setDirection={setDirection}
               setLeftSqIndex={setLeftSqIndex}
+              isDominoPicked={isDominoPicked}
             />
           </div>
 
-          <button className="absolute top-10 lg:top-14  right-16 md:-right-36" onClick={handleRightTurnClick}>
+          <button className="absolute top-10 lg:top-14  right-20 md:-right-36" onClick={handleRightTurnClick}>
             <TurnRight />
           </button>
         </div>

@@ -1,11 +1,10 @@
-import { DominoPickerProps, DominoState, SquareState, playerInfo2, PlayerInfo } from '@/app/_components/Interfaces'
+import { DominoPickerProps, DominoState, PlayerInfo } from '@/app/_components/Interfaces'
 import React, { useEffect, useState } from 'react'
 import { usePlayerStore } from '@/app/_components/useStore'
 import { projectDatabase } from '@/firebase/config'
 import { onValue, ref, set, update } from 'firebase/database'
 import { DominoSetter } from './boardcomponents/DominoSetter'
 import Image from 'next/image'
-import ScoreBoard from './ScoreBoard'
 
 const DominoPicker = ({
   uniqueId,
@@ -18,6 +17,7 @@ const DominoPicker = ({
   arcaneType,
   playerArcanes,
   setPlayerArcanes,
+  setIsDominoPicked,
 }: DominoPickerProps) => {
   type ArcaneList = {
     [key: string]: string
@@ -32,6 +32,7 @@ const DominoPicker = ({
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
+  const [dominoIndex, setDominoIndex] = useState<number>(30)
   async function endPicking() {
     await sleep(2000)
     const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
@@ -116,7 +117,7 @@ const DominoPicker = ({
       })
   }, [readBoards])
 
-  const [dominoIndex, setDominoIndex] = useState<number>(30)
+  //const [dominoIndex, setDominoIndex] = useState<number>(30)
   const [canPick, setCanPick] = useState<boolean>(false)
   const [picker, setPicker] = useState<string>('')
   const [currentPicker, setCurrentPicker] = useState<number>(0)
@@ -125,6 +126,7 @@ const DominoPicker = ({
     if (dominoIndex === 30 && canPick) {
       setDominoIndex(index)
       setDomino(Domino)
+      setIsDominoPicked(true)
       const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
       if (uniqueId) {
         const updateObject = { [uniqueId]: [index, Domino] }
@@ -145,6 +147,7 @@ const DominoPicker = ({
         const tempdominoes = dominoes.filter(Boolean)
         setDominoIndex(0)
         setDomino(tempdominoes[0])
+        setIsDominoPicked(true)
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
         if (uniqueId) {
           const updateObject = { [uniqueId]: [0, tempdominoes[0]] }
@@ -212,7 +215,7 @@ const DominoPicker = ({
     <div
       className="absolute top-0 left-0 h-full w-full lg:top-14 lg:left-16 lg:w-[567px] bg-lightpurple lg:h-[564px] z-50 flex flex-col gap-4 justify-start
      items-center"
-      id="fade-in-fast">
+      id="fade-in-faster">
       <div className={`${playerCount < 4 ? 'mt-12' : 'mt-6'} flex flex-col justify-start items-center`}>
         {Object.entries(playerArcanes).map(([playerId, { name }]) => (
           <div key={playerId}>
@@ -234,7 +237,11 @@ const DominoPicker = ({
               index === 30 ? (
                 <div>None</div>
               ) : (
-                <div id="fade-in-fast" className={`${dominoIndex === index && 'hidden'} flex`} key={index} onClick={() => chooseDomino(Domino, index)}>
+                <div
+                  id="fade-in-fast"
+                  className={`${dominoIndex === index && 'hidden'} flex cursor-pointer`}
+                  key={index}
+                  onClick={() => chooseDomino(Domino, index)}>
                   <div className={` ring-2 bg-grey ring-gray-200 shadow-lg z-20 dominosmall`} data-testid="Domino">
                     <Image src={Domino.img} alt="kep" width={40} height={40} className={`w-full h-full`} draggable="false" unoptimized />
                   </div>

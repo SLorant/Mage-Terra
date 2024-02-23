@@ -11,7 +11,7 @@ const PlayerGrid = ({ readNames, playerName, uniqueId, hostId }: PlayerGridProps
       Array.from({ length: 6 - Object.keys(readNames).length }).map((_, index) => (
         <div
           key={`placeholder-${index}`}
-          className="md:flex hidden opacity-50 flex w-[300px] mt-8 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple"></div>
+          className="md:flex hidden opacity-50 w-[300px] mt-8 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple"></div>
       )),
     )
   }, [readNames])
@@ -38,7 +38,7 @@ const PlayerGrid = ({ readNames, playerName, uniqueId, hostId }: PlayerGridProps
             </div>
             <div
               className={`flex w-[300px] justify-between relative mt-8 items-center ml-4 h-[42px]  rounded-[42px] border-2 border-lightpurple
-      ${Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
+      ${Name !== undefined && Name.length > 5 ? 'text-lg' : Name.length > 10 ? 'text-md' : 'text-xl'}`}>
               <p className="ml-16 mb-1">
                 {Name === playerName && playerId === uniqueId && Name === 'New player'
                   ? 'You'
