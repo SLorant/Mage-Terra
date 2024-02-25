@@ -72,7 +72,16 @@ export const Square: FC<SquareProps> = memo(function Square({
      ${borderClass} ${borderColor} ${animation} ${bgColor} relative shadow-lg z-20`}
       ref={drop}
       data-testid="Square">
-      {hasStar && <Image src="/dominoes/star.svg" alt="star" width={50} height={50} className="absolute top-2.5 left-2.5 w-3/4 h-3/4 z-50" unoptimized />}
+      {hasStar && (
+        <Image
+          src="/dominoes/star.svg"
+          alt="star"
+          width={50}
+          height={50}
+          className="absolute top-2 left-2 md:top-2.5 md:left-2.5 w-3/4 h-3/4 z-50"
+          unoptimized
+        />
+      )}
       {lastDroppedItem && (
         <div className={`h-auto w-auto  shadow-lg z-20 `}>
           <Image src={lastDroppedItem.img} alt="dropped" width={50} height={50} className="w-full h-full " unoptimized />

@@ -220,7 +220,7 @@ const DominoPicker = ({
         {Object.entries(playerArcanes).map(([playerId, { name }]) => (
           <div key={playerId}>
             {playerId === picker && (
-              <h1 id="fade-in-fast" className="text-3xl">
+              <h1 id="fade-in-fast" className="text-2xl md:text-3xl">
                 {playerId === uniqueId ? 'Choose a domino!' : name + ' is picking a domino'}
               </h1>
             )}

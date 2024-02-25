@@ -38,8 +38,7 @@ export default function Home() {
   const [donePicking, setDonePicking] = useState<boolean>(true)
   const [arcaneType, setArcaneType] = useState('')
   const [sbOpened, setSbOpened] = useState<boolean>(false)
-  const [isDominoPicked, setIsDominoPicked] = useState<boolean>(false)
-  //const [isPickingStage, setIsPickingStage] = useState<boolean>(false)
+  const [isDominoPicked, setIsDominoPicked] = useState<boolean>(true)
   const needBoard = true
 
   const handleDisconnection = () => {
@@ -87,7 +86,7 @@ export default function Home() {
 
   useEffect(() => {
     setIsDropped(false)
-    setIsDominoPicked(false)
+    if (round !== 1) setIsDominoPicked(false)
     if (!uniqueId) initializeUniqueId()
     const playersRef = ref(projectDatabase, `/${room}`)
     if (round > 14) {
@@ -96,8 +95,6 @@ export default function Home() {
     }
     return onValue(playersRef, (snapshot) => {
       const data = snapshot.val()
-      const gameStarted: boolean = snapshot.child('gameStarted').exists()
-      //if (!victory.current && !gameStarted) router.push('/') // Game doesn't exist
       const dataHost: { Host: string; round: number } = snapshot.val()
       if (data) {
         setLoading(false)
@@ -115,12 +112,13 @@ export default function Home() {
             }))
           }
           const scoreData: number = userSnapshot.child('Score').val()
-          const dominoData: DominoState = userSnapshot.child('Domino').val()
-          /*  if (playerId === uniqueId && dominoData) {
-            setDomino(dominoData)
-          } */
+
           if (nameData) addPlayerInfo(playerId, nameData, scoreData, avatarData)
         })
+      } else {
+        setTimeout(() => {
+          setLoading(false)
+        }, 5000)
       }
       if (dataHost && dataHost.Host) {
         setHostId(dataHost.Host)
@@ -269,7 +267,9 @@ export default function Home() {
       )}
       {!isPlayer && (
         <div className="xl:w-1/3 h-1/3 w-full md:w-1/2 absolute z-50 darkbg rounded-sm flex flex-col justify-around items-center">
-          <h2 className="text-2xl xl:text-3xl mt-8  text-white ">{loading ? 'Loading...' : 'The game has already started'}</h2>
+          <h2 className="px-8 text-center text-2xl xl:text-3xl mt-8  text-white ">
+            {loading ? 'Loading...' : 'The game has already started or does not exist'}
+          </h2>
           <div className="flex">
             {!loading && (
               <button

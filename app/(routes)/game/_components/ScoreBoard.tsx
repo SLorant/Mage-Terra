@@ -18,7 +18,6 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       avatar,
     }))
     rankedPlayersData.sort((a, b) => b.score - a.score)
-    console.log(rankedPlayersData)
 
     setRankedPlayers(
       rankedPlayersData.map((player, index) => ({
@@ -90,7 +89,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       absolute w-full transform-gpu duration-300 transition ease-out
        mobilebottom h-[48px] left-0 flex items-center justify-center bg-lightpurple lg:hidden z-50`}
         onClick={openScoreBoard}>
-        <svg width="47" height="21" viewBox="0 0 47 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className={`${sbOpened ? 'rotate-180' : ''}`} width="47" height="21" viewBox="0 0 47 21" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M47 19.9298L23.651 -1.02062e-06L0.236751 20.043L23.651 15.1738L47 19.9298Z" fill="white" />
         </svg>
       </button>

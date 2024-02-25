@@ -23,6 +23,8 @@ const AvatarChooser = ({
   const [_, updatePlayerCount] = usePlayerStore((state) => [state.playerCount, state.updatePlayerCount])
   const [inputName, setInputName] = useState('')
   const [avatar, setAvatar] = useState(1)
+  const [isClickedPrev, setIsClickedPrev] = useState(false)
+  const [isClickedNext, setIsClickedNext] = useState(false)
   useEffect(() => {
     const randomAvatar = Math.floor(Math.random() * 12)
     if (randomAvatar > 0) setAvatar(randomAvatar)
@@ -41,13 +43,11 @@ const AvatarChooser = ({
         if (data === true) gameStarted = true
       })
       if (currentPlayers !== 100 && currentPlayers < 6 && !gameStarted) {
-        console.log(playerName)
         if (playerName === 'New player') {
           const dataRef = ref(projectDatabase, `/${room}/${uniqueId}/Name`)
           set(dataRef, 'New player')
           const avatarRef = ref(projectDatabase, `/${room}/${uniqueId}/Avatar`)
           set(avatarRef, avatar)
-          setPlayerName('You')
         }
         setIsSpectator(false)
       } else if (Object.keys(readNames).includes(uniqueId)) {
@@ -71,11 +71,19 @@ const AvatarChooser = ({
     }
   }
   const handleNextAv = () => {
+    setIsClickedNext(true)
+    setTimeout(() => {
+      setIsClickedNext(false)
+    }, 300)
     if (avatar > 11) {
       setAvatar(1)
     } else setAvatar(avatar + 1)
   }
   const handlePrevAv = () => {
+    setIsClickedPrev(true)
+    setTimeout(() => {
+      setIsClickedPrev(false)
+    }, 300)
     if (avatar < 2) {
       setAvatar(12)
     } else setAvatar(avatar - 1)
@@ -85,12 +93,16 @@ const AvatarChooser = ({
   return (
     <div id="fade-in" className="flex flex-col  items-center justify-center avatarchooser">
       <div className="flex justify-center items-center  text-3xl">
-        <button className="prev mt-4" onClick={handlePrevAv}>
+        <button
+          className={`prev mt-4 ${isClickedPrev ? '-translate-x-0.5 transition duration-200 ease-in-out' : 'transition duration-200 ease-in-out'}`}
+          onClick={handlePrevAv}>
           <PrevAvatar />
         </button>
         <Image src={currentAvatar} alt="mainavatar" width={100} height={100} className="w-36 h-40 mainavatar" unoptimized />
 
-        <button className="next mt-4" onClick={handleNextAv}>
+        <button
+          className={`next mt-4 ${isClickedNext ? 'translate-x-0.5 transition duration-200 ease-in-out' : 'transition duration-200 ease-in-out'}`}
+          onClick={handleNextAv}>
           <NextAvatar />
         </button>
       </div>
@@ -111,7 +123,7 @@ const AvatarChooser = ({
             <p className="text-lg md:text-xl">I'm ready</p>
           </button>
         </div>
-        {error && <p className="text-lightpurple absolute -bottom-8">{error}</p>}
+        {error && <p className="text-lightpurple text-lg lg:text-xl  absolute -bottom-8">{error}</p>}
       </div>
     </div>
   )

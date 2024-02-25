@@ -7,7 +7,7 @@ const RoundBar = ({ round, setArcaneType, room, uniqueId, hostId }: RoundBarProp
   const [arcaneColors, setArcaneColors] = useState<string[]>([])
   const [arcanes, setArcanes] = useState<string[]>([])
   const arcaneList = { Dungeon: '#9000BD', Lagoon: '#FF40B1', Mt: '#35CB8F', Village: '#184BC2', Field: '#E29D6B' }
-  const arcaneCount = 5
+  const arcaneCount = 6
   const fillWidth = 22.33
 
   useEffect(() => {
@@ -47,6 +47,7 @@ const RoundBar = ({ round, setArcaneType, room, uniqueId, hostId }: RoundBarProp
     if (round == 8) setArcaneType(arcanes[3])
     if (round == 10) setArcaneType(arcanes[4])
     if (round == 12) setArcaneType(arcanes[5])
+    if (round == 14) setArcaneType(arcanes[6])
   }, [round])
   return (
     <div id="fade-in" className="lg:mt-8 lg:mb-0  z-30 lg:static absolute top-2 ">
