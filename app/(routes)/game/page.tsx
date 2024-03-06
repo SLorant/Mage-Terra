@@ -31,9 +31,10 @@ export default function Home() {
   const [round, setRound] = useState<number>(1)
   const [hostId, setHostId] = useState('')
   const victory = useRef(false)
+
   const router = useRouter()
   const [Domino, setDomino] = useState<DominoState>(DominoSetter())
-  const [countdown, setCountdown] = useState(4000)
+  const [countdown, setCountdown] = useState(40)
   const [isRoundOver, setIsRoundOver] = useState<boolean>(false)
   const [donePicking, setDonePicking] = useState<boolean>(true)
   const [arcaneType, setArcaneType] = useState('')
@@ -44,9 +45,12 @@ export default function Home() {
   const handleDisconnection = () => {
     const playerRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
     const roomRef = ref(projectDatabase, `/${room}`)
+    const pickerRef = ref(projectDatabase, `/${room}/pickerPlayer`)
     const doneRef = ref(projectDatabase, `/${room}/doneWithAction/${uniqueId}`)
     const playerDisconnectRef = onDisconnect(playerRef)
     const doneDisconnectRef = onDisconnect(doneRef)
+    const pickerDisconnectRef = onDisconnect(pickerRef)
+    pickerDisconnectRef.remove()
     doneDisconnectRef.set(null)
     playerDisconnectRef.update({ [uniqueId]: true })
     if (victory.current) playerDisconnectRef.cancel()
@@ -144,7 +148,7 @@ export default function Home() {
             setRound(round + 1)
             const roundRef = ref(projectDatabase, `/${room}/round`)
             set(roundRef, round + 1)
-            setCountdown(3300 + playerCount * 15)
+            setCountdown(33 + playerCount * 15)
             setIsRoundOver(false)
             setDonePicking(false)
           }
@@ -155,9 +159,11 @@ export default function Home() {
     const unsubscribeRoom = onValue(roomRef, (snapshot) => {
       const data: { Host: string; round: number } = snapshot.val()
       if (data && data.round && uniqueId !== hostId) {
+        console.log(round)
+        console.log(data.round)
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(3300 + playerCount * 15)
+          setCountdown(103 + playerCount * 15)
           setIsRoundOver(false)
           setDonePicking(false)
         }
@@ -165,11 +171,6 @@ export default function Home() {
     })
     return () => unsubscribeRoom()
   }, [isDropped, isRoundOver])
-
-  useEffect(() => {
-    if (round > 2 && countdown > 30 && !donePicking) {
-    }
-  }, [round, countdown, donePicking])
 
   const addPlayerInfo = (otherId: string, nameData: string, scoreData: number, avatarData: string) => {
     scoreData = scoreData ?? 0
@@ -247,7 +248,7 @@ export default function Home() {
                   needBoard={needBoard}
                   sbOpened={sbOpened}
                   setSbOpened={setSbOpened}
-                  scoreText={'arc'}
+                  scoreText={false}
                 />
               ) : (
                 <ScoreBoard
@@ -257,7 +258,7 @@ export default function Home() {
                   needBoard={needBoard}
                   sbOpened={sbOpened}
                   setSbOpened={setSbOpened}
-                  scoreText="p"
+                  scoreText={true}
                 />
               )}
               <RoundBar round={round} setArcaneType={setArcaneType} uniqueId={uniqueId} hostId={hostId} room={room ?? ''} />

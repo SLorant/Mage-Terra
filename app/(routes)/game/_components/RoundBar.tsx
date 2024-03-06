@@ -34,8 +34,6 @@ const RoundBar = ({ round, setArcaneType, room, uniqueId, hostId }: RoundBarProp
     if (uniqueId && uniqueId !== hostId && arcanes?.length > arcaneCount) {
       for (let i = 0; i < arcanes.length; i++) {
         const color = Object.entries(arcaneList).find(([key, _value]) => key === arcanes[i])
-        console.log(arcanes[i])
-        console.log(color)
         if (color) setArcaneColors((prevArcanes) => [...prevArcanes, color[1]])
       }
     }

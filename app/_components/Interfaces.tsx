@@ -25,7 +25,7 @@ export interface ScoreBoardProps {
   readBoards?: { [playerId: string]: [SquareState[], string, string] }
   sbOpened: boolean
   setSbOpened: Dispatch<SetStateAction<boolean>>
-  scoreText: string
+  scoreText: boolean
 }
 
 export interface SquareState {

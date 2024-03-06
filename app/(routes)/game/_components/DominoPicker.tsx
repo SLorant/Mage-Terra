@@ -28,7 +28,7 @@ const DominoPicker = ({
   const [dominoes, setDominoes] = useState<DominoState[]>([])
 
   const [playerDominoes, setPlayerDominoes] = useState<{ [key: string]: [name: string, domino: DominoState] }>({})
-  const [pickingCountDown, setPickingCountDown] = useState(1500)
+  const [pickingCountDown, setPickingCountDown] = useState(16)
   function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
@@ -148,10 +148,12 @@ const DominoPicker = ({
         setDominoIndex(0)
         setDomino(tempdominoes[0])
         setIsDominoPicked(true)
+        setCanPick(false)
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
         if (uniqueId) {
           const updateObject = { [uniqueId]: [0, tempdominoes[0]] }
-          update(playersRef, updateObject)
+          console.log(updateObject)
+          update(playersRef, updateObject) //itt baj van meccs végénél, meg mikor a nem host nem valaszt, es a host pedig igen
         }
       }
       return () => {
@@ -226,7 +228,11 @@ const DominoPicker = ({
             )}
           </div>
         ))}
-        <p className="mt-2">{pickingCountDown} seconds left</p>
+        {pickingCountDown < 16 && (
+          <p id="fade-in-fast" className="mt-2">
+            {pickingCountDown} seconds left
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col justify-center items-center gap-4">

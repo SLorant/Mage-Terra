@@ -13,6 +13,7 @@ import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import { useRoomData } from './_components/useRoomData'
 import PlayerGrid from './_components/PlayerGrid'
 import AvatarChooser from './_components/AvatarChooser'
+import { Timestamp } from 'firebase-admin/firestore'
 
 export default function Home() {
   const router = useRouter()

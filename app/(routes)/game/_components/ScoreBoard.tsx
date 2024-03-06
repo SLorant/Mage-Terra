@@ -85,7 +85,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       } `}>
       <button
         id="scoreArrow"
-        className={`${sbOpened ? '-translate-y-[548px] static z-50' : ''}
+        className={`${sbOpened ? (scoreText ? ' -translate-y-[548px] static z-50' : ' -translate-y-[248px] static z-50') : ''}
       absolute w-full transform-gpu duration-300 transition ease-out
        mobilebottom h-[48px] left-0 flex items-center justify-center bg-lightpurple lg:hidden z-50`}
         onClick={openScoreBoard}>
@@ -96,8 +96,9 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
       <aside
         id="fade-in"
         className={`${sbOpened ? 'w-full transform-gpu duration-200 transition ease-in-out' : 'hidden lg:flex'}
-      mt-24 lg:mt-9 w-[335px] bg-grey flex flex-col h-[600px] lg:h-[500px] justify-start items-center gap-2 relative`}>
-        <div id="fade-in-fast" className={`flex flex-col text-xl text-white w-full items-center text-center`}>
+        ${scoreText ? '  h-[600px]' : ' h-[300px]'}
+      mt-24 lg:mt-9 w-[335px] bg-grey flex flex-col lg:h-[500px] justify-start items-center gap-2 relative`}>
+        <div id="fade-in-fast" className={` ${scoreText ? 'flex' : 'hidden md:flex'} flex-col text-xl text-white w-full items-center text-center`}>
           {Object.entries(playerInfos).map(([playerId, { name, score, avatar }]) => (
             <div
               key={playerId}
@@ -110,7 +111,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
               </div>
               <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
               <div className="mr-4 absolute right-2">
-                {score} {scoreText}
+                {score} {scoreText ? 'p' : 'arc'}
               </div>
             </div>
           ))}

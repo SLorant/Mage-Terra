@@ -129,8 +129,6 @@ export const Board: FC<BoardProps> = memo(function Board({ uniqueId, room, isDro
 
       const fillIndex: number = isTurned ? index + rowLength : index + 1
       setIsActive(false)
-      console.log(index)
-      console.log(Squares[index])
       setLeftSqIndex(-1)
       //dominoIndexes.set(index, item)
       if (

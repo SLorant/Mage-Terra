@@ -78,7 +78,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
           ))}
         </div>
         <button
-          className="darkbutton w-[275px] rounded-sm h-14 mb-6 mt-12 text-2xl  text-white 
+          className="darkbutton w-[275px] rounded-sm h-14 mb-6 mt-6 md:mt-12 text-2xl  text-white 
         transition ease-in-out duration-300 hover:scale-[102%]"
           onClick={handleGoBack}>
           back to home
