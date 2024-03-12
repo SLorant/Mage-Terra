@@ -74,6 +74,14 @@ export default function Home() {
   }, [uniqueId, playerInfos])
 
   useEffect(() => {
+    if (room && uniqueId && uniqueId === hostId) {
+      const updateRef = ref(projectDatabase, `/updates`)
+      update(updateRef, { [room]: Date.now() })
+    }
+    return
+  }, [uniqueId, hostId, room])
+
+  useEffect(() => {
     let timer: number
     if (round > 1 && countdown > 0 && victory.current === false) {
       timer = window.setInterval(() => {
@@ -159,11 +167,9 @@ export default function Home() {
     const unsubscribeRoom = onValue(roomRef, (snapshot) => {
       const data: { Host: string; round: number } = snapshot.val()
       if (data && data.round && uniqueId !== hostId) {
-        console.log(round)
-        console.log(data.round)
         if (round !== data.round) {
           setRound(data.round)
-          setCountdown(103 + playerCount * 15)
+          setCountdown(33 + playerCount * 15)
           setIsRoundOver(false)
           setDonePicking(false)
         }
@@ -202,7 +208,7 @@ export default function Home() {
                   <svg width="117" height="55" viewBox="0 0 117 55" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M58.5 55L0.909314 0.250001L116.091 0.250011L58.5 55Z" fill="#E1DAFF" />
                   </svg>
-                  <p className="absolute text-3xl -top-2 left-7 md:top-0 md:left-10 text-darkblue z-50">{countdown}</p>
+                  <p className="absolute text-3xl top-0 left-10 text-darkblue z-50">{countdown}</p>
                 </div>
               </div>
             </div>

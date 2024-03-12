@@ -13,7 +13,7 @@ import Lottie, { LottieRefCurrentProps } from 'lottie-react'
 import { useRoomData } from './_components/useRoomData'
 import PlayerGrid from './_components/PlayerGrid'
 import AvatarChooser from './_components/AvatarChooser'
-import { Timestamp } from 'firebase-admin/firestore'
+import Link from 'next/link'
 
 export default function Home() {
   const router = useRouter()
@@ -223,11 +223,15 @@ export default function Home() {
         </div>
       )}
       <div
-        className="w-3/4 md:flex md:ml-20 absolute bottom-6 sm:bottom-2 footer
-       md:flex-row text-xl justify-center items-center opacity-40 h-20 z-30 flex md:gap-20 text-white">
-        <a className="mb-2">Cookies</a>
+        className="w-3/4 sm:ml-16 absolute bottom-6 sm:bottom-2
+       sm:flex-row flex-col text-xl justify-center items-center opacity-40 h-20 z-30 flex sm:gap-20 text-white">
+        <Link href={'contact'} className="mb-2">
+          Contact
+        </Link>
         <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
-        <a className="mb-2">Terms & conditions</a>
+        <Link href={'terms'} className="mb-2">
+          Privacy policy
+        </Link>
       </div>
     </main>
   )

@@ -31,9 +31,9 @@ const PlayerGrid = ({ readNames, playerName, uniqueId, hostId }: PlayerGridProps
           <div id="fade-in" className="relative" key={playerId}>
             <div className="absolute z-40 top-[18px] left-2">
               {Avatar === undefined ? (
-                <Image height={55} width={55} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
+                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
               ) : (
-                <Image height={55} width={55} src={`/avatars/avatars-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
+                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatars-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
               )}
             </div>
             <div

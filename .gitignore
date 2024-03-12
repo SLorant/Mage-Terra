@@ -39,6 +39,16 @@ next-env.d.ts
 .prettierrc.json
 app/unusedcode.txt
 .env.development
-functions
 .firebaserc
 firebase.json
+
+# Compiled JavaScript files
+functions/lib/**/*.js
+functions/lib/**/*.js.map
+
+# TypeScript v1 declaration files
+functions/typings/
+
+# Node.js dependency directory
+functions/node_modules/
+

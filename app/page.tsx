@@ -117,11 +117,15 @@ export default function Home() {
         </Link>
       </div>
       <div
-        className="w-3/4 sm:ml-20 absolute bottom-6 sm:bottom-2
+        className="w-3/4 sm:ml-16 absolute bottom-6 sm:bottom-2
        sm:flex-row flex-col text-xl justify-center items-center opacity-40 h-20 z-30 flex sm:gap-20 text-white">
-        <a className="mb-2">Cookies</a>
+        <Link href={'contact'} className="mb-2">
+          Contact
+        </Link>
         <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
-        <a className="mb-2">Terms & conditions</a>
+        <Link href={'terms'} className="mb-2">
+          Privacy policy
+        </Link>
       </div>
     </main>
   )

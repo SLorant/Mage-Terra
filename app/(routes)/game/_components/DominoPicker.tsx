@@ -66,14 +66,13 @@ const DominoPicker = ({
     onValue(dominoesRef, (snapshot) => {
       const data: DominoState[] | DominoState = snapshot.val()
       let dataArray: DominoState[]
-
       if (Array.isArray(data)) {
         dataArray = data
       } else if (data) {
         const keys = Object.keys(data)
         const values = Object.values(data)
 
-        dataArray = new Array(keys.length).fill(undefined)
+        dataArray = new Array(keys.length)
 
         for (let i = 0; i < keys.length; i++) {
           const index = parseInt(keys[i])
@@ -124,10 +123,12 @@ const DominoPicker = ({
 
   const chooseDomino = (Domino: DominoState, index: number) => {
     if (dominoIndex === 30 && canPick) {
+      setPickingCountDown(30)
       setDominoIndex(index)
       setDomino(Domino)
       setIsDominoPicked(true)
       const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
+
       if (uniqueId) {
         const updateObject = { [uniqueId]: [index, Domino] }
         update(playersRef, updateObject)
@@ -135,7 +136,7 @@ const DominoPicker = ({
     }
   }
   useEffect(() => {
-    if (canPick) {
+    if (canPick && pickingCountDown < 30) {
       let timer: number
 
       if (pickingCountDown) {
@@ -150,11 +151,13 @@ const DominoPicker = ({
         setIsDominoPicked(true)
         setCanPick(false)
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`)
+        console.log(tempdominoes)
         if (uniqueId) {
           const updateObject = { [uniqueId]: [0, tempdominoes[0]] }
           console.log(updateObject)
-          update(playersRef, updateObject) //itt baj van meccs végénél, meg mikor a nem host nem valaszt, es a host pedig igen
+          update(playersRef, updateObject)
         }
+        setPickingCountDown(30)
       }
       return () => {
         clearInterval(timer)
@@ -236,7 +239,7 @@ const DominoPicker = ({
       </div>
 
       <div className="flex flex-col justify-center items-center gap-4">
-        <div className="flex flex-col justify-center items-center bg-grey w-[100vw] md:w-[567px] h-[155px] py-4">
+        <div className="flex flex-col justify-center items-center bg-grey w-[100vw] md:w-[567px] h-auto py-4">
           <p className="mb-4 text-2xl">Pickable dominos</p>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-10 mb-4 ">
             {dominoes.map((Domino, index) =>
@@ -260,7 +263,7 @@ const DominoPicker = ({
           </div>
         </div>
         <h2 className="text-2xl">Chosen dominos</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-6">
           {Object.entries(playerDominoes).map(([playerId, [name, domino]]) => (
             <div className="flex flex-col justify-center items-center " key={playerId} id="fade-in-fast">
               <p className="text-xl mb-2">{name}:</p>

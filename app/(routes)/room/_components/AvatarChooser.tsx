@@ -1,5 +1,5 @@
 import React from 'react'
-import { set, ref, onValue, onDisconnect } from 'firebase/database'
+import { set, ref, onValue, onDisconnect, update } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
@@ -98,7 +98,7 @@ const AvatarChooser = ({
           onClick={handlePrevAv}>
           <PrevAvatar />
         </button>
-        <Image src={currentAvatar} alt="mainavatar" width={100} height={100} className="w-36 h-40 mainavatar" unoptimized />
+        <Image src={currentAvatar} alt="mainavatar" width={0} height={0} className="w-36 h-40 mainavatar" unoptimized />
 
         <button
           className={`next mt-4 ${isClickedNext ? 'translate-x-0.5 transition duration-200 ease-in-out' : 'transition duration-200 ease-in-out'}`}
