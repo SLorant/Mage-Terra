@@ -1,5 +1,6 @@
 'use client'
 
+import ParallaxImages from '@/app/_components/ParallaxImages'
 import { BackButton } from '@/app/_components/Vectors'
 import { useRouter } from 'next/navigation'
 
@@ -12,6 +13,9 @@ export default function Home() {
   return (
     <main className={`flex h-full flex-col items-center justify-center text-white  font-sans`}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
+      <div className="md:block hidden">
+        <ParallaxImages />
+      </div>
       <div className="h-full relative overflow-auto w-full  px-8 md:px-16 xl:px-28  md:w-2/3 2xl:w-1/2 darkbg z-50 flex flex-col items-center justify-start">
         <button className="z-30 absolute top-6 left-10" onClick={handleGoBack}>
           <BackButton />

@@ -1,5 +1,6 @@
 'use client'
 
+import ParallaxImages from '@/app/_components/ParallaxImages'
 import { BackButton } from '@/app/_components/Vectors'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -14,6 +15,9 @@ export default function Home() {
   return (
     <main className={`flex h-full flex-col items-center justify-center text-white  font-sans`}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
+      <div className="md:block hidden">
+        <ParallaxImages />
+      </div>
       <div className="h-full relative overflow-auto w-full px-8 md:px-16 xl:px-28 md:w-2/3 2xl:w-1/2 darkbg z-50 flex flex-col items-center justify-start">
         <button className="z-30 absolute top-6 left-10" onClick={handleGoBack}>
           <BackButton />
@@ -81,11 +85,15 @@ export default function Home() {
           <p>On the roundbar, you can see the next arcanes. They change every two rounds, and they are random, you can get the same arcanes in a game.</p>
         </div>
         <h1 className="text-3xl mt-10">More info</h1>
-        <div className="mt-10 w-full  text-justify text-lg mb-20">
+        <div className="mt-10 w-full  text-justify text-lg ">
           <p>
             In both game modes, if the host quits, a new host will be chosen randomly. Normal play rooms wait five minutes, if the game is not started by then,
             the room gets deleted.
           </p>
+        </div>
+        <div className="mt-10 flex flex-col w-full justify-center items-center text-justify text-lg mb-12">
+          <p className="text-2xl">Have fun, and thank you for playing the game!</p>
+          <Image className="w-96 mt-4" src="/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
         </div>
       </div>
     </main>

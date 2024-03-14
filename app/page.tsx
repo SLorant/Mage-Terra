@@ -123,7 +123,7 @@ export default function Home() {
           Contact
         </Link>
         <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
-        <Link href={'terms'} className="mb-2">
+        <Link href={'privacy'} className="mb-2">
           Privacy policy
         </Link>
       </div>
