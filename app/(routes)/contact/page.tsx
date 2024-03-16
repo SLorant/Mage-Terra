@@ -40,7 +40,7 @@ export default function Home() {
             <Image className="w-6 md:w-8" src="/behance.svg" alt="" height={80} width={80} unoptimized></Image>
           </Link>
         </div>
-        <p className="md:text-lg md:mt-0 mt-2 py-6">Contact us: contact.mageterra@gmail.com</p>
+        <p className="md:text-lg md:mt-0 mt-2 py-6">Contact us: contact.Mage Terra@gmail.com</p>
         <Image className="w-80" src="/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
       </div>
     </main>

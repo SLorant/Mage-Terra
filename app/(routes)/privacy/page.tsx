@@ -22,17 +22,17 @@ export default function Home() {
         </button>
         <h1 className="text-3xl mt-10 pb-4">Privacy policy</h1>
         <p>
-          MageTerra is an online multiplayer game developed by Lorant Sutus. This Privacy Policy outlines how we collect, use, and protect data in MageTerra.
+          Mage Terra is an online multiplayer game developed by Lorant Sutus. This Privacy Policy outlines how we collect, use, and protect data in Mage Terra.
         </p>
         <h3 className="text-xl mt-2 py-4">Information We Collect</h3>
 
         <ol>
           <li>
-            <strong>Generated ID:</strong> MageTerra may generate and store a unique identifier in your browser's local storage to facilitate gameplay and
+            <strong>Generated ID:</strong> Mage Terra may generate and store a unique identifier in your browser's local storage to facilitate gameplay and
             provide a personalized experience. This identifier is not linked to any personal information and is used solely for game functionality.
           </li>
           <li>
-            <strong>Firebase Realtime Database:</strong> MageTerra utilizes Firebase Realtime Database provided by Google to store game-related data, such as
+            <strong>Firebase Realtime Database:</strong> Mage Terra utilizes Firebase Realtime Database provided by Google to store game-related data, such as
             player scores, and game progress. However, we do not collect any personally identifiable information through Firebase Realtime Database.
           </li>
         </ol>
@@ -53,7 +53,7 @@ export default function Home() {
         <h3 className="text-xl mt-2 py-4">Third-Party Services</h3>
 
         <p>
-          MageTerra may utilize third-party services, such as Firebase Realtime Database, for certain game functionalities. These third-party services may have
+          Mage Terra may utilize third-party services, such as Firebase Realtime Database, for certain game functionalities. These third-party services may have
           their own privacy policies governing the collection and use of data. We encourage you to review the privacy policies of these third-party services for
           more information.
         </p>
@@ -62,13 +62,14 @@ export default function Home() {
 
         <p>
           We reserve the right to update or modify this Privacy Policy at any time. Any changes will be effective immediately upon posting the updated Privacy
-          Policy on our website. Your continued use of MageTerra after the posting of the updated Privacy Policy constitutes your acceptance of the changes.
+          Policy on our website. Your continued use of Mage Terra after the posting of the updated Privacy Policy constitutes your acceptance of the changes.
         </p>
 
         <h3 className="text-xl mt-2 py-4">Contact Us</h3>
 
         <p className="mb-10">
-          If you have any questions or concerns about this Privacy Policy or the data practices of MageTerra, please contact us at contact.mageterra@gmail.com.
+          If you have any questions or concerns about this Privacy Policy or the data practices of Mage Terra, please contact us at contact.Mage
+          Terra@gmail.com.
         </p>
       </div>
     </main>

@@ -22,14 +22,14 @@ export default function Home() {
         <button className="z-30 absolute top-6 left-10" onClick={handleGoBack}>
           <BackButton />
         </button>
-        <h1 className="text-5xl mt-10">The rules of MageTerra</h1>
+        <h1 className="text-5xl mt-10">The rules of Mage Terra</h1>
         <div className="mt-10 w-full  text-justify text-lg">
-          <p>MageTerra is a turn based game, the main goal is to place the same coloured dominoes together to score more points than your opponent(s).</p>
+          <p>Mage Terra is a turn based game, the main goal is to place the same coloured dominoes together to score more points than your opponent(s).</p>
         </div>
         <h1 className="text-3xl mt-10">Starting a game</h1>
         <div className="mt-10 w-full  text-justify text-lg">
           <p>
-            MageTerra can be played with 2-6 players either with friends, or randos. Choose a name and avatar, then click the "I'm ready!" button to save them.
+            Mage Terra can be played with 2-6 players either with friends, or randos. Choose a name and avatar, then click the "I'm ready!" button to save them.
             Only the host can start the game.
           </p>
         </div>

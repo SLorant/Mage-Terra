@@ -1,7 +1,7 @@
 import './_assets/style/globals.css'
 
 export const metadata = {
-  title: 'MageTerra',
+  title: 'Mage Terra',
   description: 'Build your magical kingdom with dominoes!',
 }
 

@@ -1,6 +1,6 @@
-# MageTerra
+# Mage Terra
 
-MageTerra is a multiplayer real-time board game. Players place down dominoes to create their own kingdom. The objective is to connect the dominoes and form areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
+Mage Terra is a multiplayer real-time board game. Players place down dominoes to create their own kingdom. The objective is to connect the dominoes and form areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
 
 ## Features
 
@@ -22,7 +22,7 @@ MageTerra is a multiplayer real-time board game. Players place down dominoes to 
 
 ## Getting Started
 
-To run MageTerra locally, follow these steps:
+To run Mage Terra locally, follow these steps:
 
 1. Clone the repository:
 
@@ -53,12 +53,12 @@ npm install
 npm run dev
 ```
 
-5. Open your browser and navigate to http://localhost:3000 to experience MageTerra!
+5. Open your browser and navigate to http://localhost:3000 to experience Mage Terra!
 
 ## Contact & Credits
 
-- The beautiful illustrations were made by Adrienn Kovacs ([Behance](https://www.behance.net/adriennkovcs2)).
-- You can reach me on ([GitHub](https://github.com/SLorant)), ([LinkedIn](https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/)), or [email](mailto:contact.mageterra@gmail.com).
+- The beautiful illustrations were made by Adrienn Kovacs [Behance](https://www.behance.net/adriennkovcs2).
+- You can reach me on [GitHub](https://github.com/SLorant), [LinkedIn](https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/), or [email](mailto:contact.Mage Terra@gmail.com).
 
 ## License
 
