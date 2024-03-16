@@ -68,7 +68,7 @@ export default function Home() {
         <h3 className="text-xl mt-2 py-4">Contact Us</h3>
 
         <p className="mb-10">
-          If you have any questions or concerns about this Privacy Policy or the data practices of MageTerra, please contact us at [Your Contact Email].
+          If you have any questions or concerns about this Privacy Policy or the data practices of MageTerra, please contact us at contact.mageterra@gmail.com.
         </p>
       </div>
     </main>
