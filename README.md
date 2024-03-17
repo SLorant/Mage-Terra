@@ -1,16 +1,15 @@
 # Mage Terra
 
-Mage Terra is a multiplayer real-time board game. Players place down dominoes to create their own kingdom. The objective is to connect the dominoes and form areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
+Mage Terra is a multiplayer real-time board game. Players place down dominoes to create their own kingdom. The objective is to connect the dominoes creating areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
 
 ## Features
 
-- Open & Private rooms: Players can engage in matches with randomly matched opponents or create their own rooms to play with friends.
-- Choose your avatar and name: There are several high quality avatars you can choose from to play as.
-- Real-time gameplay: Experience seamless real-time gameplay with Firebase Realtime Database.
-- Core mechanics: Strategically place dominoes to maximize points by creating interconnected areas.
-- Arcane system: Always keep track of arcanes, they decide who gets to pick the best dominoes first!
-- Score tracking & mini-boards: You can see each player's score, and their kingdoms throughout the game.
-- Responsive: Play on mobile, desktop
+- Open & private rooms: You can engage in games with randomly matched opponents or create your own room to play with friends
+- Choose your avatar and name: There are several avatars to play as, they are mages from all over the world
+- Core gameplay: Connect the dominoes, create the largest colored areas, and earn the highest score
+- Arcane system: Keep track of arcanes as they decide who gets to pick the best dominoes first
+- Score tracking & mini-boards: You can see each player's score, and their kingdoms throughout the game
+- Responsive: Play on mobile or desktop
 
 ## Technologies Used
 
@@ -32,33 +31,33 @@ To run Mage Terra locally, follow these steps:
 
 2. Navigate to the project directory:
 
-```bash
-cd mage-terra
-```
+   ```bash
+   cd mage-terra
+   ```
 
 3. Install dependencies:
 
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-3. Set up Firebase:
+4. Set up Firebase:
 
    - Create a Firebase project and configure it for web.
    - Copy your Firebase configuration (apiKey, authDomain, projectId, etc.) and replace it in the Firebase config file.
 
-4. Start the development server:
+5. Start the development server:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
-5. Open your browser and navigate to http://localhost:3000 to experience Mage Terra!
+6. Open your browser and navigate to http://localhost:3000 to experience Mage Terra!
 
 ## Contact & Credits
 
-- The beautiful illustrations were made by Adrienn Kovacs [Behance](https://www.behance.net/adriennkovcs2).
-- You can reach me on [GitHub](https://github.com/SLorant), [LinkedIn](https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/), or [email](mailto:contact.Mage Terra@gmail.com).
+- The magnificent illustrations were made by Adrienn Kovacs ([Behance](https://www.behance.net/adriennkovcs2)).
+- You can reach me on [GitHub](https://github.com/SLorant), [LinkedIn](https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/), or [email](mailto:contact.mageterra@gmail.com).
 
 ## License
 
