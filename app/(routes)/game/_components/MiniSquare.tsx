@@ -1,15 +1,9 @@
 import { FC } from 'react'
 import { memo } from 'react'
 import { LittleStar } from '@/app/_components/Vectors'
-export interface SquareProps {
-  accept: string[]
-  lastDroppedItem?: any
-  hasStar: boolean
-  index: number
-  //droppedDominoes: DroppedDominoes[]
-}
+import { MiniSquareProps } from '@/app/_components/Interfaces'
 
-export const MiniSquare: FC<SquareProps> = memo(function Square({ accept, lastDroppedItem, hasStar, index /* droppedDominoes */ }) {
+export const MiniSquare: FC<MiniSquareProps> = memo(function Square({ accept, lastDroppedItem, hasStar /* droppedDominoes */ }) {
   let squareColor = 'bg-transparent'
 
   if (lastDroppedItem) {

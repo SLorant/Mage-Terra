@@ -1,5 +1,5 @@
 import React from 'react'
-import { set, ref, onValue, onDisconnect, update } from 'firebase/database'
+import { set, ref, onValue, onDisconnect } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
 import Image from 'next/image'
@@ -89,7 +89,7 @@ const AvatarChooser = ({
     } else setAvatar(avatar - 1)
   }
 
-  const currentAvatar = `avatar-${avatar}.png`
+  const currentAvatar = `/avatars/avatar-${avatar}.png`
   return (
     <div id="fade-in" className="flex flex-col  items-center justify-center avatarchooser">
       <div className="flex justify-center items-center  text-3xl">

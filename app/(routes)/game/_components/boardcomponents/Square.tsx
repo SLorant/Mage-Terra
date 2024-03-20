@@ -60,7 +60,6 @@ export const Square: FC<SquareProps> = memo(function Square({
     borderColor = 'border-lightpurple'
   }
   const ruins = ['/dominoes/ruin-01.webp', '/dominoes/ruin-02.webp', '/dominoes/ruin-03.webp']
-  //const randomRuin = Math.floor(Math.random() * ruins.length) + 1
   const [randomRuin, setRandomRuin] = useState(1)
   useEffect(() => {
     setRandomRuin(Math.floor(Math.random() * ruins.length) + 1)

@@ -1,4 +1,4 @@
-import { set, ref, onValue, update, DataSnapshot } from 'firebase/database'
+import { set, ref, onValue, DataSnapshot } from 'firebase/database'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { projectDatabase } from '@/firebase/config'
@@ -12,7 +12,6 @@ export const useRoomData = (room: string, uniqueId: string, wentBack: boolean) =
   const [quickPlay, setQuickPlay] = useState<boolean>(false)
   useEffect(() => {
     const roomRef = ref(projectDatabase, `/${room}`)
-    const playerRef = ref(projectDatabase, `/${room}/${uniqueId}`)
     const handleRoomData = (snapshot: DataSnapshot) => {
       const data = snapshot.val()
       if (data) {
@@ -48,12 +47,7 @@ export const useRoomData = (room: string, uniqueId: string, wentBack: boolean) =
         if (uniqueId) {
           if (gameStarted === true) {
             router.push(`/game?roomId=${room}`)
-          } /*  else if (gameStarted === true && Map) {
-            const discRef = ref(projectDatabase, `/${room}/DisconnectedPlayers`)
-            update(discRef, { [uniqueId]: true })
-            set(playerRef, null)
-            router.push('/')
-          } */
+          }
         }
       }
     }

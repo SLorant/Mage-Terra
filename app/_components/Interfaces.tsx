@@ -155,3 +155,8 @@ export interface RoundBarProps {
 export interface DominoPreviewProps {
   isTurned: boolean
 }
+export interface MiniSquareProps {
+  accept: string[]
+  lastDroppedItem?: any
+  hasStar: boolean
+}

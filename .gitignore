@@ -41,6 +41,7 @@ app/unusedcode.txt
 .env.development
 .firebaserc
 firebase.json
+/firebase/config.ts
 
 # Compiled JavaScript files
 functions/lib/**/*.js

@@ -51,7 +51,6 @@ export default function Home() {
             if (quickPlay === true && gameStarted !== true && playerSize < 6) {
               setQuickRoom(roomKey)
               foundQuickRoom = true
-              //router.push(`/room?roomId=${roomKey}`)
             }
           })
           if (!foundQuickRoom && quickRoom == '') {
@@ -90,7 +89,7 @@ export default function Home() {
     <main className={`flex h-full mt-6 sm:mt-2 flex-col items-center justify-center text-white  font-sans`}>
       <div className="mainbg w-full h-full absolute top-0 left-0 z-20"></div>
       <div className="mb-10 sm:mb-4  z-30  ">
-        <Image className="w-[90vw] md:w-[50vh] md:h-[22vh]" height={500} width={500} src="/logo.png" alt="logo"></Image>
+        <Image className="w-[90vw] md:w-[50vh] md:h-[22vh]" height={500} width={500} src="/logos/logo.png" alt="logo"></Image>
       </div>
       <ParallaxImages />
       <div className="z-30  text-xl mb-10 rounded-lg w-1/2 lg:w-1/3 flex flex-col items-center justify-center">
@@ -122,7 +121,7 @@ export default function Home() {
         <Link href={'contact'} className="mb-2">
           Contact
         </Link>
-        <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
+        <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logos/logosimple.png"></Image>
         <Link href={'privacy'} className="mb-2">
           Privacy policy
         </Link>

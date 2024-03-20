@@ -44,11 +44,11 @@ const ParallaxImages = () => {
   return (
     <div>
       <div className="w-[820px] h-[1150px] sm:w-[1000px] sm:h-[1400px] absolute md:-top-16 top-72 sm:top-40 -left-36 sm:-left-24 lg:left-0 xl:left-14 2xl:left-20 z-10 sm:z-0 parallax left">
-        <Image className="" height={1000} width={1000} src="/homemage.png" alt="mage"></Image>
+        <Image className="" height={1000} width={1000} src="/avatars/homemage.png" alt="mage"></Image>
         <Lottie className=" absolute top-0 left-0" animationData={dominoes} lottieRef={lottieRef} />
       </div>
       <div className="w-[700px] h-[1200px]  sm:w-[850px] sm:h-[1400px] absolute -top-24 -right-40 sm:-top-20 sm:-right-40 lg:-right-4 xl:right-20 2xl:right-20 z-0 parallax right">
-        <Image className="" height={850} width={850} src="/homemage2.png" alt="mage"></Image>
+        <Image className="" height={850} width={850} src="/avatars/homemage2.png" alt="mage"></Image>
         <Lottie className=" absolute top-0 sm:top-0 right-0" animationData={mage2} lottieRef={lottieRef2} />
       </div>
     </div>

@@ -228,7 +228,7 @@ export default function Home() {
         <Link href={'contact'} className="mb-2">
           Contact
         </Link>
-        <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logosimple.png"></Image>
+        <Image className="hidden sm:inline" height={100} width={100} alt="simplelogo" src="/logos/logosimple.png"></Image>
         <Link href={'privacy'} className="mb-2">
           Privacy policy
         </Link>

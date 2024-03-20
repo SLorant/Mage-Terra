@@ -1,10 +1,10 @@
-import functions = require('firebase-functions')
-import admin = require('firebase-admin')
+import * as functions from 'firebase-functions'
+import * as admin from 'firebase-admin'
 import { DataSnapshot } from 'firebase-admin/database'
 
 admin.initializeApp()
 
-exports.monitorNodes = functions.database.ref('/updates').onWrite(async (change, context) => {
+exports.monitorNodes = functions.database.ref('/updates').onWrite(async (change) => {
   const updateNodeRef = change.after.ref
   const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000
   // Retrieve all child nodes within the parent node

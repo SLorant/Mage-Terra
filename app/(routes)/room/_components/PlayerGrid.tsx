@@ -25,15 +25,13 @@ const PlayerGrid = ({ readNames, playerName, uniqueId, hostId }: PlayerGridProps
      grid-cols-1 md:h-auto md:grid-cols-2 md:grid-rows-3 avatartable`}>
       {readNames &&
         Object.keys(readNames).length > 0 &&
-        /* readNames[0] &&
-        readNames[0].Name !== undefined && */
         Object.entries(readNames).map(([playerId, { Name, Avatar }]) => (
           <div id="fade-in" className="relative" key={playerId}>
             <div className="absolute z-40 top-[18px] left-2">
               {Avatar === undefined ? (
-                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatars-1.png`} alt="playeravatar" unoptimized></Image>
+                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatar_small-1.png`} alt="playeravatar" unoptimized></Image>
               ) : (
-                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatars-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
+                <Image className="w-[55px] h-[62px]" height={0} width={0} src={`/avatars/avatar_small-${Avatar}.png`} alt="playeravatar" unoptimized></Image>
               )}
             </div>
             <div

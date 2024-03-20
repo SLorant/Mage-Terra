@@ -93,7 +93,7 @@ export default function Home() {
         </div>
         <div className="mt-10 flex flex-col w-full justify-center items-center text-justify text-lg mb-12">
           <p className="text-2xl">Have fun, and thank you for playing the game!</p>
-          <Image className="w-96 mt-4" src="/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
+          <Image className="w-96 mt-4" src="/examples/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
         </div>
       </div>
     </main>

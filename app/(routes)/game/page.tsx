@@ -196,7 +196,7 @@ export default function Home() {
   Scaler()
   return (
     <main className="flex h-screen mainbg items-center justify-center font-sans relative">
-      <Image className="h-screen hidden lg:block lg:absolute top-0 left-0" src={'/hexagon.svg'} height={500} width={2000} alt="hexagon"></Image>
+      <Image className="h-screen hidden lg:block lg:absolute top-0 left-0" src={'/logos/hexagon.svg'} height={500} width={2000} alt="hexagon"></Image>
       {isPlayer && (
         <div id="gameContainer" className="relative">
           <div

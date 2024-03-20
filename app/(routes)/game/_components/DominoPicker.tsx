@@ -95,16 +95,12 @@ const DominoPicker = ({
             arcane++
           }
         })
-        /*  setPlayerArcanes((prevInfos) => ({
-          ...prevInfos,
-          [board[0]]: [board[1][1] ,arcanes],
-        })) */
         setPlayerArcanes((prevPlayerInfos) => {
           const updatedPlayerInfos: { [key: string]: PlayerInfo } = {
             ...prevPlayerInfos,
             [board[0]]: {
               name: board[1][1],
-              score: arcane, // Assuming `arcane` is defined elsewhere
+              score: arcane,
               avatar: board[1][2],
             },
           }
@@ -116,7 +112,6 @@ const DominoPicker = ({
       })
   }, [readBoards])
 
-  //const [dominoIndex, setDominoIndex] = useState<number>(30)
   const [canPick, setCanPick] = useState<boolean>(false)
   const [picker, setPicker] = useState<string>('')
   const [currentPicker, setCurrentPicker] = useState<number>(0)
@@ -171,10 +166,7 @@ const DominoPicker = ({
     onValue(doneRef, (snapshot) => {
       const data = snapshot.val()
       const playersDone = snapshot.size
-      // console.log(currentPicker)
       if (uniqueId === hostId && Object.values(playerArcanes).length > 1 && currentPicker < playerCount) {
-        // console.log(currentPicker)
-        // console.log(Object.keys(playerArcanes)[currentPicker])
         if (Object.keys(playerDominoes).length !== playerCount) {
           set(roomRef, Object.keys(playerArcanes)[currentPicker])
         }
@@ -200,7 +192,6 @@ const DominoPicker = ({
             set(dominoRef, null)
           }
         })
-        //set(roomRef, Object.keys(playerArcanes)[currentPicker + 1])
       }
     })
     return onValue(roomRef, (snapshot) => {
@@ -213,7 +204,7 @@ const DominoPicker = ({
   }, [playerArcanes])
 
   const getColor = (type: string): string => {
-    return arcaneList[type] || '#000000' // Default to black if type not found
+    return arcaneList[type] || '#000000'
   }
   const color = getColor(arcaneType)
   return (
@@ -283,24 +274,6 @@ const DominoPicker = ({
         id="fade-in-fast"
         className={`${'top-60 -right-[399px] hidden md:flex z-50'} absolute  w-[335px] h-[45px] flex
        flex-col gap-10 justify-start items-center`}>
-        {/*  { <div className="flex flex-col text-xl w-full items-center text-center">
-          {Object.entries(playerArcanes).map(([playerId, { name, score, avatar }], index) => (
-            <div
-              key={playerId}
-              className={`${
-                index % 2 === 0 ? 'bg-lightpurple lg:bg-grey' : 'bg-grey lg:bg-lightpurple'
-              } text-darkblue w-full h-12 lg:h-10 justify-start items-center flex relative`}>
-              <div className="ml-4">{index + 1}</div>
-              <div className="ml-4">
-                <Image height={30} width={30} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
-              </div>
-              <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
-              <div className="mr-4 absolute right-2">{score} arc</div>
-            </div>
-
-        
-          ))}
-        </div>} */}
         <div className={`${playerCount < 6 ? 'flex' : 'hidden'} absolute w-full h-12 gap-1 bottom-0 left-0 flex justify-center items-center bg-grey`}>
           Current arcane:
           <svg width="24" height="30" viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -309,7 +282,6 @@ const DominoPicker = ({
           ({arcaneType})
         </div>
       </div>
-      {/*  <ScoreBoard uniqueId={uniqueId} playerInfos={playerArcanes} /> */}
     </div>
   )
 }

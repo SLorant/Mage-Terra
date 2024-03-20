@@ -62,7 +62,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
               className={`${getRankByPlayerId(playerId) % 2 === 0 ? 'bg-lightpurple' : 'bg-grey'} text-darkblue w-full h-12 justify-start items-center flex `}>
               <div className="ml-4 text-2xl">{getRankByPlayerId(playerId)}.</div>
               <div className="ml-4">
-                <Image className="w-9" height={40} width={40} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
+                <Image className="w-9" height={40} width={40} src={`/avatars/avatar_small-${avatar}.png`} alt="playeravatar" unoptimized></Image>
               </div>
               <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
               <div className="text-2xl mr-4 absolute right-2">{score} p</div>

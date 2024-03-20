@@ -27,21 +27,21 @@ export default function Home() {
           <p className="hidden md:flex md:text-lg">This project was made by Lorant Sutus</p>
           <p className="md:hidden flex md:text-lg">Project was made by Lorant Sutus</p>
           <Link href={'https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/'}>
-            <Image className="w-6 md:w-8" src="/linkedin.svg" alt="" height={80} width={80} unoptimized></Image>
+            <Image className="w-6 md:w-8" src="/logos/linkedin.svg" alt="" height={80} width={80} unoptimized></Image>
           </Link>
 
           <Link target="blank" href={'https://github.com/SLorant'}>
-            <Image className="w-6 md:w-8" src="/github.svg" alt="" height={80} width={80} unoptimized></Image>
+            <Image className="w-6 md:w-8" src="/logos/github.svg" alt="" height={80} width={80} unoptimized></Image>
           </Link>
         </div>
         <div className="flex justify-center items-center gap-2 mt-8 md:mt-6">
           <p className="md:text-lg">Illustrations made by Adrienn Kovacs</p>
           <Link target="blank" href={'https://www.behance.net/adriennkovcs2'}>
-            <Image className="w-6 md:w-8" src="/behance.svg" alt="" height={80} width={80} unoptimized></Image>
+            <Image className="w-6 md:w-8" src="/logos/behance.svg" alt="" height={80} width={80} unoptimized></Image>
           </Link>
         </div>
-        <p className="md:text-lg md:mt-0 mt-2 py-6">Contact us: contact.Mage Terra@gmail.com</p>
-        <Image className="w-80" src="/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
+        <p className="md:text-lg md:mt-0 mt-2 py-6">Contact us: contact.mageterra@gmail.com</p>
+        <Image className="w-80" src="/examples/avatars.png" alt="avatars" height={80} width={80} unoptimized></Image>
       </div>
     </main>
   )

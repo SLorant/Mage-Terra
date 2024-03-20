@@ -18,7 +18,7 @@ export const DominoComponent: FC<DominoProps> = memo(function Domino({
   isDominoPicked,
 }) {
   const dominoRef = useRef<HTMLDivElement>(null)
-  const [{ opacity, isDragging, canDrag }, drag] = useDrag(
+  const [{ opacity, isDragging }, drag] = useDrag(
     () => ({
       type: ItemTypes.DOMINO,
       item: { firstname, secondname, img, secondimg },

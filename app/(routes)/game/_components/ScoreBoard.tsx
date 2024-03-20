@@ -107,7 +107,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
               } text-darkblue w-full h-12 lg:h-10 justify-start items-center flex relative`}>
               <div className="ml-4">{getRankByPlayerId(playerId)}</div>
               <div className="ml-4">
-                <Image height={30} width={30} src={`/avatars/avatars-${avatar}.png`} alt="playeravatar" unoptimized></Image>
+                <Image height={30} width={30} src={`/avatars/avatar_small-${avatar}.png`} alt="playeravatar" unoptimized></Image>
               </div>
               <div className="ml-4 text-lg">{playerId === uniqueId ? name + ' (you)' : name}</div>
               <div className="mr-4 absolute right-2">
@@ -130,7 +130,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({ unique
             <div className="flex flex-col items-center justify-center">
               <div className="h-[196px] w-[196px] lg:h-[165px] lg:w-[165px] grid grid-cols-7 grid-rows-7">
                 {firstPlayerSquares.map(({ accepts, lastDroppedItem, hasStar }, squareIndex) => (
-                  <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} index={squareIndex} key={`${squareIndex}`} />
+                  <MiniSquare accept={accepts} lastDroppedItem={lastDroppedItem} hasStar={hasStar} key={`${squareIndex}`} />
                 ))}
               </div>
               <p className="text-darkblue mt-2">{boardName} map</p>

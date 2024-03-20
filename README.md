@@ -1,15 +1,15 @@
 # Mage Terra
 
-Mage Terra is a multiplayer real-time board game. Players place down dominoes to create their own kingdom. The objective is to connect the dominoes creating areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
+Mage Terra is a multiplayer real-time board game, where players place down dominoes to create their own kingdom. The objective is to connect the dominoes creating areas to earn points. At the start of each round, based on a scoring system, players take turns choosing a domino to place. The player with the highest score at the end of the game wins.
 
 ## Features
 
 - Open & private rooms: You can engage in games with randomly matched opponents or create your own room to play with friends
-- Choose your avatar and name: There are several avatars to play as, they are mages from all over the world
-- Core gameplay: Connect the dominoes, create the largest colored areas, and earn the highest score
+- Choose your avatar and name: There are several unique avatars to play as
+- Core gameplay: Connect the dominoes, create the largest areas, and earn the highest score
 - Arcane system: Keep track of arcanes as they decide who gets to pick the best dominoes first
-- Score tracking & mini-boards: You can see each player's score, and their kingdoms throughout the game
-- Responsive: Play on mobile or desktop
+- Score tracking & mini-boards: You can see each player's score and their kingdoms throughout the game
+- Responsive: Play on either mobile or desktop
 
 ## Technologies Used
 
@@ -56,7 +56,7 @@ To run Mage Terra locally, follow these steps:
 
 ## Contact & Credits
 
-- The magnificent illustrations were made by Adrienn Kovacs ([Behance](https://www.behance.net/adriennkovcs2)).
+- Illustrations were made by Adrienn Kovacs ([Behance](https://www.behance.net/adriennkovcs2)).
 - You can reach me on [GitHub](https://github.com/SLorant), [LinkedIn](https://www.linkedin.com/in/l%C3%B3r%C3%A1nt-sutus-a32123238/), or [email](mailto:contact.mageterra@gmail.com).
 
 ## License
