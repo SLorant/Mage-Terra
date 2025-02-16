@@ -53,7 +53,7 @@ export default function Rules() {
           <div className="flex  items-center gap-4 my-2">
             <img
               alt="example"
-              src={"examples/domexample.png"}
+              src={"examples/domexample.webp"}
               className="rounded-md"
               height={400}
               width={400}
@@ -107,7 +107,7 @@ export default function Rules() {
           <div className="flex  items-center gap-4 my-2">
             <img
               alt="example"
-              src={"examples/starexample.png"}
+              src={"examples/starexample.webp"}
               className="rounded-md"
               height={200}
               width={200}
@@ -146,7 +146,7 @@ export default function Rules() {
           </p>
           <img
             alt="example"
-            src={"examples/arcanexample.png"}
+            src={"examples/arcanexample.webp"}
             className="rounded-md mt-4 mb-2"
             height={220}
             width={220}
@@ -157,7 +157,7 @@ export default function Rules() {
           </p>
           <img
             alt="example"
-            src={"examples/roundbarexample.png"}
+            src={"examples/roundbarexample.webp"}
             className="rounded-md mt-4 mb-2"
             height={300}
             width={300}
@@ -181,7 +181,7 @@ export default function Rules() {
           </p>
           <img
             className="w-96 mt-4"
-            src="/examples/avatars.png"
+            src="/examples/avatars.webp"
             alt="avatars"
             height={80}
             width={80}

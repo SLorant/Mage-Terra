@@ -68,7 +68,7 @@ export const useRoomData = (
           setCurrentPlayers(Object.keys(playersData).length);
         if (uniqueId) {
           if (gameStarted === true) {
-            navigate(`/game?roomId=${room}`);
+            navigate(`/game/${room}`);
           }
         }
       }

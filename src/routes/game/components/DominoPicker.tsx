@@ -100,7 +100,6 @@ const DominoPicker = ({
     readBoards &&
       Object.entries(readBoards).forEach((board) => {
         let arcane: number = 0;
-        // console.log(board)
         board[1][0].forEach((square) => {
           if (square.lastDroppedItem?.firstname === arcaneType) {
             arcane++;
@@ -160,10 +159,9 @@ const DominoPicker = ({
         setIsDominoPicked(true);
         setCanPick(false);
         const playersRef = ref(projectDatabase, `/${room}/doneWithDomino`);
-        console.log(tempdominoes);
+
         if (uniqueId) {
           const updateObject = { [uniqueId]: [0, tempdominoes[0]] };
-          console.log(updateObject);
           update(playersRef, updateObject);
         }
         setPickingCountDown(30);

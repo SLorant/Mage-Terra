@@ -34,7 +34,7 @@ export default function Room() {
       if (uniqueId === hostId) {
         await update(dataRef, { gameStarted: true });
       }
-      navigate(`/game?roomId=${room}`);
+      navigate(`/game/${room}`);
     }
   };
 
@@ -264,7 +264,7 @@ export default function Room() {
           height={100}
           width={100}
           alt="simplelogo"
-          src="/logos/logosimple.png"
+          src="/logos/logosimple.webp"
         ></img>
         <Link to={"privacy"} className="mb-2">
           Privacy policy

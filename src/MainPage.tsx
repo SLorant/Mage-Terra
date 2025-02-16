@@ -27,7 +27,7 @@ export default function MainPage() {
       await set(dataRef, "New player");
       const avatarRef = ref(projectDatabase, `/${roomId}/${uniqueId}/Avatar`);
       await set(avatarRef, 1);
-      navigate(`/room?roomId=${roomId}`);
+      navigate(`/room/${roomId}`);
     } catch (error) {
       console.log("Error setting the data: " + error);
     }
@@ -61,7 +61,7 @@ export default function MainPage() {
             set(avatarRef, 1);
             const quickPlayRef = ref(projectDatabase, `/${roomId}/quickPlay`);
             set(quickPlayRef, true);
-            navigate(`/room?roomId=${roomId}`);
+            navigate(`/room/${roomId}`);
           }
         },
 
@@ -86,7 +86,7 @@ export default function MainPage() {
         `/${quickRoom}/${uniqueId}/Avatar`
       );
       await set(avatarRef, 1);
-      navigate(`/room?roomId=${quickRoom}`);
+      navigate(`/room/${quickRoom}`);
     }
   };
   return (
@@ -99,7 +99,7 @@ export default function MainPage() {
           className="w-[90vw] md:w-[50vh] md:h-[22vh]"
           height={500}
           width={500}
-          src="/logos/logo.png"
+          src="/logos/logo.webp"
           alt="logo"
         ></img>
       </div>
@@ -115,10 +115,10 @@ export default function MainPage() {
           play
         </button>
         <button
-          className="darkbg hover:scale-[103%] transition duration-500 ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 text-2xl  text-white"
+          className="darkbg hover:scale-[103%] transition duration-500 will-change-transform ease-in-out w-[80vw] sm:w-[500px] rounded-sm h-14 text-2xl  text-white"
           onClick={handlePlayGame}
         >
-          create private room
+          <p>create private room</p>
         </button>
 
         <p className="text-xl mt-10 mb-2 opacity-60 sm:opacity-40">
@@ -144,7 +144,7 @@ export default function MainPage() {
           height={100}
           width={100}
           alt="simplelogo"
-          src="/logos/logosimple.png"
+          src="/logos/logosimple.webp"
         />
         <Link to={"privacy"} className="mb-2">
           Privacy policy

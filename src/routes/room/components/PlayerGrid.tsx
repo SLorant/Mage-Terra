@@ -43,7 +43,7 @@ const PlayerGrid = ({
                   className="w-[55px] h-[62px]"
                   height={0}
                   width={0}
-                  src={`/avatars/avatar_small-1.png`}
+                  src={`/avatars/avatar_small-1.webp`}
                   alt="playeravatar"
                 ></img>
               ) : (
@@ -51,7 +51,7 @@ const PlayerGrid = ({
                   className="w-[55px] h-[62px]"
                   height={0}
                   width={0}
-                  src={`/avatars/avatar_small-${Avatar}.png`}
+                  src={`/avatars/avatar_small-${Avatar}.webp`}
                   alt="playeravatar"
                 ></img>
               )}

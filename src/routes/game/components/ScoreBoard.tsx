@@ -164,7 +164,7 @@ export const ScoreBoard: FC<ScoreBoardProps> = memo(function ScoreBoard({
                   <img
                     height={30}
                     width={30}
-                    src={`/avatars/avatar_small-${avatar}.png`}
+                    src={`/avatars/avatar_small-${avatar}.webp`}
                     alt="playeravatar"
                   ></img>
                 </div>

@@ -47,7 +47,7 @@ const ParallaxImages = () => {
           className=""
           height={1000}
           width={1000}
-          src="/avatars/homemage.png"
+          src="/avatars/homemage.webp"
           alt="mage"
         ></img>
         <Lottie
@@ -61,7 +61,7 @@ const ParallaxImages = () => {
           className=""
           height={850}
           width={850}
-          src="/avatars/homemage2.png"
+          src="/avatars/homemage2.webp"
           alt="mage"
         ></img>
         <Lottie

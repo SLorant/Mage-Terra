@@ -70,7 +70,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
                     className="absolute left-[34px] top-7"
                     height={120}
                     width={120}
-                    src={`/avatar-${avatar}.png`}
+                    src={`/avatars/avatar-${avatar}.webp`}
                     alt="playeravatar"
                   ></img>
                 </div>
@@ -97,7 +97,7 @@ const VictoryScreen = ({ playerInfos, uniqueId }: VictoryScreenProps) => {
                     className="w-9"
                     height={40}
                     width={40}
-                    src={`/avatars/avatar_small-${avatar}.png`}
+                    src={`/avatars/avatar_small-${avatar}.webp`}
                     alt="playeravatar"
                   ></img>
                 </div>

@@ -69,7 +69,7 @@ export default function Contact() {
         </p>
         <img
           className="w-80"
-          src="/examples/avatars.png"
+          src="/examples/avatars.webp"
           alt="avatars"
           height={80}
           width={80}

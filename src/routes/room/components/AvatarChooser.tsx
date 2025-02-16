@@ -92,7 +92,7 @@ const AvatarChooser = ({
     } else setAvatar(avatar - 1);
   };
 
-  const currentAvatar = `/avatars/avatar-${avatar}.png`;
+  const currentAvatar = `/avatars/avatar-${avatar}.webp`;
   return (
     <div
       id="fade-in"
